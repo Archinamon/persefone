@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mobi.anoda.archcore.persefone.ui.widget.shareprovider.IcsLinearLayout
+        xmlns:android = "http://schemas.android.com/apk/res/android"
+        android:id = "@+id/activity_chooser_view_content"
+        android:layout_width = "wrap_content"
+        android:layout_height = "wrap_content"
+        android:layout_gravity = "center"
+        android:dividerPadding = "6dp"
+        android:showDividers = "middle">
+
+    <FrameLayout
+            android:id = "@+id/expand_activities_button"
+            android:layout_width = "wrap_content"
+            android:layout_height = "wrap_content"
+            android:layout_gravity = "center"
+            android:addStatesFromChildren = "true"
+            android:clickable = "true"
+            android:focusable = "true">
+
+        <ImageView
+                android:id = "@+id/image_expand"
+                android:layout_width = "wrap_content"
+                android:layout_height = "wrap_content"
+                android:layout_gravity = "center"
+                android:adjustViewBounds = "true"
+                android:clickable = "true"
+                android:paddingBottom = "2dip"
+                android:paddingLeft = "12dip"
+                android:paddingRight = "12dip"
+                android:paddingTop = "2dip"
+                android:scaleType = "fitCenter" />
+    </FrameLayout>
+
+    <FrameLayout
+            android:id = "@+id/default_activity_button"
+            android:layout_width = "wrap_content"
+            android:layout_height = "wrap_content"
+            android:layout_gravity = "center"
+            android:addStatesFromChildren = "true"
+            android:clickable = "true"
+            android:focusable = "true">
+
+        <ImageView
+                android:id = "@+id/image_default"
+                android:layout_width = "wrap_content"
+                android:layout_height = "wrap_content"
+                android:layout_gravity = "center"
+                android:adjustViewBounds = "true"
+                android:clickable = "true"
+                android:paddingBottom = "2dip"
+                android:paddingLeft = "12dip"
+                android:paddingRight = "12dip"
+                android:paddingTop = "2dip"
+                android:scaleType = "fitCenter" />
+    </FrameLayout>
+
+</mobi.anoda.archcore.persefone.ui.widget.shareprovider.IcsLinearLayout>

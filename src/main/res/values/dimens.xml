@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name = "min_swipe">10dip</dimen>
+    <dimen name = "min_vert">10dip</dimen>
+    <dimen name = "min_lock">20dip</dimen>
+    <dimen name = "body_font_size">18sp</dimen>
+    <dimen name = "toast_bar_bottom_margin_in_conversation">24dip</dimen>
+    <dimen name = "height_clickable_default">48dp</dimen>
+    <dimen name = "sv__preferred_height">48dp</dimen>
+    <dimen name = "sv__preferred_dropdown_item_height">48dp</dimen>
+    <dimen name = "sv__preferred_dialog_width">320dp</dimen>
+    <dimen name = "sv__activity_icon_size">32dp</dimen>
+
+</resources>

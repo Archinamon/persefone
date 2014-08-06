@@ -1,0 +1,39 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.12.+'
+    }
+}
+apply plugin: 'com.android.library'
+
+repositories {
+    mavenCentral()
+}
+
+android {
+    compileSdkVersion 20
+    buildToolsVersion '20.0.0'
+
+    defaultConfig {
+        minSdkVersion 15
+        targetSdkVersion 20
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+}
+
+dependencies {
+    compile 'com.google.guava:guava:+'
+    compile 'com.google.code.gson:gson:+'
+    compile 'com.squareup.picasso:picasso:+'
+    compile 'com.android.support:support-v4:20.+'
+    compile 'com.nhaarman.listviewanimations:library:+'
+    compile 'org.apache.servicemix.bundles:org.apache.servicemix.bundles.jsr305:+'
+    compile files('libs/annotations.jar')
+    compile files('libs/FlurryAnalytics.jar')
+}

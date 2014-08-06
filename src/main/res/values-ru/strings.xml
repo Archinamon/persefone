@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name = "no_internet_access">Для работы с приложением необходимо подключение к интернету</string>
+    <string name = "loading">Загрузка…</string>
+
+    <!-- Actions -->
+    <string name = "action_select_all">Выбрать всё</string>
+    <string name = "action_select_all_long">Выбрать все пункты списка</string>
+    <string name = "action_menu_delete">Удалить</string>
+    <string name = "items_selected">выбрано: %d</string>
+    <string name = "no_internet_open_wifi">Настройки Wi-Fi</string>
+
+    <!-- Errors -->
+    <string name = "drawer_open">Открыть меню</string>
+    <string name = "drawer_close">Закрыть меню</string>
+    <string name = "error_default">Произошла ошибка, попробуйте позже</string>
+    <string name = "error_retry">Пробуем еще раз…</string>
+    <string name = "error_internet_try_again">Нет соединения с интернетом\nПовторить?</string>
+    <string name = "error_unauth_access">Сессия истекла, войдите в профиль еще раз</string>
+    <string name = "request_failed">Запрос неудался, попробуйте позже</string>
+    <string name = "swipe_deleted">Удалено</string>
+    <string name = "undo">Отмена</string>
+
+    <!-- ShareWidget -->
+    <string name = "Choose_an_application">Выберите приложение</string>
+    <string name = "See_all___">Показать все…</string>
+
+    <string name = "popup_btn_ok">OK</string>
+    <string name = "popup_btn_yes">Да</string>
+    <string name = "popup_btn_no">Нет</string>
+    <string name = "popup_btn_cancel">Отмена</string>
+    <string name = "popup_btn_abort">Отменить</string>
+    <string name = "popup_btn_retry">Повторить</string>
+
+</resources>

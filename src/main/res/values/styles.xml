@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Widget">
+        <item name="android:textAppearance">?android:attr/textAppearance</item>
+    </style>
+
+    <style name="Widget.ShareView">
+        <item name="sv_shareViewHeight">@dimen/sv__preferred_height</item>
+        <item name="sv_frameBackground">@drawable/sv__border_dark</item>
+        <item name="sv_dividerDrawable">@drawable/sv__list_divider_holo_dark</item>
+        <item name="sv_buttonDrawable">@drawable/sv__ic_menu_share_holo_dark</item>
+        <item name="sv_buttonBackground">@drawable/sv__list_selector_holo_dark</item>
+        <item name="sv_popupBackground">@drawable/sv__menu_dropdown_panel_holo_dark</item>
+        <item name="sv_popupSelector">@drawable/sv__list_selector_holo_dark</item>
+        <item name="sv_popupDivider">@drawable/sv__list_divider_holo_dark</item>
+        <item name="sv_popupTextColor">#f3f3f3</item>
+        <item name="sv_favoriteDisplayed">true</item>
+    </style>
+
+    <!-- This is the same as Widget.ShareView -->
+    <style name="Widget.ShareView.Dark" />
+
+    <style name="Widget.ShareView.Dark.Simple">
+        <item name="sv_favoriteDisplayed">false</item>
+    </style>
+
+    <style name="Widget.ShareView.Light">
+        <item name="sv_frameBackground">@drawable/sv__border_light</item>
+        <item name="sv_dividerDrawable">@drawable/sv__list_divider_holo_light</item>
+        <item name="sv_buttonDrawable">@drawable/sv__ic_menu_share_holo_light</item>
+        <item name="sv_buttonBackground">@drawable/sv__list_selector_holo_light</item>
+        <item name="sv_popupBackground">@drawable/sv__menu_dropdown_panel_holo_light</item>
+        <item name="sv_popupSelector">@drawable/sv__list_selector_holo_light</item>
+        <item name="sv_popupDivider">@drawable/sv__list_divider_holo_light</item>
+        <item name="sv_popupTextColor">#000000</item>
+    </style>
+
+    <style name="Widget.ShareView.Light.Simple">
+        <item name="sv_favoriteDisplayed">false</item>
+    </style>
+
+    <style name = "ProgressPopupLight" parent = "@android:style/Theme.Holo.Light.Dialog">
+        <item name = "android:windowBackground">@android:color/transparent</item>
+    </style>
+
+    <style name = "ProgressBar.Medium" parent = "@android:style/Widget.Holo.ProgressBar.Small">
+        <item name = "android:minWidth">24dp</item>
+        <item name = "android:minHeight">24dp</item>
+    </style>
+
+    <style name = "ToastBarStyle">
+        <item name = "android:layout_width">match_parent</item>
+        <item name = "android:layout_height">48dip</item>
+        <item name = "android:layout_gravity">bottom</item>
+        <item name = "android:layout_marginLeft">4dip</item>
+        <item name = "android:layout_marginRight">4dip</item>
+        <item name = "android:orientation">horizontal</item>
+        <item name = "android:gravity">center_vertical</item>
+        <item name = "android:background">@drawable/panel_undo_holo</item>
+        <item name = "android:visibility">gone</item>
+        <item name = "android:alpha">0</item>
+        <item name = "android:clickable">true</item>
+    </style>
+
+</resources>
