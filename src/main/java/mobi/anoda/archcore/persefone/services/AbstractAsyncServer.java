@@ -5,7 +5,10 @@ import android.content.Intent;
 import android.os.IBinder;
 import java.io.UnsupportedEncodingException;
 import java.util.concurrent.ConcurrentSkipListMap;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import mobi.anoda.archcore.persefone.AnodaApplicationDelegate;
+import mobi.anoda.archcore.persefone.annotation.Implement;
 import mobi.anoda.archcore.persefone.network.AbstractAsyncTask;
 import mobi.anoda.archcore.persefone.network.processor.RESTSignal;
 import mobi.anoda.archcore.persefone.network.processor.SignalProcessor;
@@ -111,4 +114,6 @@ public abstract class AbstractAsyncServer extends AbstractIntentService {
     private SignalProcessor getProcessor() {
         return SignalProcessor.getInstance();
     }
+
+    @Implement protected final void onAction(@Nonnull String action, @Nullable Intent data) {}
 }
