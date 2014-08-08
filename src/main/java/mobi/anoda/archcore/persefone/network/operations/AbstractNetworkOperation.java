@@ -107,6 +107,7 @@ public abstract class AbstractNetworkOperation implements NetworkOperation {
             if (rawString.startsWith("{")) return new ProjectionObject(rawString);
             if (rawString.startsWith("[")) return new ProjectionArray(rawString);
         } catch (Exception ignore) {
+            LogHelper.println_error(TAG, ignore);
         }
         return null;
     }
