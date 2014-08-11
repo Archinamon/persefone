@@ -19,6 +19,8 @@ android {
     defaultConfig {
         minSdkVersion 15
         targetSdkVersion 20
+        versionCode 186
+        versionName '0.6'
     }
 
     compileOptions {
@@ -33,7 +35,9 @@ dependencies {
     compile 'com.squareup.picasso:picasso:+'
     compile 'com.android.support:support-v4:20.+'
     compile 'com.nhaarman.listviewanimations:library:+'
-    compile 'org.apache.servicemix.bundles:org.apache.servicemix.bundles.jsr305:+'
+    compile 'org.apache.servicemix.bundles:org.apache.servicemix.bundles.jsr305:2.0.3_1'
+    compile('org.apache.httpcomponents:httpmime:4.3') {exclude module: "httpclient"}
+    compile('org.apache.httpcomponents:httpcore:4.3') {exclude module: "httpclient"}
     compile files('libs/annotations.jar')
     compile files('libs/FlurryAnalytics.jar')
 }

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mobi.anoda.archcore.persefone.ui.widget.shareprovider.IcsLinearLayout
+<mobi.anoda.archinamon.kernel.persefone.ui.widget.shareprovider.IcsLinearLayout
         xmlns:android = "http://schemas.android.com/apk/res/android"
         android:id = "@+id/activity_chooser_view_content"
         android:layout_width = "wrap_content"
@@ -54,4 +54,4 @@
                 android:scaleType = "fitCenter" />
     </FrameLayout>
 
-</mobi.anoda.archcore.persefone.ui.widget.shareprovider.IcsLinearLayout>
+</mobi.anoda.archinamon.kernel.persefone.ui.widget.shareprovider.IcsLinearLayout>

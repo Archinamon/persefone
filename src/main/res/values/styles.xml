@@ -44,6 +44,10 @@
         <item name = "android:windowBackground">@android:color/transparent</item>
     </style>
 
+    <style name = "ProgressPopupDark" parent = "@android:style/Theme.Holo.Dialog">
+        <item name = "android:windowBackground">@android:color/transparent</item>
+    </style>
+
     <style name = "ProgressBar.Medium" parent = "@android:style/Widget.Holo.ProgressBar.Small">
         <item name = "android:minWidth">24dp</item>
         <item name = "android:minHeight">24dp</item>
