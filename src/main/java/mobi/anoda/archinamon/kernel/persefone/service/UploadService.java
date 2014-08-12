@@ -6,10 +6,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerManager;
-import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.HttpMultipartMode;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.cookie.BasicClientCookie;
@@ -19,8 +17,13 @@ import java.net.MalformedURLException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
+import mobi.anoda.archinamon.kernel.persefone.network.http.entity.mime.CountableMultiPartEntity;
+import mobi.anoda.archinamon.kernel.persefone.network.json.IJson;
 import mobi.anoda.archinamon.kernel.persefone.network.operations.AbstractNetworkOperation;
+import mobi.anoda.archinamon.kernel.persefone.network.operations.NetworkOperationDelete;
+import mobi.anoda.archinamon.kernel.persefone.network.operations.NetworkOperationGet;
 import mobi.anoda.archinamon.kernel.persefone.network.operations.NetworkOperationPost;
+import mobi.anoda.archinamon.kernel.persefone.network.operations.NetworkOperationPut;
 import mobi.anoda.archinamon.kernel.persefone.upload.Extras;
 import mobi.anoda.archinamon.kernel.persefone.upload.FileToUpload;
 import mobi.anoda.archinamon.kernel.persefone.upload.IUploadService;
@@ -28,6 +31,7 @@ import mobi.anoda.archinamon.kernel.persefone.upload.NameValue;
 import mobi.anoda.archinamon.kernel.persefone.upload.NotificationConfig;
 import mobi.anoda.archinamon.kernel.persefone.upload.Request;
 import mobi.anoda.archinamon.kernel.persefone.upload.UploadAction;
+import mobi.anoda.archinamon.kernel.persefone.utils.AtomicString;
 import mobi.anoda.archinamon.kernel.persefone.utils.Common;
 import mobi.anoda.archinamon.kernel.persefone.utils.LogHelper;
 
@@ -40,16 +44,14 @@ import mobi.anoda.archinamon.kernel.persefone.utils.LogHelper;
 public class UploadService extends AbstractService {
 
     public static final  String TAG                         = UploadService.class.getSimpleName();
-    private static final int    UPLOAD_NOTIFICATION_ID      = 1234; // Something unique
-    private static final int    UPLOAD_NOTIFICATION_ID_DONE = 1235; // Something unique
-    private static final int    BUFFER_SIZE                 = 4096;
-    private static final String NEW_LINE                    = "\r\n";
-    private static final String TWO_HYPHENS                 = "--";
+    private static final int    UPLOAD_NOTIFICATION_ID      = 0xfa1166; // Something unique
+    private static final int    UPLOAD_NOTIFICATION_ID_DONE = 0xed1123; // Something unique
     private NotificationManager   mNotificationManager;
     private Notification.Builder  mNotification;
     private PowerManager.WakeLock mWakeLock;
     private NotificationConfig    mNotificationConfig;
     private int                   mLastPublishedProgress;
+    private volatile AtomicString mLastUploadId = new AtomicString();
 
     private /*synthetic*/ final IUploadService.Stub mBinder = new IUploadService.Stub() {
 
@@ -63,9 +65,9 @@ public class UploadService extends AbstractService {
                 }
 
                 mNotificationConfig = task.getNotificationConfig();
-                final String uploadId = task.getUploadId();
+                mLastUploadId.updateQuery(task.getUploadId());
                 final String url = task.getServerUrl();
-                final String method = task.getMethod();
+                final Request.Method method = task.getMethod();
                 final ArrayList<FileToUpload> files = task.getFilesToUpload();
                 final ArrayList<NameValue> headers = task.getHeaders();
                 final ArrayList<NameValue> parameters = task.getParameters();
@@ -74,9 +76,9 @@ public class UploadService extends AbstractService {
                 mWakeLock.acquire();
                 try {
                     createNotification();
-                    handleFileUpload(uploadId, url, method, files, headers, parameters);
+                    handleFileUpload(url, method, files, headers, parameters);
                 } catch (Exception exception) {
-                    broadcastError(uploadId, exception);
+                    broadcastError(exception);
                 } finally {
                     mWakeLock.release();
                 }
@@ -95,6 +97,14 @@ public class UploadService extends AbstractService {
         }
     };
 
+    private /*synthetic*/ final CountableMultiPartEntity.ProgressListener mProgressListener = new CountableMultiPartEntity.ProgressListener() {
+
+        @Implement
+        public void transferred(long num, long total) {
+            broadcastProgress(num, total);
+        }
+    };
+
     @Override
     public IBinder onBind(Intent intent) {
         return mBinder;
@@ -110,12 +120,26 @@ public class UploadService extends AbstractService {
         mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
     }
 
-    private void handleFileUpload(final String uploadId, final String url, final String method, final ArrayList<FileToUpload> filesToUpload, final ArrayList<NameValue> requestHeaders, final ArrayList<NameValue> requestParameters) throws IOException {
-        AbstractNetworkOperation operation = new NetworkOperationPost(url);
+    private void handleFileUpload(final String url, Request.Method method, final ArrayList<FileToUpload> filesToUpload, final ArrayList<NameValue> requestHeaders, final ArrayList<NameValue> requestParameters) throws IOException {
+        AbstractNetworkOperation operation;
+        switch (method) {
+            default:
+            case GET:
+                operation = new NetworkOperationGet(url);
+                break;
+            case POST:
+                operation = new NetworkOperationPost(url);
+                break;
+            case PUT:
+                operation = new NetworkOperationPut(url);
+                break;
+            case DELETE:
+                operation = new NetworkOperationDelete(url);
+                break;
+        }
 
-        MultipartEntityBuilder multipartEntity = MultipartEntityBuilder.create();
-        multipartEntity.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
-        multipartEntity.setCharset(Charset.forName("UTF-8"));
+        CountableMultiPartEntity multipartEntity = new CountableMultiPartEntity(HttpMultipartMode.BROWSER_COMPATIBLE, null, Charset.forName("UTF-8"), mProgressListener);
+
         for (NameValue param : requestParameters)
             multipartEntity.addPart(param.getName(), new StringBody(param.getValue(), ContentType.TEXT_PLAIN));
 
@@ -127,17 +151,16 @@ public class UploadService extends AbstractService {
             }
         }
 
-        HttpEntity entity = multipartEntity.build();
-        operation.setEntity(entity);
-        operation.execute(mAppDelegate);
+        operation.setEntity(multipartEntity);
+        IJson response = operation.getJsonProjection(mAppDelegate);
 
         int serverResponseCode = operation.getResponseCode();
         String serverResponseMessage = operation.getResponseMessage();
 
-        broadcastCompleted(uploadId, serverResponseCode, serverResponseMessage);
+        broadcastCompleted(serverResponseCode, serverResponseMessage, response);
     }
 
-    private void broadcastProgress(final String uploadId, final long uploadedBytes, final long totalBytes) {
+    private synchronized void broadcastProgress(final long uploadedBytes, final long totalBytes) {
         final int progress = (int) (uploadedBytes * 100 / totalBytes);
         if (progress <= mLastPublishedProgress) {
             return;
@@ -147,14 +170,14 @@ public class UploadService extends AbstractService {
         updateNotificationProgress(progress);
 
         final Bundle data = new Bundle();
-        data.putString(Extras.UPLOAD_ID, uploadId);
+        data.putString(Extras.UPLOAD_ID, mLastUploadId.getQuery().toString());
         data.putInt(Extras.STATUS, Extras.STATUS_IN_PROGRESS);
         data.putInt(Extras.PROGRESS, progress);
 
         sendBroadcast(UploadAction.POST_STATUS, data);
     }
 
-    private void broadcastCompleted(final String uploadId, final int responseCode, final String responseMessage) {
+    private synchronized void broadcastCompleted(final int responseCode, final String responseMessage, IJson response) {
         final String filteredMessage;
         if (responseMessage == null) {
             filteredMessage = "";
@@ -169,19 +192,20 @@ public class UploadService extends AbstractService {
         }
 
         final Bundle data = new Bundle();
-        data.putString(Extras.UPLOAD_ID, uploadId);
+        data.putString(Extras.UPLOAD_ID, mLastUploadId.getQuery().toString());
         data.putInt(Extras.STATUS, Extras.STATUS_COMPLETED);
         data.putInt(Extras.SERVER_RESPONSE_CODE, responseCode);
         data.putString(Extras.SERVER_RESPONSE_MESSAGE, filteredMessage);
+        data.putString(Extras.API_RESPONSE_DATA, response.toString());
 
         sendBroadcast(UploadAction.POST_STATUS, data);
     }
 
-    private void broadcastError(final String uploadId, final Exception exception) {
+    private void broadcastError(final Exception exception) {
         updateNotificationError();
 
         final Bundle data = new Bundle();
-        data.putString(Extras.UPLOAD_ID, uploadId);
+        data.putString(Extras.UPLOAD_ID, mLastUploadId.getQuery().toString());
         data.putInt(Extras.STATUS, Extras.STATUS_ERROR);
         data.putSerializable(Extras.ERROR_EXCEPTION, exception);
 
