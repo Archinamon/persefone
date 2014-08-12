@@ -1,5 +1,6 @@
 package mobi.anoda.archinamon.kernel.persefone.ui.dialog;
 
+import android.app.ProgressDialog;
 import mobi.anoda.archinamon.kernel.persefone.R;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
 
@@ -20,6 +21,7 @@ public class ProgressPopup extends AbstractPopup {
     @Implement
     public boolean setup() {
         setDialogType(Popup.PROGRESS_SIMPLE);
+        setProgressStyle(ProgressDialog.STYLE_SPINNER);
         setMessage(R.string.loading);
 
         return true;

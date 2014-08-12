@@ -7,7 +7,7 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import mobi.anoda.archinamon.kernel.persefone.R;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
-import mobi.anoda.archinamon.kernel.persefone.service.NetworkNotification;
+import mobi.anoda.archinamon.kernel.persefone.service.notification.NetworkNotification;
 import mobi.anoda.archinamon.kernel.persefone.utils.Common;
 
 /**

@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import mobi.anoda.archinamon.kernel.persefone.AnodaApplicationDelegate;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
-import mobi.anoda.archinamon.kernel.persefone.network.ExtAndroidHttpClient;
+import mobi.anoda.archinamon.kernel.persefone.network.client.ExtAndroidHttpClient;
 import mobi.anoda.archinamon.kernel.persefone.network.json.IJson;
 import mobi.anoda.archinamon.kernel.persefone.network.json.ProjectionArray;
 import mobi.anoda.archinamon.kernel.persefone.network.json.ProjectionObject;

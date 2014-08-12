@@ -27,7 +27,7 @@ import mobi.anoda.archinamon.kernel.persefone.utils.LogHelper;
  */
 public abstract class WakefulBroadcastReceiver extends BroadcastReceiver {
 
-    private static final String                             EXTRA_WAKE_LOCK_ID = "mobi.anoda.archcore.persefone.receivers.content.wakelockid";
+    private static final String                             EXTRA_WAKE_LOCK_ID = "mobi.anoda.archinsmon.kernel.persefone.receivers.content.wakelockid";
     private static final SparseArray<PowerManager.WakeLock> mActiveWakeLocks   = new SparseArray<>();
     private static       int                                mNextId            = 1;
 

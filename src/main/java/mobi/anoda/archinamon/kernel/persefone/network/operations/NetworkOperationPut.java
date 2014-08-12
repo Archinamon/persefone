@@ -3,7 +3,7 @@ package mobi.anoda.archinamon.kernel.persefone.network.operations;
 import android.util.Log;
 import org.apache.http.NameValuePair;
 import org.apache.http.auth.Credentials;
-import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
@@ -16,15 +16,15 @@ import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
  *
  * @author archinamon
  */
-public class NetworkOperationGet extends AbstractNetworkOperation {
+public class NetworkOperationPut extends AbstractNetworkOperation {
 
-    private static final String LOG_TAG = NetworkOperationGet.class.getSimpleName();
+    private static final String LOG_TAG = NetworkOperationPut.class.getSimpleName();
 
-    public NetworkOperationGet(String url, Credentials credentials) {
+    public NetworkOperationPut(String url, Credentials credentials) {
         super(url, credentials);
     }
 
-    public NetworkOperationGet(String url) {
+    public NetworkOperationPut(String url) {
         super(url, null);
     }
 
@@ -46,6 +46,6 @@ public class NetworkOperationGet extends AbstractNetworkOperation {
 
         Log.i(LOG_TAG, "URL: " + url);
 
-        return new HttpGet(url);
+        return new HttpPut(url);
     }
 }

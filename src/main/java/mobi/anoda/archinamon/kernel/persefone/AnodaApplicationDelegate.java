@@ -1,7 +1,7 @@
 package mobi.anoda.archinamon.kernel.persefone;
 
 import android.app.Application;
-import mobi.anoda.archinamon.kernel.persefone.network.ExtAndroidHttpClient;
+import mobi.anoda.archinamon.kernel.persefone.network.client.ExtAndroidHttpClient;
 import mobi.anoda.archinamon.kernel.persefone.network.State;
 import mobi.anoda.archinamon.kernel.persefone.receiver.InternetAccessReceiver;
 import mobi.anoda.archinamon.kernel.persefone.ui.activity.AbstractActivity;

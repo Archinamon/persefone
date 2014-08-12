@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import mobi.anoda.archinamon.kernel.persefone.network.State;
-import mobi.anoda.archinamon.kernel.persefone.service.NetworkNotification;
+import mobi.anoda.archinamon.kernel.persefone.service.notification.NetworkNotification;
 import mobi.anoda.archinamon.kernel.persefone.utils.LogHelper;
 
 /** author Archinamon */

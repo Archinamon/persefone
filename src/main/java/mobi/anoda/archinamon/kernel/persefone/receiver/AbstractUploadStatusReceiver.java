@@ -37,7 +37,8 @@ public abstract class AbstractUploadStatusReceiver extends AbstractReceiver {
                     case Extras.STATUS_COMPLETED:
                         final int responseCode = data.getIntExtra(Extras.SERVER_RESPONSE_CODE, 0);
                         final String responseMsg = data.getStringExtra(Extras.SERVER_RESPONSE_MESSAGE);
-                        onCompleted(uploadId, responseCode, responseMsg);
+                        final String apiResponse = data.getStringExtra(Extras.API_RESPONSE_DATA);
+                        onCompleted(uploadId, responseCode, responseMsg, apiResponse);
                         break;
                     case Extras.STATUS_IN_PROGRESS:
                         final int progress = data.getIntExtra(Extras.PROGRESS, 0);
@@ -91,5 +92,5 @@ public abstract class AbstractUploadStatusReceiver extends AbstractReceiver {
      * @param serverResponseCode status code returned by the server
      * @param serverResponseMessage string containing the response received from the server
      */
-    public abstract void onCompleted(final String uploadId, final int serverResponseCode, final String serverResponseMessage);
+    public abstract void onCompleted(final String uploadId, final int serverResponseCode, final String serverResponseMessage, final String apiResponseData);
 }

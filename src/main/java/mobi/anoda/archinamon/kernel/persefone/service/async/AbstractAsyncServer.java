@@ -1,4 +1,4 @@
-package mobi.anoda.archinamon.kernel.persefone.service;
+package mobi.anoda.archinamon.kernel.persefone.service.async;
 
 import android.content.Context;
 import android.content.Intent;
@@ -9,9 +9,11 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import mobi.anoda.archinamon.kernel.persefone.AnodaApplicationDelegate;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
-import mobi.anoda.archinamon.kernel.persefone.network.AbstractAsyncTask;
+import mobi.anoda.archinamon.kernel.persefone.network.async.AbstractAsyncTask;
 import mobi.anoda.archinamon.kernel.persefone.network.processor.RESTSignal;
 import mobi.anoda.archinamon.kernel.persefone.network.processor.SignalProcessor;
+import mobi.anoda.archinamon.kernel.persefone.service.AbstractService;
+import mobi.anoda.archinamon.kernel.persefone.service.wakeful.WakefulIntentService;
 import mobi.anoda.archinamon.kernel.persefone.signals.Broadcastable;
 import mobi.anoda.archinamon.kernel.persefone.signals.Channel;
 import mobi.anoda.archinamon.kernel.persefone.ui.activity.AbstractActivity;
@@ -21,7 +23,7 @@ import mobi.anoda.archinamon.kernel.persefone.utils.LogHelper;
  * @author: Archinamon
  * @project: FavorMe
  */
-public abstract class AbstractAsyncServer extends AbstractIntentService {
+public abstract class AbstractAsyncServer extends WakefulIntentService {
 
     protected static final class SignalMap {
 

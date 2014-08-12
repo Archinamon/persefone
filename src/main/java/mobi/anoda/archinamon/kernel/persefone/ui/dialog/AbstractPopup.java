@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
+import org.intellij.lang.annotations.MagicConstant;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -29,7 +30,7 @@ import javax.annotation.Nullable;
 import mobi.anoda.archinamon.kernel.persefone.AnodaApplicationDelegate;
 import mobi.anoda.archinamon.kernel.persefone.R;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
-import mobi.anoda.archinamon.kernel.persefone.service.AsyncRequest;
+import mobi.anoda.archinamon.kernel.persefone.service.async.AsyncRequest;
 import mobi.anoda.archinamon.kernel.persefone.signals.AsyncReceiver;
 import mobi.anoda.archinamon.kernel.persefone.signals.BroadcastFilter;
 import mobi.anoda.archinamon.kernel.persefone.ui.TaggedView;
@@ -170,6 +171,7 @@ public abstract class AbstractPopup extends DialogFragment implements TaggedView
     private                    OnClickListener          mOnClickNeutralCallback;
     // Customization
     private                    int                      mDialogTheme;
+    private                    int                      mProgressStyle;
     private                    String                   mButtonOkTitle;
     private                    String                   mButtonCancelTitle;
     private                    String                   mButtonNeutralTitle;
@@ -360,6 +362,10 @@ public abstract class AbstractPopup extends DialogFragment implements TaggedView
         mDialogType = type;
     }
 
+    protected final void setProgressStyle(@MagicConstant(flagsFromClass = ProgressDialog.class) int style) {
+        mProgressStyle = style;
+    }
+
     protected final void setTheme(int style) {
         mDialogTheme = style;
     }
@@ -509,6 +515,7 @@ public abstract class AbstractPopup extends DialogFragment implements TaggedView
         final int style = mDialogTheme == mDialogThemeLight ? R.style.ProgressPopupLight : R.style.ProgressPopupDark;
         mDialog = new ProgressDialog(mContext, style);
         ((ProgressDialog) mDialog).setMessage(mDialogMessage);
+        ((ProgressDialog) mDialog).setProgressStyle(mProgressStyle);
     }
 
     private ListView buildList() {

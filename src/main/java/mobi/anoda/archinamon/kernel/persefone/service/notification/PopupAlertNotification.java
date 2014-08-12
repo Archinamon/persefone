@@ -1,4 +1,4 @@
-package mobi.anoda.archinamon.kernel.persefone.service;
+package mobi.anoda.archinamon.kernel.persefone.service.notification;
 
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
 import mobi.anoda.archinamon.kernel.persefone.signals.Broadcastable;

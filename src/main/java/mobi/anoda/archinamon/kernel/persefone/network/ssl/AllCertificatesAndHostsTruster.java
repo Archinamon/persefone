@@ -1,4 +1,4 @@
-package mobi.anoda.archinamon.kernel.persefone.network;
+package mobi.anoda.archinamon.kernel.persefone.network.ssl;
 
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;

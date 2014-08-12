@@ -1,8 +1,8 @@
-package mobi.anoda.archinamon.kernel.persefone.network;
+package mobi.anoda.archinamon.kernel.persefone.network.async;
 
 import java.util.EmptyStackException;
 import java.util.Stack;
-import mobi.anoda.archinamon.kernel.persefone.service.AsyncRequest;
+import mobi.anoda.archinamon.kernel.persefone.service.async.AsyncRequest;
 
 public class AsyncTwister {
 

@@ -1,7 +1,7 @@
 package mobi.anoda.archinamon.kernel.persefone.ui.activity.interfaces;
 
-import mobi.anoda.archinamon.kernel.persefone.service.AbstractAsyncServer;
-import mobi.anoda.archinamon.kernel.persefone.service.AsyncRequest;
+import mobi.anoda.archinamon.kernel.persefone.service.async.AbstractAsyncServer;
+import mobi.anoda.archinamon.kernel.persefone.service.async.AsyncRequest;
 import mobi.anoda.archinamon.kernel.persefone.ui.fragment.AbstractFragment;
 
 /**

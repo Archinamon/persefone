@@ -1,4 +1,4 @@
-package mobi.anoda.archinamon.kernel.persefone.network;
+package mobi.anoda.archinamon.kernel.persefone.network.async;
 
 import android.app.Service;
 import android.content.Context;
@@ -19,6 +19,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import mobi.anoda.archinamon.kernel.persefone.R;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
+import mobi.anoda.archinamon.kernel.persefone.network.State;
 import mobi.anoda.archinamon.kernel.persefone.network.json.IJson;
 import mobi.anoda.archinamon.kernel.persefone.network.json.JSONHashMap;
 import mobi.anoda.archinamon.kernel.persefone.network.json.Projection;
@@ -27,7 +28,7 @@ import mobi.anoda.archinamon.kernel.persefone.network.operations.NetworkOperatio
 import mobi.anoda.archinamon.kernel.persefone.network.processor.IStrategyInterrupt;
 import mobi.anoda.archinamon.kernel.persefone.network.processor.InterruptSequencer;
 import mobi.anoda.archinamon.kernel.persefone.service.AbstractService;
-import mobi.anoda.archinamon.kernel.persefone.service.NetworkNotification;
+import mobi.anoda.archinamon.kernel.persefone.service.notification.NetworkNotification;
 import mobi.anoda.archinamon.kernel.persefone.signals.Broadcastable;
 import mobi.anoda.archinamon.kernel.persefone.ui.activity.AbstractActivity;
 import mobi.anoda.archinamon.kernel.persefone.ui.dialog.AbstractPopup;

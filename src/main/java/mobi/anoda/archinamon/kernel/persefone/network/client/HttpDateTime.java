@@ -1,4 +1,4 @@
-package mobi.anoda.archinamon.kernel.persefone.network;
+package mobi.anoda.archinamon.kernel.persefone.network.client;
 
 import android.text.format.Time;
 import java.util.Calendar;

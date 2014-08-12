@@ -16,6 +16,14 @@ import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
  */
 public class Request implements Parcelable {
 
+    public static enum Method {
+
+        POST,
+        GET,
+        PUT,
+        DELETE
+    }
+
     public static final String                      TAG     = Request.class.getSimpleName();
     public static final Parcelable.Creator<Request> CREATOR = new Parcelable.Creator<Request>() {
 
@@ -35,18 +43,17 @@ public class Request implements Parcelable {
     private final ArrayList<FileToUpload> mFilesToUpload;
     private final ArrayList<NameValue>    mHeaders;
     private final ArrayList<NameValue>    mParameters;
-    private String mMethod = "POST";
+    private       Method                  mMethod;
 
     private Request(Parcel src) {
         this.mNotificationConfig = src.readParcelable(NotificationConfig.class.getClassLoader());
 
-        final String[] strings = new String[3];
+        final String[] strings = new String[2];
         src.readStringArray(strings);
 
         this.mUploadId = strings[0];
         this.mFileUrl = strings[1];
-        this.mMethod = strings[2];
-
+        this.mMethod = Method.values()[src.readInt()];
         this.mFilesToUpload = new ArrayList<>();
         this.mHeaders = new ArrayList<>();
         this.mParameters = new ArrayList<>();
@@ -69,6 +76,7 @@ public class Request implements Parcelable {
         mFilesToUpload = new ArrayList<>();
         mHeaders = new ArrayList<>();
         mParameters = new ArrayList<>();
+        mMethod = Method.POST;
     }
 
     /**
@@ -167,11 +175,11 @@ public class Request implements Parcelable {
     /**
      * Sets the HTTP method to use. By default it's set to POST.
      *
-     * @param mMethod new HTTP method to use
+     * @param method new HTTP method to use
      */
-    public void setMethod(final String mMethod) {
-        if (mMethod != null && mMethod.length() > 0) {
-            this.mMethod = mMethod;
+    public void setMethod(final Method method) {
+        if (method != null) {
+            this.mMethod = method;
         }
     }
 
@@ -180,7 +188,7 @@ public class Request implements Parcelable {
      *
      * @return
      */
-    public String getMethod() {
+    public Method getMethod() {
         return mMethod;
     }
 
@@ -247,8 +255,8 @@ public class Request implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeParcelable(mNotificationConfig, flags);
         dest.writeStringArray(new String[] {this.mUploadId,
-                                            this.mFileUrl,
-                                            this.mMethod});
+                                            this.mFileUrl});
+        dest.writeInt(this.mMethod.ordinal());
         dest.writeTypedList(this.mFilesToUpload);
         dest.writeTypedList(this.mHeaders);
         dest.writeTypedList(this.mParameters);

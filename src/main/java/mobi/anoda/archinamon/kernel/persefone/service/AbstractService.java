@@ -16,6 +16,8 @@ import javax.annotation.Nullable;
 import mobi.anoda.archinamon.kernel.persefone.AnodaApplicationDelegate;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
 import mobi.anoda.archinamon.kernel.persefone.network.State;
+import mobi.anoda.archinamon.kernel.persefone.service.async.AbstractAsyncServer;
+import mobi.anoda.archinamon.kernel.persefone.service.async.AsyncRequest;
 import mobi.anoda.archinamon.kernel.persefone.signals.AsyncReceiver;
 import mobi.anoda.archinamon.kernel.persefone.signals.BroadcastFilter;
 import mobi.anoda.archinamon.kernel.persefone.signals.Broadcastable;
@@ -51,7 +53,7 @@ public abstract class AbstractService extends Service {
     protected volatile AnodaApplicationDelegate             mAppDelegate;
     protected          Class<? extends AbstractAsyncServer> mAsyncServiceImpl;
     protected          AsyncReceiver                        mServerListener;
-    private final    BroadcastReceiver mMainAsyncReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mMainAsyncReceiver = new BroadcastReceiver() {
 
         @Implement
         public void onReceive(Context context, Intent intent) {

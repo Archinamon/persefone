@@ -14,4 +14,5 @@ public final class Extras {
     public static final String ERROR_EXCEPTION         = "errorException";
     public static final String SERVER_RESPONSE_CODE    = "serverResponseCode";
     public static final String SERVER_RESPONSE_MESSAGE = "serverResponseMessage";
+    public static final String API_RESPONSE_DATA       = "apiResponseData";
 }
