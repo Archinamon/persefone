@@ -3,7 +3,6 @@ package mobi.anoda.archinamon.kernel.persefone.network.async;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
 import com.google.common.collect.ImmutableMap;
@@ -38,7 +37,7 @@ import mobi.anoda.archinamon.kernel.persefone.utils.LogHelper;
 /**
  * @author: Archinamon
  */
-public abstract class AbstractAsyncTask<Progress, Result> extends AsyncTask<Object, Progress, Result> implements Runnable, ResourceAccess {
+public abstract class AbstractAsyncTask<Progress, Result> extends CoreAsyncTask<Object, Progress, Result> implements Runnable, ResourceAccess {
 
     private static final String  TAG                    = AbstractAsyncTask.class.getSimpleName();
     private static final String  TEST_SOCKET            = "utcnist.colorado.edu";
@@ -66,6 +65,8 @@ public abstract class AbstractAsyncTask<Progress, Result> extends AsyncTask<Obje
         mProgressTarget = ProgressPopup.class;
         mErrorCallback = InterruptSequencer.getInstance();
 
+        CoreAsyncTask.sWakeLock = CoreAsyncTask.getLock(context);
+
         onPostInit();
     }
 
@@ -74,6 +75,8 @@ public abstract class AbstractAsyncTask<Progress, Result> extends AsyncTask<Obje
         mServiceContext = context;
         mProgressTarget = ProgressPopup.class;
         mErrorCallback = InterruptSequencer.getInstance();
+
+        CoreAsyncTask.sWakeLock = CoreAsyncTask.getLock(context);
 
         onPostInit();
     }

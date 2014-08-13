@@ -21,17 +21,17 @@ public abstract class WakefulIntentService extends AbstractIntentService {
 
     static final            String                NAME       = WakefulIntentService.class.getName();
     static final            String                LAST_ALARM = "lastAlarm";
-    private static volatile PowerManager.WakeLock lockStatic = null;
+    private static volatile PowerManager.WakeLock sWakeLock  = null;
 
     private synchronized static PowerManager.WakeLock getLock(Context context) {
-        if (lockStatic == null) {
+        if (sWakeLock == null) {
             PowerManager mgr = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
 
-            lockStatic = mgr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, NAME);
-            lockStatic.setReferenceCounted(true);
+            sWakeLock = mgr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, NAME);
+            sWakeLock.setReferenceCounted(true);
         }
 
-        return lockStatic;
+        return sWakeLock;
     }
 
     public static void sendWakefulWork(Context ctxt, Intent i) {

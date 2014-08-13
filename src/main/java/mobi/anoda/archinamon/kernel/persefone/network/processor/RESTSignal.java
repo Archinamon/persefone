@@ -1,9 +1,9 @@
 package mobi.anoda.archinamon.kernel.persefone.network.processor;
 
-import android.os.AsyncTask.Status;
 import javax.annotation.Nonnull;
 import mobi.anoda.archinamon.kernel.persefone.model.NetworkModel;
 import mobi.anoda.archinamon.kernel.persefone.network.async.AbstractAsyncTask;
+import mobi.anoda.archinamon.kernel.persefone.network.async.CoreAsyncTask.Status;
 import mobi.anoda.archinamon.kernel.persefone.ui.dialog.AbstractPopup;
 
 /**
