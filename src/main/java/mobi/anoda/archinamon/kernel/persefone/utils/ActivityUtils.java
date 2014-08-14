@@ -3,6 +3,7 @@ package mobi.anoda.archinamon.kernel.persefone.utils;
 import android.app.Application;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import mobi.anoda.archinamon.kernel.persefone.AnodaApplicationDelegate;
 import mobi.anoda.archinamon.kernel.persefone.annotation.ProxyMethod;
 
 /**
@@ -22,6 +23,10 @@ public final class ActivityUtils {
             context = (Application) method.invoke(null, (Object[]) null);
         } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             LogHelper.println_error(TAG, e);
+        } finally {
+            if (context == null) {
+                context = (Application) AnodaApplicationDelegate.getProxyContext();
+            }
         }
 
         return context;
