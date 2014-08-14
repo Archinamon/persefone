@@ -1,6 +1,8 @@
 package mobi.anoda.archinamon.kernel.persefone;
 
 import android.app.Application;
+import android.content.Context;
+import android.content.ContextWrapper;
 import mobi.anoda.archinamon.kernel.persefone.network.State;
 import mobi.anoda.archinamon.kernel.persefone.network.async.AbstractAsyncTask;
 import mobi.anoda.archinamon.kernel.persefone.network.client.ExtAndroidHttpClient;
@@ -15,18 +17,27 @@ import mobi.anoda.archinamon.kernel.persefone.utils.LogHelper;
  */
 public abstract class AnodaApplicationDelegate extends Application {
 
-    public static final  boolean DEBUG                = true;
-    private static String               mFlurryKey;
-    protected      AbstractActivity     mContext;
-    protected      ExtAndroidHttpClient mHttpClient;
+    public static final boolean DEBUG = true;
+    private static          String               sFlurryKey;
+    private static volatile ContextWrapper       sAppContextProxy;
+    protected               AbstractActivity     mContext;
+    protected               ExtAndroidHttpClient mHttpClient;
 
     @Override
     public void onCreate() {
         super.onCreate();
+        sAppContextProxy = this;
+
         AbstractAsyncTask.init();
-        State.svAccessState = InternetAccessReceiver.checkConnection(this)
-                              ? State.ACCESS_GRANTED
-                              : State.ACCESS_DENIED;
+        State.svAccessState = InternetAccessReceiver.checkConnection(this) ? State.ACCESS_GRANTED : State.ACCESS_DENIED;
+    }
+
+    /**
+     * @return an Application as ContextWrapper proxy instance
+     * @hide
+     */
+    public final static Context getProxyContext() {
+        return AnodaApplicationDelegate.sAppContextProxy;
     }
 
     protected final void setDefaultScreen(String who, Class<? extends AbstractActivity> screen) {
@@ -46,11 +57,11 @@ public abstract class AnodaApplicationDelegate extends Application {
     }
 
     protected final void setFlurryKey(String key) {
-        mFlurryKey = key;
+        sFlurryKey = key;
     }
 
     public final String getFlurryKey() {
-        return mFlurryKey;
+        return sFlurryKey;
     }
 
     public abstract void registerContext(AbstractActivity context);
