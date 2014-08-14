@@ -183,26 +183,7 @@ import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
  *
  * @hide
  */
-public abstract class CoreAsyncTask<Params, Progress, Result> {
-
-    /**
-     * Indicates the current status of the task. Each status will be set only once
-     * during the lifetime of a task.
-     */
-    public enum Status {
-        /**
-         * Indicates that the task has not been executed yet.
-         */
-        PENDING,
-        /**
-         * Indicates that the task is running.
-         */
-        RUNNING,
-        /**
-         * Indicates that {@link CoreAsyncTask#onPostExecute} has finished.
-         */
-        FINISHED,
-    }
+abstract class CoreAsyncTask<Params, Progress, Result> {
 
     private static class SerialExecutor implements Executor {
 
@@ -582,7 +563,7 @@ public abstract class CoreAsyncTask<Params, Progress, Result> {
      * @return This instance of AsyncTask.
      *
      * @throws IllegalStateException If {@link #getStatus()} returns either
-     *         {@link CoreAsyncTask.Status#RUNNING} or {@link CoreAsyncTask.Status#FINISHED}.
+     *         {@link Status#RUNNING} or {@link Status#FINISHED}.
      *
      * @see #executeOnExecutor(java.util.concurrent.Executor, Object[])
      * @see #execute(Runnable)
@@ -620,7 +601,7 @@ public abstract class CoreAsyncTask<Params, Progress, Result> {
      * @return This instance of AsyncTask.
      *
      * @throws IllegalStateException If {@link #getStatus()} returns either
-     *         {@link CoreAsyncTask.Status#RUNNING} or {@link CoreAsyncTask.Status#FINISHED}.
+     *         {@link Status#RUNNING} or {@link Status#FINISHED}.
      *
      * @see #execute(Object[])
      */

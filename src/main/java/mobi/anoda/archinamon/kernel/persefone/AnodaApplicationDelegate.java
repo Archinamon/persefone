@@ -1,9 +1,9 @@
 package mobi.anoda.archinamon.kernel.persefone;
 
 import android.app.Application;
-import mobi.anoda.archinamon.kernel.persefone.network.async.CoreAsyncTask;
-import mobi.anoda.archinamon.kernel.persefone.network.client.ExtAndroidHttpClient;
 import mobi.anoda.archinamon.kernel.persefone.network.State;
+import mobi.anoda.archinamon.kernel.persefone.network.async.AbstractAsyncTask;
+import mobi.anoda.archinamon.kernel.persefone.network.client.ExtAndroidHttpClient;
 import mobi.anoda.archinamon.kernel.persefone.receiver.InternetAccessReceiver;
 import mobi.anoda.archinamon.kernel.persefone.ui.activity.AbstractActivity;
 import mobi.anoda.archinamon.kernel.persefone.ui.dialog.AbstractPopup;
@@ -23,7 +23,7 @@ public abstract class AnodaApplicationDelegate extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        CoreAsyncTask.init();
+        AbstractAsyncTask.init();
         State.svAccessState = InternetAccessReceiver.checkConnection(this)
                               ? State.ACCESS_GRANTED
                               : State.ACCESS_DENIED;
