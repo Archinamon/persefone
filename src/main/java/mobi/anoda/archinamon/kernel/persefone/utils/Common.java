@@ -47,8 +47,8 @@ public class Common {
         return metrics.density;
     }
 
-    public static String getApplicationAgent(Context context) {
-        StringBuilder agentBuilder = new StringBuilder("Wallpapers2/1.8 (Android-");
+    public static String getApplicationAgent(Context context, String ua) {
+        StringBuilder agentBuilder = new StringBuilder(ua + "/1.8 (Android-");
         agentBuilder.append(Build.MANUFACTURER)
                     .append(Build.DEVICE)
                     .append(Build.MODEL)
