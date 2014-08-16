@@ -1,6 +1,7 @@
 package mobi.anoda.archinamon.kernel.persefone.service.wakeful;
 
 import android.app.AlarmManager;
+import android.app.Application;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -12,9 +13,9 @@ public abstract class WakefulIntentService extends AbstractIntentService {
 
     public interface AlarmListener {
 
-        void scheduleAlarms(AlarmManager mgr, PendingIntent pi, Context ctxt);
+        void scheduleAlarms(AlarmManager mgr, PendingIntent pi, Application application);
 
-        void sendWakefulWork(Context ctxt);
+        void sendWakefulWork(Context context);
 
         long getMaxAge();
     }
@@ -34,40 +35,40 @@ public abstract class WakefulIntentService extends AbstractIntentService {
         return sWakeLock;
     }
 
-    public static void sendWakefulWork(Context ctxt, Intent i) {
-        getLock(ctxt.getApplicationContext()).acquire();
-        ctxt.startService(i);
+    public static void sendWakefulWork(Context context, Intent i) {
+        getLock(context.getApplicationContext()).acquire();
+        context.startService(i);
     }
 
-    public static void sendWakefulWork(Context ctxt, Class<?> clsService) {
-        sendWakefulWork(ctxt, new Intent(ctxt, clsService));
+    public static void sendWakefulWork(Context context, Class<?> clsService) {
+        sendWakefulWork(context, new Intent(context, clsService));
     }
 
-    public static void scheduleAlarms(AlarmListener listener, Context ctxt) {
-        scheduleAlarms(listener, ctxt, true);
+    public static void scheduleAlarms(AlarmListener listener, Application application) {
+        scheduleAlarms(listener, application, true);
     }
 
-    public static void scheduleAlarms(AlarmListener listener, Context ctxt, boolean force) {
-        SharedPreferences prefs = ctxt.getSharedPreferences(NAME, 0);
+    public static void scheduleAlarms(AlarmListener listener, Application application, boolean force) {
+        SharedPreferences prefs = application.getSharedPreferences(NAME, 0);
         long lastAlarm = prefs.getLong(LAST_ALARM, 0);
 
         if (lastAlarm == 0 || force || (System.currentTimeMillis() > lastAlarm && System.currentTimeMillis() - lastAlarm > listener.getMaxAge())) {
-            AlarmManager mgr = (AlarmManager) ctxt.getSystemService(Context.ALARM_SERVICE);
-            Intent i = new Intent(ctxt, AlarmReceiver.class);
-            PendingIntent pi = PendingIntent.getBroadcast(ctxt, 0, i, 0);
+            AlarmManager mgr = (AlarmManager) application.getSystemService(Context.ALARM_SERVICE);
+            Intent i = new Intent(application, AlarmEventDispatcher.class);
+            PendingIntent pi = PendingIntent.getBroadcast(application, 0, i, 0);
 
-            listener.scheduleAlarms(mgr, pi, ctxt);
+            listener.scheduleAlarms(mgr, pi, application);
         }
     }
 
-    public static void cancelAlarms(Context ctxt) {
-        AlarmManager mgr = (AlarmManager) ctxt.getSystemService(Context.ALARM_SERVICE);
-        Intent i = new Intent(ctxt, AlarmReceiver.class);
-        PendingIntent pi = PendingIntent.getBroadcast(ctxt, 0, i, 0);
+    public static void cancelAlarms(Context context) {
+        AlarmManager mgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        Intent i = new Intent(context, AlarmEventDispatcher.class);
+        PendingIntent pi = PendingIntent.getBroadcast(context, 0, i, 0);
 
         mgr.cancel(pi);
 
-        ctxt.getSharedPreferences(NAME, 0)
+        context.getSharedPreferences(NAME, 0)
             .edit()
             .remove(LAST_ALARM)
             .commit();

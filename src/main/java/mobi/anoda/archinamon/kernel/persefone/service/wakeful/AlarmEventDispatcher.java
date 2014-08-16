@@ -1,5 +1,6 @@
 package mobi.anoda.archinamon.kernel.persefone.service.wakeful;
 
+import android.app.Application;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -17,9 +18,9 @@ import mobi.anoda.archinamon.kernel.persefone.receiver.AbstractReceiver;
 import mobi.anoda.archinamon.kernel.persefone.service.wakeful.WakefulIntentService.AlarmListener;
 import mobi.anoda.archinamon.kernel.persefone.utils.WordUtils;
 
-public class AlarmReceiver extends AbstractReceiver {
+public class AlarmEventDispatcher extends AbstractReceiver {
 
-    private static final String WAKEFUL_META_DATA = "com.commonsware.cwac.wakeful";
+    private static final String WAKEFUL_META_DATA = "wakefulAlarmProcessor";
 
     @Override
     public void onReceive(@Nonnull final String action, @Nullable Intent data) {
@@ -35,7 +36,7 @@ public class AlarmReceiver extends AbstractReceiver {
 
                 listener.sendWakefulWork(context());
             } else {
-                WakefulIntentService.scheduleAlarms(listener, context(), true);
+                WakefulIntentService.scheduleAlarms(listener, (Application) context(), true);
             }
         }
     }
@@ -51,8 +52,7 @@ public class AlarmReceiver extends AbstractReceiver {
 
             while (xpp.getEventType() != XmlPullParser.END_DOCUMENT) {
                 if (xpp.getEventType() == XmlPullParser.START_TAG) {
-                    if (xpp.getName()
-                           .equals("WakefulIntentService")) {
+                    if (xpp.getName().equals("WakefulIntentService")) {
                         String clsName = xpp.getAttributeValue(null, "listener");
                         Class<AlarmListener> cls = (Class<AlarmListener>) Class.forName(clsName);
 
