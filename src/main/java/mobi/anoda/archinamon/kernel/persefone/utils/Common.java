@@ -12,14 +12,10 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.Point;
-import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
-import android.view.Display;
-import android.view.WindowManager;
 import android.webkit.MimeTypeMap;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -48,6 +44,9 @@ public class Common {
     }
 
     public static String getApplicationAgent(Context context, String ua) {
+        final int[] metrics = MetricsHelper.getDisplayMetrics(context);
+        final int height = metrics[1];
+
         StringBuilder agentBuilder = new StringBuilder(ua + "/1.8 (Android-");
         agentBuilder.append(Build.MANUFACTURER)
                     .append(Build.DEVICE)
@@ -98,31 +97,6 @@ public class Common {
         int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
         cursor.moveToFirst();
         return cursor.getString(column_index);
-    }
-
-    @SuppressWarnings("deprecation")
-    public static int getRotation(Activity context, Uri uri) throws IOException {
-        ExifInterface exif = new ExifInterface(uri.getPath());
-        String[] orientationColumn = {MediaStore.Images.Media.ORIENTATION};
-        Cursor cur = context.managedQuery(uri, orientationColumn, null, null, null);
-
-        int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
-        if (cur != null && cur.moveToFirst()) {
-            orientation = cur.getInt(cur.getColumnIndex(orientationColumn[0]));
-        }
-
-        return orientation;
-    }
-
-    public static int[] getDisplayMetrics(Context context) {
-        final int[] result = new int[2];
-        final Point point = new Point();
-        final WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        final Display display = windowManager.getDefaultDisplay();
-        display.getRealSize(point);
-        result[0] = point.x;
-        result[1] = point.y;
-        return result;
     }
 
     public static String getApplicationName(Context ctx) {

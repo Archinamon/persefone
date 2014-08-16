@@ -14,15 +14,18 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
 import mobi.anoda.archinamon.kernel.persefone.receiver.AbstractReceiver;
 import mobi.anoda.archinamon.kernel.persefone.service.wakeful.WakefulIntentService.AlarmListener;
 import mobi.anoda.archinamon.kernel.persefone.utils.WordUtils;
 
 public class AlarmEventDispatcher extends AbstractReceiver {
 
+    public static final  String TAG               = AlarmEventDispatcher.class.getSimpleName();
+    public static final  String EVENT_META_ACTION = TAG + ".signal:dispatch_event";
     private static final String WAKEFUL_META_DATA = "wakefulAlarmProcessor";
 
-    @Override
+    @Implement
     public void onReceive(@Nonnull final String action, @Nullable Intent data) {
         AlarmListener listener = getListener(context());
 

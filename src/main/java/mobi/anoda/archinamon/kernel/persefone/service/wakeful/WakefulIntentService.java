@@ -55,6 +55,7 @@ public abstract class WakefulIntentService extends AbstractIntentService {
         if (lastAlarm == 0 || force || (System.currentTimeMillis() > lastAlarm && System.currentTimeMillis() - lastAlarm > listener.getMaxAge())) {
             AlarmManager mgr = (AlarmManager) application.getSystemService(Context.ALARM_SERVICE);
             Intent i = new Intent(application, AlarmEventDispatcher.class);
+            i.setAction(AlarmEventDispatcher.EVENT_META_ACTION);
             PendingIntent pi = PendingIntent.getBroadcast(application, 0, i, 0);
 
             listener.scheduleAlarms(mgr, pi, application);

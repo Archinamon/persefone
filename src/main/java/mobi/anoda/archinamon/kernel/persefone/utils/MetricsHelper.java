@@ -4,14 +4,45 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.graphics.Point;
+import android.media.ExifInterface;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.view.Display;
+import android.view.WindowManager;
+import java.io.IOException;
 
 /**
  * author: Archinamon
  * project: FavorMe
  */
 public class MetricsHelper {
+
+    @SuppressWarnings("deprecation")
+    public static int getRotation(Activity context, Uri uri) throws IOException {
+        ExifInterface exif = new ExifInterface(uri.getPath());
+        String[] orientationColumn = {MediaStore.Images.Media.ORIENTATION};
+        Cursor cur = context.managedQuery(uri, orientationColumn, null, null, null);
+
+        int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
+        if (cur != null && cur.moveToFirst()) {
+            orientation = cur.getInt(cur.getColumnIndex(orientationColumn[0]));
+        }
+
+        return orientation;
+    }
+
+    public static int[] getDisplayMetrics(Context context) {
+        final int[] result = new int[2];
+        final Point point = new Point();
+        final WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        final Display display = windowManager.getDefaultDisplay();
+        display.getRealSize(point);
+        result[0] = point.x;
+        result[1] = point.y;
+        return result;
+    }
 
     public static void calcSmallPopupMetrics(Activity a, int[] wh) {
         final int MAX_WIDTH = 300;
