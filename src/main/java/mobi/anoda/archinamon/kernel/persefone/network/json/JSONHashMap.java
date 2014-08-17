@@ -15,7 +15,7 @@ import static mobi.anoda.archinamon.kernel.persefone.network.json.Projection.Err
  */
 public class JSONHashMap<SuccessMap extends HashMap<String, String>, ErrorMap extends HashMap<String, String>> extends HashMap<SuccessMap, ErrorMap> {
 
-    public static final  String TAG              = "mobi.anoda.archinamon.network.json.JSONHashMap";
+    public static final  String TAG              = JSONHashMap.class.getSimpleName();
     static final         String RESULT_TAG       = "field_result";
     static final         String ERROR_TAG        = "field_error";
     private static final String ERR_DEFAULT_CODE = "000";

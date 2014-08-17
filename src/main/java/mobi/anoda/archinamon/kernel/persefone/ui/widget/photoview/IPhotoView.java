@@ -20,8 +20,8 @@ import android.graphics.RectF;
 import android.view.View;
 import android.widget.ImageView;
 
-
 public interface IPhotoView {
+
     /**
      * Returns true if the PhotoView is set to allow zooming of Photos.
      *
@@ -231,5 +231,4 @@ public interface IPhotoView {
      * @param rotationDegree - Degree to rotate PhotoView by, should be in range 0 to 360
      */
     void setPhotoViewRotation(float rotationDegree);
-
 }

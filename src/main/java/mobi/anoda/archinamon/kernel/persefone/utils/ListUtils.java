@@ -70,4 +70,22 @@ public class ListUtils {
         Collections.addAll(list, elements);
         return list;
     }
+
+    public static <T> String join(T[] array, String cement) {
+        StringBuilder builder = new StringBuilder();
+
+        if(array == null || array.length == 0) {
+            return null;
+        }
+
+        for (T t : array) {
+            builder.append(t).append(cement);
+        }
+
+        if (cement.length() > 0) {
+            builder.delete(builder.length() - cement.length(), builder.length());
+        }
+
+        return builder.toString();
+    }
 }

@@ -576,6 +576,27 @@ public class WordUtils {
         return text;
     }
 
+    public static String[] concatAll(String[] jobsA, String[] jobsB, String[] jobsC, String[] jobsD) {
+        return generalConcatAll(jobsA, jobsB, jobsC, jobsD);
+    }
+
+    public static String[] generalConcatAll(String[]... jobs) {
+        int len = 0;
+        for (final String[] job : jobs) {
+            len += job.length;
+        }
+
+        final String[] result = new String[len];
+
+        int currentPos = 0;
+        for (final String[] job : jobs) {
+            System.arraycopy(job, 0, result, currentPos, job.length);
+            currentPos += job.length;
+        }
+
+        return result;
+    }
+
     public static String transcendListToString(List<String> input, String delim) {
         StringBuilder builder = new StringBuilder();
 

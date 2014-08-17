@@ -364,12 +364,9 @@ public final class ExtAndroidHttpClient implements HttpClient {
     private class CurlLogger implements HttpRequestInterceptor {
 
         @Implement
-        public void process(HttpRequest request, HttpContext context)
-                throws HttpException, IOException {
+        public void process(HttpRequest request, HttpContext context) throws HttpException, IOException {
             LoggingConfiguration configuration = curlConfiguration;
-            if (configuration != null
-                    && configuration.isLoggable()
-                    && request instanceof HttpUriRequest) {
+            if (configuration != null && configuration.isLoggable() && request instanceof HttpUriRequest) {
                 // Never print auth token -- we used to check ro.secure=0 to
                 // enable that, but can't do that in unbundled code.
                 configuration.println(toCurl((HttpUriRequest) request, false));
