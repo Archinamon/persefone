@@ -12,27 +12,39 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
+import android.support.annotation.IdRes;
 import android.util.DisplayMetrics;
+import android.view.Gravity;
+import android.view.View;
 import android.webkit.MimeTypeMap;
+import android.widget.Toast;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import mobi.anoda.archinamon.kernel.persefone.R;
+import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
 import mobi.anoda.archinamon.kernel.persefone.ui.activity.AbstractActivity;
 
 /**
- * author: Archinamon
- * project: FavorMe
+ * author: Archinamon project: FavorMe
  */
 public class Common {
 
-    public static final String TAG          = Common.class.getSimpleName();
-    public static final String EMPTY_STRING = "";
+    public static final  String                   TAG                = Common.class.getSimpleName();
+    public static final  String                   EMPTY_STRING       = "";
+    private static final View.OnLongClickListener TOASTABLE_LISTENER = new View.OnLongClickListener() {
+
+        @Implement
+        public boolean onLongClick(View v) {
+            return showToastInternal(v);
+        }
+    };
 
     public static String obtainClassTag(Object i) {
         return i.getClass().getSimpleName();
@@ -117,7 +129,8 @@ public class Common {
      * Check if package installed
      *
      * @param context Context of current app
-     * @param uri Package of application to check
+     * @param uri     Package of application to check
+     *
      * @return true if passed package installed
      */
     public static boolean isAppInstalled(Context context, String uri) {
@@ -137,7 +150,8 @@ public class Common {
      * Check if action available installed
      *
      * @param context Context of current app
-     * @param action Package of application to check
+     * @param action  Package of application to check
+     *
      * @return true if passed package installed
      */
     public static boolean isIntentAvailable(Context context, String action) {
@@ -179,7 +193,9 @@ public class Common {
     public static boolean isActivityRunning(Context context, Class activityClass) {
         ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         List<RunningTaskInfo> tasks = activityManager.getRunningTasks(Integer.MAX_VALUE);
-        if (ListUtils.isEmpty(tasks)) return false;
+        if (ListUtils.isEmpty(tasks)) {
+            return false;
+        }
 
         if (tasks != null) {
             for (RunningTaskInfo task : tasks) {
@@ -187,8 +203,9 @@ public class Common {
                 if (info != null) {
                     String activityName = activityClass.getCanonicalName();
                     String packageName = info.getPackageName();
-                    if (activityName.equals(task.baseActivity.getClassName()) && (packageName != null && packageName.equals(context.getPackageName())))
+                    if (activityName.equals(task.baseActivity.getClassName()) && (packageName != null && packageName.equals(context.getPackageName()))) {
                         return true;
+                    }
                 }
             }
         }
@@ -217,5 +234,41 @@ public class Common {
 
     public static String getMarketSchemaLink(Context context) {
         return "market://details?id=" + context.getPackageName();
+    }
+
+    public static void makeToastableButtons(View context, @IdRes int... viewIds) {
+        for (int id : viewIds) {
+            try {
+                context.findViewById(id)
+                       .setOnLongClickListener(TOASTABLE_LISTENER);
+            } catch (Exception ignore) {}
+        }
+    }
+
+    private static boolean showToastInternal(View v) {
+        final CharSequence content = v.getContentDescription();
+        if (WordUtils.isEmpty(content)) return false;
+
+        final int[] screenPos = new int[2];
+        final Rect displayFrame = new Rect();
+        v.getLocationOnScreen(screenPos);
+        v.getWindowVisibleDisplayFrame(displayFrame);
+
+        final Context context = v.getContext();
+        final int width = v.getWidth();
+        final int height = v.getHeight();
+        final int midy = screenPos[1] + height / 2;
+        final int screenWidth = context.getResources().getDisplayMetrics().widthPixels;
+
+        Toast cheatSheet = Toast.makeText(context, content, Toast.LENGTH_SHORT);
+        if (midy < displayFrame.height()) {
+            // Show along the top; follow action buttons
+            cheatSheet.setGravity(Gravity.TOP | Gravity.END, screenWidth - screenPos[0] - width / 2, height);
+        } else {
+            // Show along the bottom center
+            cheatSheet.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, height);
+        }
+        cheatSheet.show();
+        return true;
     }
 }
