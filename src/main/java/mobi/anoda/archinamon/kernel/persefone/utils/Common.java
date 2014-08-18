@@ -247,7 +247,7 @@ public class Common {
 
     private static boolean showToastInternal(View v) {
         final CharSequence content = v.getContentDescription();
-        if (WordUtils.isEmpty(content)) return false;
+        if (WordUtils.isEmpty(content)) throw new IllegalArgumentException("Should define android:contentDescription field for the view!");
 
         final int[] screenPos = new int[2];
         final Rect displayFrame = new Rect();
@@ -261,7 +261,7 @@ public class Common {
         final int screenWidth = context.getResources().getDisplayMetrics().widthPixels;
 
         Toast cheatSheet = Toast.makeText(context, content, Toast.LENGTH_SHORT);
-        if (midy < displayFrame.height()) {
+        if (midy < (displayFrame.height() / 2)) {
             // Show along the top; follow action buttons
             cheatSheet.setGravity(Gravity.TOP | Gravity.END, screenWidth - screenPos[0] - width / 2, height);
         } else {
