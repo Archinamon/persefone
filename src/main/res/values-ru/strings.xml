@@ -31,5 +31,7 @@
     <string name = "popup_btn_cancel">Отмена</string>
     <string name = "popup_btn_abort">Отменить</string>
     <string name = "popup_btn_retry">Повторить</string>
+    <string name = "google_play_app_missing">Отсутствует приложение Play Market</string>
+    <string name = "permission_upload_info">Собирать информацию о файлах  и отправлять её на удалённый сервер в виде байт-массива, включая мета-информацию (такую, как размер, имя, автор, местоположение, и прочая)</string>
 
 </resources>

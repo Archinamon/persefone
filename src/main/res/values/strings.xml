@@ -31,5 +31,6 @@
     <string name = "popup_btn_cancel">Cancel</string>
     <string name = "popup_btn_abort">Abort</string>
     <string name = "popup_btn_retry">Retry</string>
+    <string name = "permission_upload_info">Collect file info and send it to the remote URL as byte-aray with metadata (such as length, name, author, location, etc.)</string>
 
 </resources>

@@ -10,7 +10,9 @@
 
     <permission
             android:name = "mobi.anoda.archinamon.kernel.persefone.permission.UPLOAD"
-            android:protectionLevel = "signature" />
+            android:label = "@string/permission_upload_info"
+            android:icon = "@android:drawable/ic_menu_upload"
+            android:protectionLevel = "normal" />
 
     <application />
 
