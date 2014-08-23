@@ -593,6 +593,26 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
         startActivity(activity);
     }
 
+    public void startDisorderedActivity(Broadcastable action, Class<? extends Activity> activity) {
+        Intent intent = new Intent(mSelf, activity)
+                .setClassName(getPackageName(), activity.getName())
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                .setAction(action.getAction())
+                .setPackage(getPackageName());
+        startActivity(intent);
+    }
+
+    public void startDisorderedActivity(Broadcastable action, Class<? extends Activity> activity, Bundle params) {
+        Intent intent = new Intent(mSelf, activity)
+                .setClassName(getPackageName(), activity.getName())
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                .setAction(action.getAction())
+                .setPackage(getPackageName())
+                .putExtras(params);
+        startActivity(intent);
+    }
+
+
     public void startActivity(Broadcastable action, Bundle params) {
         Intent i = new Intent(action.getAction());
         i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -675,6 +695,14 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
         if (data != null) {
             intent.putExtra(CUSTOM_DATA, data);
         }
+
+        startActivityForResult(intent, code);
+    }
+
+    /* Switch activity for result without anim */
+    public void openActivityForResult(Class c, int code, int data) {
+        Intent intent = new Intent(mSelf, c);
+        intent.putExtra(CUSTOM_DATA, data);
 
         startActivityForResult(intent, code);
     }
