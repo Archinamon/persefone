@@ -38,7 +38,7 @@ public class MetricsHelper {
         final Point point = new Point();
         final WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         final Display display = windowManager.getDefaultDisplay();
-        display.getRealSize(point);
+        display.getSize(point);
         result[0] = point.x;
         result[1] = point.y;
         return result;

@@ -782,7 +782,7 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
     }
 
     protected void addCallToStack(AsyncRequest request) {
-        if (!accessAllowed()) openPopup(NoInternetPopup.class, getString(R.string.no_internet_access));
+        assertInternetAccess();
         synchronized (MUTEX) {
             POSTPONED_CALLS.push(request);
         }
@@ -804,6 +804,13 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
                 }
             }
         }
+    }
+
+    protected boolean assertInternetAccess() {
+        final boolean status = accessAllowed();
+        if (!status) openPopup(NoInternetPopup.class, getString(R.string.no_internet_access));
+
+        return status;
     }
 
     private boolean accessAllowed() {
