@@ -440,6 +440,12 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
         sendBroadcast(command, params);
     }
 
+    public void sendBroadcast(Broadcastable command, int data) {
+        Bundle params = new Bundle();
+        params.putInt(CUSTOM_DATA, data);
+        sendBroadcast(command, params);
+    }
+
     public <Model extends Parcelable> void sendBroadcast(Broadcastable command, Model data) {
         Intent intent = new Intent(command.getAction());
         intent.putExtra(CUSTOM_DATA, data);

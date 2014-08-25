@@ -2,7 +2,7 @@ package mobi.anoda.archinamon.kernel.persefone.ui.adapter;
 
 import android.view.LayoutInflater;
 import android.view.View.OnClickListener;
-import org.jetbrains.annotations.NotNull;
+import javax.annotation.Nonnull;
 import mobi.anoda.archinamon.kernel.persefone.AnodaApplicationDelegate;
 import mobi.anoda.archinamon.kernel.persefone.ui.activity.AbstractActivity;
 
@@ -31,7 +31,7 @@ public abstract class ListItem<ModelObject> implements AbsAdapterItem, OnClickLi
         this.mContext = context;
     }
 
-    public final void setInflater(@NotNull LayoutInflater inflater) {
+    public final void setInflater(@Nonnull LayoutInflater inflater) {
         this.mInflater = inflater;
     }
 
@@ -40,6 +40,14 @@ public abstract class ListItem<ModelObject> implements AbsAdapterItem, OnClickLi
     }
 
     public abstract int getViewType();
+
+    public final int getPosition() {
+        return this.mPosition;
+    }
+
+    public final ModelObject getDataModel() {
+        return this.mDataModel;
+    }
 
     public /*virtual*/ void setAsLast() {}
 }
