@@ -669,7 +669,11 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
     /* Switch activity with anim */
     public <T extends Parcelable> void enterActivity(Class c, T data) {
         Intent intent = new Intent(mSelf, c);
-        intent.putExtra(CUSTOM_DATA, data);
+        if (data instanceof Bundle) {
+            intent.putExtras((Bundle) data);
+        } else {
+            intent.putExtra(CUSTOM_DATA, data);
+        }
 
         startActivity(c, intent);
         overridePendingTransition(R.anim.in_right, R.anim.out_left);
