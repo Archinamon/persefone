@@ -43,7 +43,7 @@ import mobi.anoda.archinamon.kernel.persefone.utils.LogHelper;
  * author: Archinamon
  * project: FavorMe
  */
-public abstract class AbstractPopup extends DialogFragment implements TaggedView, OnServerReady {
+public abstract class AbstractDialog extends DialogFragment implements TaggedView, OnServerReady {
 
     public static interface ICustomInjection {
 
@@ -120,7 +120,7 @@ public abstract class AbstractPopup extends DialogFragment implements TaggedView
         }
     }
 
-    public static final                 String               TAG             = AbstractPopup.class.getSimpleName();
+    public static final                 String               TAG             = AbstractDialog.class.getSimpleName();
     public static final                 String               CUSTOM_DATA     = AbstractActivity.CUSTOM_DATA;
     public static final                 String               IEXTRA_TITLE    = ":popup_title";
     public static final                 String               IEXTRA_MESSAGE  = ":popup_message";
@@ -182,8 +182,8 @@ public abstract class AbstractPopup extends DialogFragment implements TaggedView
     private int     mDialogThemeLight = android.R.style.Theme_Holo_Light_DialogWhenLarge;
     private boolean mIsReady          = false;
 
-    public static AbstractPopup newInstance(Class<? extends AbstractPopup> klass, Bundle params) {
-        AbstractPopup instance = null;
+    public static AbstractDialog newInstance(Class<? extends AbstractDialog> klass, Bundle params) {
+        AbstractDialog instance = null;
         try {
             instance = klass.newInstance();
             instance.mDialogParams = params;
@@ -249,9 +249,12 @@ public abstract class AbstractPopup extends DialogFragment implements TaggedView
 
         if (mDialogParams != null) {
             if (mDialogParams.containsKey(IEXTRA_THEME))
-                setTheme(mDialogParams.getString(IEXTRA_THEME).equals(THEME_LIGHT) ? mDialogThemeLight : mDialogThemeDark);
-            if (mDialogParams.containsKey(IEXTRA_MESSAGE)) setMessage(mDialogParams.getString(IEXTRA_MESSAGE));
-            if (mDialogParams.containsKey(IEXTRA_TITLE)) setTitle(mDialogParams.getString(IEXTRA_TITLE));
+                setTheme(mDialogParams.getString(IEXTRA_THEME)
+                                      .equals(THEME_LIGHT) ? mDialogThemeLight : mDialogThemeDark);
+            if (mDialogParams.containsKey(IEXTRA_MESSAGE))
+                setMessage(mDialogParams.getString(IEXTRA_MESSAGE));
+            if (mDialogParams.containsKey(IEXTRA_TITLE))
+                setTitle(mDialogParams.getString(IEXTRA_TITLE));
         }
 
         mIsReady = setup();

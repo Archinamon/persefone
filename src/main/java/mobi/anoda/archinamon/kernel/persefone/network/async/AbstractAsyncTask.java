@@ -30,8 +30,8 @@ import mobi.anoda.archinamon.kernel.persefone.service.AbstractService;
 import mobi.anoda.archinamon.kernel.persefone.service.notification.NetworkNotification;
 import mobi.anoda.archinamon.kernel.persefone.signals.Broadcastable;
 import mobi.anoda.archinamon.kernel.persefone.ui.activity.AbstractActivity;
-import mobi.anoda.archinamon.kernel.persefone.ui.dialog.AbstractPopup;
-import mobi.anoda.archinamon.kernel.persefone.ui.dialog.ProgressPopup;
+import mobi.anoda.archinamon.kernel.persefone.ui.dialog.AbstractDialog;
+import mobi.anoda.archinamon.kernel.persefone.ui.dialog.ProgressDialog;
 import mobi.anoda.archinamon.kernel.persefone.utils.LogHelper;
 
 /**
@@ -46,23 +46,23 @@ public abstract class AbstractAsyncTask<Progress, Result> extends CoreAsyncTask<
     private final        Object  MUTEX                  = new Object();
     private volatile     int     mInternetAccess        = 1;
     private              boolean mIsSilent              = false;
-    protected AbstractActivity               mUiContext;
-    protected AbstractService                mServiceContext;
-    protected AbstractPopup                  mProgressDialog;
-    protected Class<? extends AbstractPopup> mProgressTarget;
-    protected AbstractNetworkOperation       mOperation;
-    protected Broadcastable                  mActionCallback;
-    protected APIErrorCode                   mErrorTranslation;
-    protected IStrategyInterrupt             mErrorCallback;
-    private   List<BasicNameValuePair>       mCompiledValuableModel;
-    private   String                         mActualAction;
+    protected AbstractActivity                mUiContext;
+    protected AbstractService                 mServiceContext;
+    protected AbstractDialog                  mProgressDialog;
+    protected Class<? extends AbstractDialog> mProgressTarget;
+    protected AbstractNetworkOperation        mOperation;
+    protected Broadcastable                   mActionCallback;
+    protected APIErrorCode                    mErrorTranslation;
+    protected IStrategyInterrupt              mErrorCallback;
+    private   List<BasicNameValuePair>        mCompiledValuableModel;
+    private   String                          mActualAction;
 
     public AbstractAsyncTask() {
     }
 
     public final void init(AbstractActivity context) {
         mUiContext = context;
-        mProgressTarget = ProgressPopup.class;
+        mProgressTarget = ProgressDialog.class;
         mErrorCallback = InterruptSequencer.getInstance();
 
         CoreAsyncTask.sWakeLock = CoreAsyncTask.getLock(context);
@@ -73,7 +73,7 @@ public abstract class AbstractAsyncTask<Progress, Result> extends CoreAsyncTask<
     public final void init(AbstractService context) {
         mUiContext = null;
         mServiceContext = context;
-        mProgressTarget = ProgressPopup.class;
+        mProgressTarget = ProgressDialog.class;
         mErrorCallback = InterruptSequencer.getInstance();
 
         CoreAsyncTask.sWakeLock = CoreAsyncTask.getLock(context);
@@ -92,14 +92,14 @@ public abstract class AbstractAsyncTask<Progress, Result> extends CoreAsyncTask<
         mIsSilent = true;
     }
 
-    public final synchronized void applySpinner(Class<? extends AbstractPopup> popupSpinner) {
+    public final synchronized void applySpinner(Class<? extends AbstractDialog> popupSpinner) {
         if (popupSpinner != null) {
             mIsSilent = false;
             mProgressTarget = popupSpinner;
         }
     }
 
-    public final synchronized void applySpinner(AbstractPopup popupSpinner) {
+    public final synchronized void applySpinner(AbstractDialog popupSpinner) {
         if (popupSpinner != null) {
             mIsSilent = false;
             mProgressDialog = popupSpinner;
@@ -129,7 +129,8 @@ public abstract class AbstractAsyncTask<Progress, Result> extends CoreAsyncTask<
 
     protected final void post() {
         final int modelProjectionSize = mCompiledValuableModel.size();
-        /*volatile*/ BasicNameValuePair[] coherentProjection = new BasicNameValuePair[modelProjectionSize];
+        /*volatile*/
+        BasicNameValuePair[] coherentProjection = new BasicNameValuePair[modelProjectionSize];
         mCompiledValuableModel.toArray(coherentProjection);//mutation
         mOperation.addValues(coherentProjection);
     }

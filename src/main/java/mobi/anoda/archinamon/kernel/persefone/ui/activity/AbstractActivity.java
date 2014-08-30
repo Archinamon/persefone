@@ -46,8 +46,8 @@ import mobi.anoda.archinamon.kernel.persefone.ui.actionbar.ActionBarFactory;
 import mobi.anoda.archinamon.kernel.persefone.ui.activity.interfaces.OnServerReady;
 import mobi.anoda.archinamon.kernel.persefone.ui.activity.interfaces.StateControllable;
 import mobi.anoda.archinamon.kernel.persefone.ui.activity.interfaces.StateControllable.FragmentState;
-import mobi.anoda.archinamon.kernel.persefone.ui.dialog.AbstractPopup;
-import mobi.anoda.archinamon.kernel.persefone.ui.dialog.NoInternetPopup;
+import mobi.anoda.archinamon.kernel.persefone.ui.dialog.AbstractDialog;
+import mobi.anoda.archinamon.kernel.persefone.ui.dialog.NoInternetDialog;
 import mobi.anoda.archinamon.kernel.persefone.ui.fragment.AbstractFragment;
 import mobi.anoda.archinamon.kernel.persefone.utils.Common;
 import mobi.anoda.archinamon.kernel.persefone.utils.LogHelper;
@@ -69,7 +69,8 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
     public static final    BroadcastFilter     DEFAULT_FILTERS    = new BroadcastFilter();
     protected final        BroadcastFilter     FILTER             = new BroadcastFilter();
     protected final        List<OnServerReady> mServerListeners   = new ArrayList<>();
-    private final          String              TAG                = ((Object) this).getClass().getSimpleName();
+    private final          String              TAG                = ((Object) this).getClass()
+                                                                                   .getSimpleName();
     private final          Object              MUTEX              = new Object();
     private final          BroadcastReceiver   mErrorsReceiver    = new BroadcastReceiver() {
 
@@ -80,9 +81,10 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
 
             final ErrorReport report = intent.getParcelableExtra(Channel.KEY_DATA);
             if (NetworkNotification.FORCE_LOGOUT.isEqual(action)) {
-                if (sfOnForceLogoutScreen != null) switchWorkflow(sfOnForceLogoutScreen);
+                if (sfOnForceLogoutScreen != null)
+                    switchWorkflow(sfOnForceLogoutScreen);
             } else if (NetworkNotification.ALERT_NO_INTERNET.isEqual(action)) {
-                openPopup(NoInternetPopup.class, getString(R.string.no_internet_access));
+                openPopup(NoInternetDialog.class, getString(R.string.no_internet_access));
                 informError(null);
             } else if (NetworkNotification.ALERT_EXCEPTION.isEqual(action)) {
                 informError(report);
@@ -108,7 +110,7 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
         }
     };
     private static Class<? extends AbstractActivity>    sfOnForceLogoutScreen;
-    private static Class<? extends AbstractPopup>       sfOnServerOfflineScreen;
+    private static Class<? extends AbstractDialog>      sfOnServerOfflineScreen;
     protected      AnodaApplicationDelegate             mAppDelegate;
     protected      Class<? extends AbstractAsyncServer> mAsyncServiceImpl;
     protected      AbstractActivity                     mSelf;
@@ -177,7 +179,7 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
      * @hide
      */
     @SuppressWarnings("FinalStaticMethod")
-    public final static void setDefaultOnServerOfflineScreen(Class<? extends AbstractPopup> klass) throws ClassNotFoundException, IllegalAccessException {
+    public final static void setDefaultOnServerOfflineScreen(Class<? extends AbstractDialog> klass) throws ClassNotFoundException, IllegalAccessException {
         if (klass == null)
             throw new ClassNotFoundException("Cannot find requested class declaration");
         if (sfOnServerOfflineScreen != null)
@@ -537,42 +539,42 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
     }
 
     /* Launch Popup dialog */
-    public AbstractPopup openPopup(Class<? extends AbstractPopup> dialogClass) {
-        AbstractPopup dialog = AbstractPopup.newInstance(dialogClass, null);
+    public AbstractDialog openPopup(Class<? extends AbstractDialog> dialogClass) {
+        AbstractDialog dialog = AbstractDialog.newInstance(dialogClass, null);
         return openPopupInternal(dialog);
     }
 
-    public AbstractPopup openPopup(Class<? extends AbstractPopup> dialogClass, Bundle params) {
-        AbstractPopup dialog = AbstractPopup.newInstance(dialogClass, params);
+    public AbstractDialog openPopup(Class<? extends AbstractDialog> dialogClass, Bundle params) {
+        AbstractDialog dialog = AbstractDialog.newInstance(dialogClass, params);
         return openPopupInternal(dialog);
     }
 
-    public AbstractPopup openPopup(Class<? extends AbstractPopup> dialogClass, Parcelable data) {
+    public AbstractDialog openPopup(Class<? extends AbstractDialog> dialogClass, Parcelable data) {
         final Bundle params = new Bundle();
         params.putParcelable(CUSTOM_DATA, data);
 
-        AbstractPopup dialog = AbstractPopup.newInstance(dialogClass, params);
+        AbstractDialog dialog = AbstractDialog.newInstance(dialogClass, params);
         return openPopupInternal(dialog);
     }
 
-    public AbstractPopup openPopup(Class<? extends AbstractPopup> dialogClass, String message) {
+    public AbstractDialog openPopup(Class<? extends AbstractDialog> dialogClass, String message) {
         final Bundle params = new Bundle();
-        params.putString(AbstractPopup.IEXTRA_MESSAGE, message);
+        params.putString(AbstractDialog.IEXTRA_MESSAGE, message);
 
-        AbstractPopup dialog = AbstractPopup.newInstance(dialogClass, params);
+        AbstractDialog dialog = AbstractDialog.newInstance(dialogClass, params);
         return openPopupInternal(dialog);
     }
 
-    public AbstractPopup openPopup(Class<? extends AbstractPopup> dialogClass, String title, String message) {
+    public AbstractDialog openPopup(Class<? extends AbstractDialog> dialogClass, String title, String message) {
         final Bundle params = new Bundle();
-        params.putString(AbstractPopup.IEXTRA_TITLE, title);
-        params.putString(AbstractPopup.IEXTRA_MESSAGE, message);
+        params.putString(AbstractDialog.IEXTRA_TITLE, title);
+        params.putString(AbstractDialog.IEXTRA_MESSAGE, message);
 
-        AbstractPopup dialog = AbstractPopup.newInstance(dialogClass, params);
+        AbstractDialog dialog = AbstractDialog.newInstance(dialogClass, params);
         return openPopupInternal(dialog);
     }
 
-    private <TagDialog extends AbstractPopup & TaggedView> TagDialog openPopupInternal(TagDialog popup) {
+    private <TagDialog extends AbstractDialog & TaggedView> TagDialog openPopupInternal(TagDialog popup) {
         final String tag = popup.getViewTag();
         FragmentManager manager = getFragmentManager();
 
@@ -818,7 +820,7 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
 
     protected boolean assertInternetAccess() {
         final boolean status = accessAllowed();
-        if (!status) openPopup(NoInternetPopup.class, getString(R.string.no_internet_access));
+        if (!status) openPopup(NoInternetDialog.class, getString(R.string.no_internet_access));
 
         return status;
     }

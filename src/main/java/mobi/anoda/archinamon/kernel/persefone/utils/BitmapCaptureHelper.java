@@ -23,8 +23,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import mobi.anoda.archinamon.kernel.persefone.R;
-import mobi.anoda.archinamon.kernel.persefone.ui.dialog.AbstractPopup;
-import mobi.anoda.archinamon.kernel.persefone.ui.dialog.WarningPopup;
+import mobi.anoda.archinamon.kernel.persefone.ui.dialog.AbstractDialog;
+import mobi.anoda.archinamon.kernel.persefone.ui.dialog.WarningDialog;
 
 /**
  * author: Archinamon
@@ -56,8 +56,8 @@ public class BitmapCaptureHelper {
             fragment.startActivityForResult(intent, CAMERA_REQUEST_CODE);
         } catch (ActivityNotFoundException e) {
             Bundle params = new Bundle();
-            params.putString(WarningPopup.CUSTOM_DATA, context.getString(R.string.error_default));
-            WarningPopup popup = (WarningPopup) AbstractPopup.newInstance(WarningPopup.class, params);
+            params.putString(WarningDialog.CUSTOM_DATA, context.getString(R.string.error_default));
+            WarningDialog popup = (WarningDialog) AbstractDialog.newInstance(WarningDialog.class, params);
             popup.show(context.getFragmentManager(),
                      tag != null
                      ? tag

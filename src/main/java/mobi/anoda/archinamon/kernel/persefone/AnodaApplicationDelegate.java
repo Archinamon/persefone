@@ -8,7 +8,7 @@ import mobi.anoda.archinamon.kernel.persefone.network.async.AbstractAsyncTask;
 import mobi.anoda.archinamon.kernel.persefone.network.client.ExtAndroidHttpClient;
 import mobi.anoda.archinamon.kernel.persefone.receiver.InternetAccessReceiver;
 import mobi.anoda.archinamon.kernel.persefone.ui.activity.AbstractActivity;
-import mobi.anoda.archinamon.kernel.persefone.ui.dialog.AbstractPopup;
+import mobi.anoda.archinamon.kernel.persefone.ui.dialog.AbstractDialog;
 import mobi.anoda.archinamon.kernel.persefone.utils.LogHelper;
 
 /**
@@ -48,7 +48,7 @@ public abstract class AnodaApplicationDelegate extends Application {
         }
     }
 
-    protected final void setServerOfflineScreen(String who, Class<? extends AbstractPopup> screen) {
+    protected final void setServerOfflineScreen(String who, Class<? extends AbstractDialog> screen) {
         try {
             AbstractActivity.setDefaultOnServerOfflineScreen(screen);
         } catch (ClassNotFoundException | IllegalAccessException e) {

@@ -8,17 +8,17 @@ import mobi.anoda.archinamon.kernel.persefone.utils.Common;
 /**
  * author: Archinamon
  */
-public class WarningPopup extends AbstractPopup {
+public class WarningDialog extends AbstractDialog {
 
-    public static final String TAG = WarningPopup.class.getSimpleName();
+    public static final String TAG = WarningDialog.class.getSimpleName();
     OnClickListener mOnClick;
 
-    public WarningPopup() {
+    public WarningDialog() {
     }
 
     @Implement
     public String getViewTag() {
-        return WarningPopup.TAG;
+        return WarningDialog.TAG;
     }
 
     @Implement

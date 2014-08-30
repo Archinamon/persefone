@@ -33,8 +33,8 @@ import mobi.anoda.archinamon.kernel.persefone.ui.TaggedView;
 import mobi.anoda.archinamon.kernel.persefone.ui.activity.AbstractActivity;
 import mobi.anoda.archinamon.kernel.persefone.ui.activity.interfaces.OnServerReady;
 import mobi.anoda.archinamon.kernel.persefone.ui.activity.interfaces.StateControllable.FragmentState;
-import mobi.anoda.archinamon.kernel.persefone.ui.dialog.AbstractPopup;
-import mobi.anoda.archinamon.kernel.persefone.ui.dialog.NoInternetPopup;
+import mobi.anoda.archinamon.kernel.persefone.ui.dialog.AbstractDialog;
+import mobi.anoda.archinamon.kernel.persefone.ui.dialog.NoInternetDialog;
 import mobi.anoda.archinamon.kernel.persefone.ui.fragment.interfaces.IOptionsVisibilityListener;
 import mobi.anoda.archinamon.kernel.persefone.utils.LogHelper;
 
@@ -332,42 +332,42 @@ public abstract class AbstractFragment extends Fragment implements TaggedView, O
     }
 
     /* Launch Popup dialog */
-    public AbstractPopup openPopup(Class<? extends AbstractPopup> dialogClass) {
-        AbstractPopup dialog = AbstractPopup.newInstance(dialogClass, null);
+    public AbstractDialog openPopup(Class<? extends AbstractDialog> dialogClass) {
+        AbstractDialog dialog = AbstractDialog.newInstance(dialogClass, null);
         return openPopupInternal(dialog);
     }
 
-    public AbstractPopup openPopup(Class<? extends AbstractPopup> dialogClass, Bundle params) {
-        AbstractPopup dialog = AbstractPopup.newInstance(dialogClass, params);
+    public AbstractDialog openPopup(Class<? extends AbstractDialog> dialogClass, Bundle params) {
+        AbstractDialog dialog = AbstractDialog.newInstance(dialogClass, params);
         return openPopupInternal(dialog);
     }
 
-    public AbstractPopup openPopup(Class<? extends AbstractPopup> dialogClass, Parcelable data) {
+    public AbstractDialog openPopup(Class<? extends AbstractDialog> dialogClass, Parcelable data) {
         final Bundle params = new Bundle();
         params.putParcelable(CUSTOM_DATA, data);
 
-        AbstractPopup dialog = AbstractPopup.newInstance(dialogClass, params);
+        AbstractDialog dialog = AbstractDialog.newInstance(dialogClass, params);
         return openPopupInternal(dialog);
     }
 
-    public AbstractPopup openPopup(Class<? extends AbstractPopup> dialogClass, String message) {
+    public AbstractDialog openPopup(Class<? extends AbstractDialog> dialogClass, String message) {
         final Bundle params = new Bundle();
-        params.putString(AbstractPopup.IEXTRA_MESSAGE, message);
+        params.putString(AbstractDialog.IEXTRA_MESSAGE, message);
 
-        AbstractPopup dialog = AbstractPopup.newInstance(dialogClass, params);
+        AbstractDialog dialog = AbstractDialog.newInstance(dialogClass, params);
         return openPopupInternal(dialog);
     }
 
-    public AbstractPopup openPopup(Class<? extends AbstractPopup> dialogClass, String title, String message) {
+    public AbstractDialog openPopup(Class<? extends AbstractDialog> dialogClass, String title, String message) {
         final Bundle params = new Bundle();
-        params.putString(AbstractPopup.IEXTRA_TITLE, title);
-        params.putString(AbstractPopup.IEXTRA_MESSAGE, message);
+        params.putString(AbstractDialog.IEXTRA_TITLE, title);
+        params.putString(AbstractDialog.IEXTRA_MESSAGE, message);
 
-        AbstractPopup dialog = AbstractPopup.newInstance(dialogClass, params);
+        AbstractDialog dialog = AbstractDialog.newInstance(dialogClass, params);
         return openPopupInternal(dialog);
     }
 
-    private <TagDialog extends AbstractPopup & TaggedView> TagDialog openPopupInternal(TagDialog popup) {
+    private <TagDialog extends AbstractDialog & TaggedView> TagDialog openPopupInternal(TagDialog popup) {
         final String tag = popup.getViewTag();
         FragmentManager manager = getFragmentManager();
 
@@ -464,7 +464,7 @@ public abstract class AbstractFragment extends Fragment implements TaggedView, O
     }
 
     private void addCallToStack(AsyncRequest request) {
-        if (!accessAllowed()) mContext.openPopup(NoInternetPopup.class, getString(R.string.no_internet_access));
+        if (!accessAllowed()) mContext.openPopup(NoInternetDialog.class, getString(R.string.no_internet_access));
         synchronized (MUTEX) {
             POSTPONED_CALLS.push(request);
         }

@@ -7,15 +7,16 @@ import mobi.anoda.archinamon.kernel.persefone.utils.Common;
  * @author: Archinamon
  * @project: FavorMe
  */
-public abstract class SuggestionPopup extends AbstractPopup {
+public abstract class SuggestionDialog extends AbstractDialog {
 
-    public static final String TAG = SuggestionPopup.class.getSimpleName();
+    public static final String TAG = SuggestionDialog.class.getSimpleName();
 
-    public SuggestionPopup() {}
+    public SuggestionDialog() {
+    }
 
     @Implement
     public String getViewTag() {
-        return SuggestionPopup.TAG;
+        return SuggestionDialog.TAG;
     }
 
     @Implement

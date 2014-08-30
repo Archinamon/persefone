@@ -14,16 +14,17 @@ import mobi.anoda.archinamon.kernel.persefone.utils.Common;
  * @author: Archinamon
  * @project: FavorMe
  */
-public class NoInternetPopup extends AbstractPopup {
+public class NoInternetDialog extends AbstractDialog {
 
-    public static final String TAG = NoInternetPopup.class.getSimpleName();
+    public static final String TAG = NoInternetDialog.class.getSimpleName();
     private volatile boolean mIsNotified;
 
-    public NoInternetPopup() {}
+    public NoInternetDialog() {
+    }
 
     @Implement
     public String getViewTag() {
-        return NoInternetPopup.TAG;
+        return NoInternetDialog.TAG;
     }
 
     @Override
@@ -38,7 +39,8 @@ public class NoInternetPopup extends AbstractPopup {
     public void onDismiss(DialogInterface dialog) {
         super.onDismiss(dialog);
 
-        if (!mIsNotified) mContext.sendBroadcast(NetworkNotification.NOTIFY_DISMISS);
+        if (!mIsNotified)
+            mContext.sendBroadcast(NetworkNotification.NOTIFY_DISMISS);
     }
 
     @Implement

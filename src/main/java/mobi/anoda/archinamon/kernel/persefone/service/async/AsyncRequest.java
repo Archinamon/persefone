@@ -13,7 +13,7 @@ import mobi.anoda.archinamon.kernel.persefone.model.NetworkModel;
 import mobi.anoda.archinamon.kernel.persefone.network.processor.ISignal;
 import mobi.anoda.archinamon.kernel.persefone.signals.CallQueue;
 import mobi.anoda.archinamon.kernel.persefone.signals.Channel;
-import mobi.anoda.archinamon.kernel.persefone.ui.dialog.AbstractPopup;
+import mobi.anoda.archinamon.kernel.persefone.ui.dialog.AbstractDialog;
 
 /**
  * @author: Archinamon
@@ -31,7 +31,7 @@ public final class AsyncRequest<Model extends NetworkModel> implements Parcelabl
             ISignal signal = source.readParcelable(ISignal.class.getClassLoader());
             NetworkModel model = source.readParcelable(NetworkModel.class.getClassLoader());
             //parametrize section
-            Class<? extends AbstractPopup> popup = (Class<? extends AbstractPopup>) source.readSerializable();
+            Class<? extends AbstractDialog> popup = (Class<? extends AbstractDialog>) source.readSerializable();
             boolean isDaemon = source.readByte() > 0;
 
             AsyncRequest obj = new AsyncRequest<>(gate, signal, model);
@@ -46,11 +46,11 @@ public final class AsyncRequest<Model extends NetworkModel> implements Parcelabl
             return new AsyncRequest[size];
         }
     };
-    private Channel                        mGate;
-    private ISignal                        mCommand;
-    private Model                          mModel;
-    private Class<? extends AbstractPopup> mProgressClass;
-    private boolean                        mIsDaemon;
+    private Channel                         mGate;
+    private ISignal                         mCommand;
+    private Model                           mModel;
+    private Class<? extends AbstractDialog> mProgressClass;
+    private boolean                         mIsDaemon;
 
     public AsyncRequest(Channel action, ISignal call, Model params) {
         mGate = action;
@@ -68,7 +68,7 @@ public final class AsyncRequest<Model extends NetworkModel> implements Parcelabl
         this.mIsDaemon = val;
     }
 
-    public void addPopup(Class<? extends AbstractPopup> popup) {
+    public void addPopup(Class<? extends AbstractDialog> popup) {
         this.mProgressClass = popup;
     }
 
@@ -92,7 +92,7 @@ public final class AsyncRequest<Model extends NetworkModel> implements Parcelabl
         return mModel;
     }
 
-    Class<? extends AbstractPopup> getPopupClass() {
+    Class<? extends AbstractDialog> getPopupClass() {
         return mProgressClass;
     }
 

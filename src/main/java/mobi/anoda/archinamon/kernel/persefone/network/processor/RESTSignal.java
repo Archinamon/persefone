@@ -4,7 +4,7 @@ import javax.annotation.Nonnull;
 import mobi.anoda.archinamon.kernel.persefone.model.NetworkModel;
 import mobi.anoda.archinamon.kernel.persefone.network.async.AbstractAsyncTask;
 import mobi.anoda.archinamon.kernel.persefone.network.async.Status;
-import mobi.anoda.archinamon.kernel.persefone.ui.dialog.AbstractPopup;
+import mobi.anoda.archinamon.kernel.persefone.ui.dialog.AbstractDialog;
 
 /**
  * @author: Archinamon
@@ -28,12 +28,12 @@ public final class RESTSignal {
             return this;
         }
 
-        public final Builder attachPopup(AbstractPopup popup) {
+        public final Builder attachPopup(AbstractDialog popup) {
             this.mCoherenceTask.applySpinner(popup);
             return this;
         }
 
-        public final Builder attachPopup(Class<? extends AbstractPopup> popup) {
+        public final Builder attachPopup(Class<? extends AbstractDialog> popup) {
             this.mCoherenceTask.applySpinner(popup);
             return this;
         }

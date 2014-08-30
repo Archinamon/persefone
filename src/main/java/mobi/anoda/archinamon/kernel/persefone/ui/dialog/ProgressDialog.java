@@ -1,27 +1,27 @@
 package mobi.anoda.archinamon.kernel.persefone.ui.dialog;
 
-import android.app.ProgressDialog;
 import mobi.anoda.archinamon.kernel.persefone.R;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
 
 /**
  * @author archinamon
  */
-public class ProgressPopup extends AbstractPopup {
+public class ProgressDialog extends AbstractDialog {
 
-    public static final String TAG = ProgressPopup.class.getSimpleName();
+    public static final String TAG = ProgressDialog.class.getSimpleName();
 
-    public ProgressPopup() {}
+    public ProgressDialog() {
+    }
 
     @Implement
     public String getViewTag() {
-        return ProgressPopup.TAG;
+        return ProgressDialog.TAG;
     }
 
     @Implement
     public boolean setup() {
         setDialogType(Popup.PROGRESS_SIMPLE);
-        setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        setProgressStyle(android.app.ProgressDialog.STYLE_SPINNER);
         setMessage(R.string.loading);
 
         return true;
