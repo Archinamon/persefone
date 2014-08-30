@@ -102,6 +102,13 @@ public abstract class AbstractDrawerActivity<S extends AbstractFragment & StateC
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        if (mDrawerLayout.isDrawerOpen(mDrawerGravity))
+            closeDrawerMenu();
+        else super.onBackPressed();
+    }
+
     public void toggleDrawerMenu() {
         if (mDrawerLayout.isDrawerOpen(mDrawerGravity)) closeDrawerMenu();
         else openDrawerMenu();
