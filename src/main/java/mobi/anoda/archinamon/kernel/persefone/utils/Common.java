@@ -42,7 +42,7 @@ public class Common {
 
         @Implement
         public boolean onLongClick(View v) {
-            return showToastInternal(v);
+            return showToastInstance(v);
         }
     };
 
@@ -236,16 +236,21 @@ public class Common {
         return "market://details?id=" + context.getPackageName();
     }
 
+    public static void makeToastable(View target) {
+        try {
+            target.setOnLongClickListener(TOASTABLE_LISTENER);
+        } catch (Exception ignore) {}
+    }
+
     public static void makeToastableButtons(View context, @IdRes int... viewIds) {
         for (int id : viewIds) {
             try {
-                context.findViewById(id)
-                       .setOnLongClickListener(TOASTABLE_LISTENER);
+                context.findViewById(id).setOnLongClickListener(TOASTABLE_LISTENER);
             } catch (Exception ignore) {}
         }
     }
 
-    private static boolean showToastInternal(View v) {
+    public static boolean showToastInstance(View v) {
         final CharSequence content = v.getContentDescription();
         if (WordUtils.isEmpty(content)) throw new IllegalArgumentException("Should define android:contentDescription field for the view!");
 

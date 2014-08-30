@@ -183,7 +183,7 @@ import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
  *
  * @hide
  */
-abstract class CoreAsyncTask<Params, Progress, Result> {
+public abstract class CoreAsyncTask<Params, Progress, Result> {
 
     private static class SerialExecutor implements Executor {
 

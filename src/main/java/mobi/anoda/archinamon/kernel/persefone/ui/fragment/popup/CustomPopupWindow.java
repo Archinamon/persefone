@@ -1,7 +1,3 @@
-// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
-// Jad home page: http://www.geocities.com/kpdus/jad.html
-// Decompiler options: braces fieldsfirst space lnc 
-
 package mobi.anoda.archinamon.kernel.persefone.ui.fragment.popup;
 
 import android.content.Context;
@@ -11,6 +7,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.WindowManager;
+import android.widget.PopupWindow;
+import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
 
 public class CustomPopupWindow {
 
@@ -24,13 +22,12 @@ public class CustomPopupWindow {
         mBackground = null;
         mActionView = view;
         mPopupFrame = new PopupWindow(view.getContext());
-        mPopupFrame.a(new OnTouchListener() {
+        mPopupFrame.setTouchInterceptor(new OnTouchListener() {
 
-            final CustomPopupWindow mWindow = CustomPopupWindow.this;
-
+            @Implement
             public boolean onTouch(View view1, MotionEvent motionevent) {
-                if (motionevent.getAction() == 4) {
-                    mWindow.mPopupFrame.c();
+                if (motionevent.getAction() == MotionEvent.ACTION_OUTSIDE) {
+                    mPopupFrame.dismiss();
                     return true;
                 } else {
                     return false;
@@ -45,15 +42,15 @@ public class CustomPopupWindow {
             mWindowManager = null;
         }
 
-        build();
+        preBuild();
     }
 
-    protected void build() {
+    protected void preBuild() {
     }
 
-    public void build(View view) {
+    protected void build(View view) {
         mContentView = view;
-        mPopupFrame.a(view);
+        mPopupFrame.setContentView(view);
     }
 
     protected void show() {
@@ -62,19 +59,19 @@ public class CustomPopupWindow {
         }
 
         if (mBackground == null) {
-            mPopupFrame.a(new BitmapDrawable(mPopupFrame.a().getResources()));
+            mPopupFrame.setBackgroundDrawable(new BitmapDrawable(mPopupFrame.getContentView().getResources()));
         } else {
-            mPopupFrame.a(mBackground);
+            mPopupFrame.setBackgroundDrawable(mBackground);
         }
-        mPopupFrame.c(-2);
-        mPopupFrame.b(-2);
-        mPopupFrame.b(true);
-        mPopupFrame.a(true);
-        mPopupFrame.c(true);
-        mPopupFrame.a(mContentView);
+        mPopupFrame.setWidth(WindowManager.LayoutParams.WRAP_CONTENT);
+        mPopupFrame.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
+        mPopupFrame.setTouchable(true);
+        mPopupFrame.setFocusable(true);
+        mPopupFrame.setOutsideTouchable(true);
+        mPopupFrame.setContentView(mContentView);
     }
 
-    public void display() {
-        mPopupFrame.c();
+    public void dismiss() {
+        mPopupFrame.dismiss();
     }
 }

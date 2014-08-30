@@ -9,7 +9,9 @@ public class ActionItem {
     private String          mActionTitle;
     private OnClickListener mCallback;
 
-    public ActionItem() {
+    public ActionItem(String title, Drawable icon) {
+        mActionTitle = title;
+        mActionImg = icon;
     }
 
     public String getTitle() {

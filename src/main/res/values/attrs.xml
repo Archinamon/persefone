@@ -2,6 +2,7 @@
 <resources>
 
     <declare-styleable name = "PopupWindow">
+        <attr name = "popupWindowStyle" format = "reference" />
         <attr name = "popupBackground" format = "reference|color" />
         <attr name = "popupAnimationStyle" format = "reference" />
         <attr name = "state_above_anchor" format = "boolean" />

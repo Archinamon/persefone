@@ -3,8 +3,10 @@ package mobi.anoda.archinamon.kernel.persefone.ui.fragment.popup;
 import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -14,208 +16,213 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import java.util.ArrayList;
 import mobi.anoda.archinamon.kernel.persefone.R;
+import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
 
 public class QuickAction extends CustomPopupWindow {
 
-    private final View           d;
-    private final ImageView      e;
-    private final ImageView      f;
-    private final Animation      g;
-    private final LayoutInflater h;
-    private final Context        i;
-    private       int            j;
-    private       boolean        k;
-    private       ViewGroup      l;
-    private       ArrayList      m;
+    public static final int ANIM_GROW_FROM_LEFT   = 1;
+    public static final int ANIM_GROW_FROM_RIGHT  = 2;
+    public static final int ANIM_GROW_FROM_CENTER = 3;
+    public static final int ANIM_AUTO             = 4;
 
-    public QuickAction(View view) {
-        super(view);
-        m = new ArrayList();
-        i = view.getContext();
-        h = (LayoutInflater) i.getSystemService("layout_inflater");
-        d = (ViewGroup) h.inflate(R.layout.quickaction, null);
-        f = (ImageView) d.findViewById(R.id.arrow_down);
-        e = (ImageView) d.findViewById(R.id.arrow_up);
-        build(d);
-        g = AnimationUtils.loadAnimation(view.getContext(), 0x7f04000d);
-        g.setInterpolator(new Interpolator() {
+    private final View                  mRootView;
+    private final ImageView             mArrowUp;
+    private final ImageView             mArrowDown;
+    private final Animation             mTrackAnimation;
+    private final LayoutInflater        mInflater;
+    private       int                   mAnimationStyle;
+    private       boolean               isAnimateTrack;
+    private       ViewGroup             mTrack;
+    private       ArrayList<ActionItem> mActionsList;
 
-            final QuickAction a = QuickAction.this;
+    public QuickAction(View anchor) {
+        super(anchor);
+        Context context = anchor.getContext();
 
-            public float getInterpolation(float f1) {
-                float f2 = 1.55F * f1 - 1.1F;
-                return 1.2F - f2 * f2;
+        mActionsList = new ArrayList<>();
+        mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        mRootView = mInflater.inflate(R.layout.quickaction, null);
+        mArrowDown = (ImageView) mRootView.findViewById(R.id.arrow_down);
+        mArrowUp = (ImageView) mRootView.findViewById(R.id.arrow_up);
+
+        build(mRootView);
+
+        mTrackAnimation = AnimationUtils.loadAnimation(anchor.getContext(), R.anim.rail);
+        mTrackAnimation.setInterpolator(new Interpolator() {
+
+            @Implement
+            public float getInterpolation(float time) {
+                float inner = 1.55F * time - 1.1F;
+                return 1.2F - inner * inner;
             }
         });
-        l = (ViewGroup) d.findViewById(0x7f07014b);
-        j = 4;
-        k = true;
+        mTrack = (ViewGroup) mRootView.findViewById(R.id.tracks);
+        mAnimationStyle = ANIM_AUTO;
+        isAnimateTrack = true;
     }
 
-    private View a(String s, Drawable drawable, View.OnClickListener onclicklistener) {
-        LinearLayout linearlayout = (LinearLayout) h.inflate(0x7f030016, null);
-        ImageView imageview = (ImageView) linearlayout.findViewById(0x7f07005e);
-        TextView textview = (TextView) linearlayout.findViewById(0x7f07005f);
-        if (drawable != null) {
-            imageview.setImageDrawable(drawable);
+    /**
+     * Get action item {@link View}
+     *
+     * @param title    action item title
+     * @param icon     {@link Drawable} action item icon
+     * @param listener {@link View.OnClickListener} action item listener
+     *
+     * @return action item {@link View}
+     */
+    private View getActionItem(String title, Drawable icon, View.OnClickListener listener) {
+        LinearLayout container = (LinearLayout) mInflater.inflate(R.layout.action_item, null);
+        ImageView img = (ImageView) container.findViewById(R.id.icon);
+        TextView text = (TextView) container.findViewById(R.id.title);
+
+        if (icon != null) {
+            img.setImageDrawable(icon);
         } else {
-            imageview.setVisibility(8);
+            img.setVisibility(View.GONE);
         }
-        if (s != null) {
-            textview.setText(s);
+
+        if (title != null) {
+            text.setText(title);
         } else {
-            textview.setVisibility(8);
+            text.setVisibility(View.GONE);
         }
-        if (onclicklistener != null) {
-            linearlayout.setOnClickListener(onclicklistener);
+
+        if (listener != null) {
+            container.setOnClickListener(listener);
         }
-        return linearlayout;
+
+        return container;
     }
 
-    private void a(int i1, int j1) {
-        ImageView imageview;
-        ImageView imageview1;
-        int k1;
-        if (i1 == 0x7f070149) {
-            imageview = e;
-        } else {
-            imageview = f;
-        }
-        if (i1 == 0x7f070149) {
-            imageview1 = f;
-        } else {
-            imageview1 = e;
-        }
-        k1 = e.getMeasuredWidth();
-        imageview.setVisibility(0);
-        ((ViewGroup.MarginLayoutParams) imageview.getLayoutParams()).leftMargin = j1 - k1 / 2;
-        imageview1.setVisibility(8);
+    /**
+     * Show arrow
+     *
+     * @param whichArrow arrow type resource id
+     * @param requestedX distance from left screen
+     */
+    private void showArrow(int whichArrow, int requestedX) {
+        final View showArrow = (whichArrow == R.id.arrow_up) ? mArrowUp : mArrowDown;
+        final View hideArrow = (whichArrow == R.id.arrow_up) ? mArrowDown : mArrowUp;
+
+        final int arrowWidth = mArrowUp.getMeasuredWidth();
+
+        showArrow.setVisibility(View.VISIBLE);
+
+        ViewGroup.MarginLayoutParams param = (ViewGroup.MarginLayoutParams) showArrow.getLayoutParams();
+
+        param.leftMargin = requestedX - arrowWidth / 2;
+
+        hideArrow.setVisibility(View.INVISIBLE);
     }
 
-    private void a(int i1, int j1, boolean flag) {
-        int k1 = 0x7f0d00ba;
-        int l1 = 0x7f0d00b8;
-        int i2 = j1 - e.getMeasuredWidth() / 2;
-        switch (j) {
-            default:
-                return;
+    private void setAnimationStyle(int screenWidth, int requestedX, boolean onTop) {
+        int arrowPos = requestedX - mArrowUp.getMeasuredWidth() / 2;
 
-            case 1: // '\001'
-                PopupWindow popupwindow4 = mPopupFrame;
-                if (!flag) {
-                    l1 = 0x7f0d00b4;
-                }
-                popupwindow4.a(l1);
-                return;
+        switch (mAnimationStyle) {
+            case ANIM_GROW_FROM_LEFT:
+                mPopupFrame.setAnimationStyle((onTop) ? R.style.Animations_PopUpMenu_Left : R.style.Animations_PopDownMenu_Left);
+                break;
 
-            case 2: // '\002'
-                PopupWindow popupwindow3 = mPopupFrame;
-                int k2;
-                if (flag) {
-                    k2 = 0x7f0d00b9;
+            case ANIM_GROW_FROM_RIGHT:
+                mPopupFrame.setAnimationStyle((onTop) ? R.style.Animations_PopUpMenu_Right : R.style.Animations_PopDownMenu_Right);
+                break;
+
+            case ANIM_GROW_FROM_CENTER:
+                mPopupFrame.setAnimationStyle((onTop) ? R.style.Animations_PopUpMenu_Center : R.style.Animations_PopDownMenu_Center);
+                break;
+
+            case ANIM_AUTO:
+                if (arrowPos <= screenWidth / 4) {
+                    mPopupFrame.setAnimationStyle((onTop) ? R.style.Animations_PopUpMenu_Left : R.style.Animations_PopDownMenu_Left);
+                } else if (arrowPos > screenWidth / 4 && arrowPos < 3 * (screenWidth / 4)) {
+                    mPopupFrame.setAnimationStyle((onTop) ? R.style.Animations_PopUpMenu_Center : R.style.Animations_PopDownMenu_Center);
                 } else {
-                    k2 = 0x7f0d00b5;
+                    mPopupFrame.setAnimationStyle((onTop) ? R.style.Animations_PopUpMenu_Right : R.style.Animations_PopDownMenu_Right);
                 }
-                popupwindow3.a(k2);
-                return;
 
-            case 3: // '\003'
-                PopupWindow popupwindow2 = mPopupFrame;
-                int j2;
-                if (flag) {
-                    j2 = k1;
-                } else {
-                    j2 = 0x7f0d00b6;
-                }
-                popupwindow2.a(j2);
-                return;
-
-            case 4: // '\004'
                 break;
         }
-        if (i2 <= i1 / 4) {
-            PopupWindow popupwindow1 = mPopupFrame;
-            if (!flag) {
-                l1 = 0x7f0d00b4;
-            }
-            popupwindow1.a(l1);
-            return;
-        }
-        if (i2 > i1 / 4 && i2 < 3 * (i1 / 4)) {
-            PopupWindow popupwindow = mPopupFrame;
-            if (!flag) {
-                k1 = 0x7f0d00b6;
-            }
-            popupwindow.a(k1);
-            return;
-        } else {
-            mPopupFrame.a(0x7f0d00b5);
-            return;
-        }
     }
 
-    private void f() {
-        int i1 = 0;
-        int j1 = 1;
-        do {
-            if (i1 >= m.size()) {
-                return;
-            }
-            View view = a(((ActionItem) m.get(i1)).getTitle(), ((ActionItem) m.get(i1)).getIcon(), ((ActionItem) m.get(i1)).getCallback());
+    /**
+     * Create action list
+     */
+    private void createActionList() {
+        View view;
+        String title;
+        Drawable icon;
+        OnClickListener listener;
+        int index = 1;
+
+        for (ActionItem item : mActionsList) {
+            title = item.getTitle();
+            icon = item.getIcon();
+            listener = item.getCallback();
+
+            view = getActionItem(title, icon, listener);
             view.setFocusable(true);
             view.setClickable(true);
-            l.addView(view, j1);
-            j1++;
-            i1++;
-        } while (true);
+
+            mTrack.addView(view, index);
+
+            index++;
+        }
     }
 
-    public void a(int i1) {
-        j = i1;
+    /**
+     * Set animation style
+     *
+     * @param animStyle animation style, default is set to ANIM_AUTO
+     */
+    public void setAnimStyle(int animStyle) {
+        mAnimationStyle = animStyle;
     }
 
-    public void a(ActionItem actionitem) {
-        m.add(actionitem);
+    /**
+     * Add action item
+     *
+     * @param actionitem {@link ActionItem}
+     */
+    public void addActionItem(ActionItem actionitem) {
+        mActionsList.add(actionitem);
     }
 
-    public void e() {
-        f();
+    public void showPopup() {
+        createActionList();
         show();
-        int ai[] = new int[2];
-        mActionView.getLocationOnScreen(ai);
-        Rect rect = new Rect(ai[0], ai[1], ai[0] + mActionView.getWidth(), ai[1] + mActionView.getHeight());
-        d.setLayoutParams(new ViewGroup.LayoutParams(-2, -2));
-        d.measure(View.MeasureSpec.makeMeasureSpec(-2, 0x80000000), View.MeasureSpec.makeMeasureSpec(-2, 0x80000000));
-        int i1 = l.getMeasuredWidth();
-        int j1 = l.getMeasuredHeight();
-        View view = d.findViewById(0x7f07014a);
-        view.setLayoutParams(new LinearLayout.LayoutParams(i1, view.getLayoutParams().height));
-        View view1 = d.findViewById(0x7f070079);
-        view1.setLayoutParams(new LinearLayout.LayoutParams(i1, view1.getLayoutParams().height));
-        int k1 = mActionView.getWidth();
-        int l1 = rect.left + (k1 - i1) / 2;
-        int i2 = rect.top - j1;
-        int j2;
-        boolean flag;
-        int k2;
-        if (j1 > mActionView.getTop()) {
-            int l2 = rect.bottom;
-            flag = false;
-            j2 = l2;
-        } else {
-            j2 = i2;
-            flag = true;
+
+        int anchorLocation[] = new int[2];
+        mActionView.getLocationOnScreen(anchorLocation);
+        Rect rect = new Rect(anchorLocation[0], anchorLocation[1], anchorLocation[0] + mActionView.getWidth(), anchorLocation[1] + mActionView.getHeight());
+        mRootView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        mRootView.measure(View.MeasureSpec.makeMeasureSpec(ViewGroup.LayoutParams.WRAP_CONTENT, View.MeasureSpec.AT_MOST), View.MeasureSpec.makeMeasureSpec(ViewGroup.LayoutParams.WRAP_CONTENT, View.MeasureSpec.AT_MOST));
+
+        int rootWidth = mTrack.getMeasuredWidth();
+        int rootHeight = mTrack.getMeasuredHeight();
+
+        View header = mRootView.findViewById(R.id.header);
+        View footer = mRootView.findViewById(R.id.footer);
+
+        header.setLayoutParams(new LinearLayout.LayoutParams(rootWidth, header.getLayoutParams().height));
+        footer.setLayoutParams(new LinearLayout.LayoutParams(rootWidth, footer.getLayoutParams().height));
+
+        int viewWidth = mActionView.getWidth();
+        int startX = rect.left + (viewWidth - rootWidth) / 2;
+        int startY = rect.top - rootHeight;
+
+        boolean onTop = true;
+
+        if (rootHeight > mActionView.getTop()) {
+            startY = rect.bottom;
+            onTop = false;
         }
-        if (flag) {
-            k2 = 0x7f07014c;
-        } else {
-            k2 = 0x7f070149;
-        }
-        a(k2, i1 / 2);
-        a(k1, rect.centerX(), flag);
-        mPopupFrame.a(mActionView, 0, l1, j2);
-        if (k) {
-            l.startAnimation(g);
+
+        showArrow(onTop ? R.id.arrow_up : R.id.arrow_down, rootWidth / 2);
+        setAnimationStyle(viewWidth, rect.centerX(), onTop);
+        mPopupFrame.showAtLocation(mActionView, Gravity.NO_GRAVITY, startX, startY);
+
+        if (isAnimateTrack) {
+            mTrack.startAnimation(mTrackAnimation);
         }
     }
 }
