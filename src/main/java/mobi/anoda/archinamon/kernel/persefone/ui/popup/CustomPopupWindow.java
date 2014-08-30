@@ -1,4 +1,4 @@
-package mobi.anoda.archinamon.kernel.persefone.ui.fragment.popup;
+package mobi.anoda.archinamon.kernel.persefone.ui.popup;
 
 import android.content.Context;
 import android.graphics.drawable.BitmapDrawable;
