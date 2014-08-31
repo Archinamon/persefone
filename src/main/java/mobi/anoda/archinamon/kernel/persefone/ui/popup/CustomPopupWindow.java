@@ -18,10 +18,10 @@ public class CustomPopupWindow {
     private         View          mContentView;
     private         Drawable      mBackground;
 
-    public CustomPopupWindow(View view) {
+    public CustomPopupWindow(View anchor) {
         mBackground = null;
-        mActionView = view;
-        mPopupFrame = new PopupWindow(view.getContext());
+        mActionView = anchor;
+        mPopupFrame = new PopupWindow(anchor.getContext());
         mPopupFrame.setTouchInterceptor(new OnTouchListener() {
 
             @Implement
@@ -35,7 +35,7 @@ public class CustomPopupWindow {
             }
         });
 
-        Context context = view.getContext();
+        Context context = anchor.getContext();
         if (context != null) {
             mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         } else {
