@@ -15,16 +15,17 @@
  */
 package mobi.anoda.archinamon.kernel.persefone.ui.widget.arcmenu;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Rect;
+import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewPropertyAnimator;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.BounceInterpolator;
 import android.view.animation.Interpolator;
@@ -42,21 +43,22 @@ import mobi.anoda.archinamon.kernel.persefone.ui.utils.Tweener;
  */
 public class ArcLayout extends ViewGroup {
 
+    public static final  String TAG = ArcLayout.class.getSimpleName();
     /**
      * children will be set the same size.
      */
-    private int mChildSize;
-    private              int   mChildPadding        = 30;
-    private              int   mLayoutPadding       = 10;
     public static final  float DEFAULT_FROM_DEGREES = 270.0f;
     public static final  float DEFAULT_TO_DEGREES   = 360.0f;
+    private static final int   CHILD_PADDING        = 30;
+    private static final int   LAYOUT_PADDING       = 10;
+    private static final int   MIN_RADIUS           = 150;
     private              float mFromDegrees         = DEFAULT_FROM_DEGREES;
     private              float mToDegrees           = DEFAULT_TO_DEGREES;
-    private static final int   MIN_RADIUS           = 150;
-    /* the distance between the layout's center and any child's center */
-    private int mRadius;
     private boolean         mExpanded         = false;
     private AnimationBundle mTargetAnimations = new AnimationBundle();
+    /* the distance between the layout's center and any child's center */
+    private int mRadius;
+    private int mChildSize;
 
     public ArcLayout(Context context) {
         super(context);
@@ -89,17 +91,17 @@ public class ArcLayout extends ViewGroup {
         return Math.max(radius, minRadius);
     }
 
-    private static Rect computeChildFrame(final int centerX, final int centerY, final int radius, final float degrees, final int size) {
+    private static RectF computeChildFrame(final int centerX, final int centerY, final int radius, final float degrees, final int size) {
         final double childCenterX = centerX + radius * Math.cos(Math.toRadians(degrees));
         final double childCenterY = centerY + radius * Math.sin(Math.toRadians(degrees));
 
-        return new Rect((int) (childCenterX - size / 2), (int) (childCenterY - size / 2), (int) (childCenterX + size / 2), (int) (childCenterY + size / 2));
+        return new RectF((float) (childCenterX - size / 2), (float) (childCenterY - size / 2), (float) (childCenterX + size / 2), (float) (childCenterY + size / 2));
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        final int radius = mRadius = computeRadius(Math.abs(mToDegrees - mFromDegrees), getChildCount(), mChildSize, mChildPadding, MIN_RADIUS);
-        final int size = radius * 2 + mChildSize + mChildPadding + mLayoutPadding * 2;
+        final int radius = mRadius = computeRadius(Math.abs(mToDegrees - mFromDegrees), getChildCount(), mChildSize, CHILD_PADDING, MIN_RADIUS);
+        final int size = radius * 2 + mChildSize + CHILD_PADDING + LAYOUT_PADDING * 2;
 
         setMeasuredDimension(size, size);
 
@@ -110,7 +112,7 @@ public class ArcLayout extends ViewGroup {
     }
 
     @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         final int centerX = getWidth() / 2;
         final int centerY = getHeight() / 2;
         final int radius = mExpanded ? mRadius : 0;
@@ -120,9 +122,9 @@ public class ArcLayout extends ViewGroup {
 
         float degrees = mFromDegrees;
         for (int i = 0; i < childCount; i++) {
-            Rect frame = computeChildFrame(centerX, centerY, radius, degrees, mChildSize);
+            RectF frame = computeChildFrame(centerX, centerY, radius, degrees, mChildSize);
             degrees += perDegrees;
-            getChildAt(i).layout(frame.left, frame.top, frame.right, frame.bottom);
+            getChildAt(i).layout(Math.round(frame.left), Math.round(frame.top), Math.round(frame.right), Math.round(frame.bottom));
         }
     }
 
@@ -148,8 +150,9 @@ public class ArcLayout extends ViewGroup {
         return index;
     }
 
-    private void createExpandAnimation(ViewPropertyAnimator animator, float fromXDelta, float toXDelta, float fromYDelta, float toYDelta, long startOffset, long duration, Interpolator interpolator) {
+    private void createExpandAnimation(long startOffset, long duration) {
         mTargetAnimations.stop();
+
         for (int i = 0; i < getChildCount(); i++) {
             final View target = getChildAt(i);
             mTargetAnimations.add(Tweener.to(target, duration,
@@ -164,29 +167,30 @@ public class ArcLayout extends ViewGroup {
                         public void onAnimationUpdate(ValueAnimator animation) {
                             invalidate();
                         }
+                    },
+                                             "onStage", new AnimatorListenerAdapter() {
+
+                        @Override
+                        public void onAnimationStart(Animator animation) {
+                            target.setVisibility(VISIBLE);
+                        }
                     }));
         }
 
         mTargetAnimations.start();
-
-//        animator.setStartDelay(startOffset);
-//        animator.setDuration(duration);
-//        animator.setInterpolator(interpolator);
-//        animator.translationX(toXDelta / 7);
-//        animator.translationY(toYDelta / 7);
     }
 
-    private void createShrinkAnimation(ViewPropertyAnimator animator, float fromXDelta, float toXDelta, float fromYDelta, float toYDelta, long startOffset, long duration, Interpolator interpolator) {
+    private void createShrinkAnimation(long startOffset, long duration) {
         mTargetAnimations.cancel();
 
-        final TimeInterpolator interpolator2 = Ease.Cubic.easeOut;
+        final TimeInterpolator interpolator = Ease.Cubic.easeIn;
         for (int i = 0; i < getChildCount(); i++) {
             final View target = getChildAt(i);
             mTargetAnimations.add(Tweener.to(target, duration,
-                                             "ease", interpolator2,
+                                             "ease", interpolator,
                                              "alpha", 0.0f,
-                                             "scaleX", 0.8f,
-                                             "scaleY", 0.8f,
+                                             "scaleX", 0.5f,
+                                             "scaleY", 0.5f,
                                              "delay", startOffset,
                                              "onUpdate", new AnimatorUpdateListener() {
 
@@ -194,56 +198,29 @@ public class ArcLayout extends ViewGroup {
                         public void onAnimationUpdate(ValueAnimator animation) {
                             invalidate();
                         }
+                    },
+                                             "onStage", new AnimatorListenerAdapter() {
+
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            target.setVisibility(INVISIBLE);
+                        }
                     }));
         }
 
         mTargetAnimations.start();
-
-//        final long preDuration = duration / 2;
-//
-//        animator.translationX(toXDelta * 2);
-//        animator.translationY(toYDelta * 2);
-//        animator.setStartDelay(startOffset + preDuration);
-//        animator.setDuration(duration - preDuration);
-//        animator.setInterpolator(interpolator);
     }
 
-    private void bindChildAnimation(final View child, final int index, final long duration) {
-        final boolean expanded = mExpanded;
-        final int centerX = getWidth() / 2;
-        final int centerY = getHeight() / 2;
-        final int radius = expanded ? 0 : mRadius;
-
+    private void bindChildAnimation(final int index, final long duration) {
         final int childCount = getChildCount();
-        final float perDegrees = (mToDegrees - mFromDegrees) / (childCount - 1);
-        Rect frame = computeChildFrame(centerX, centerY, radius, mFromDegrees + index * perDegrees, mChildSize);
-
-        final int toXDelta = frame.left - child.getLeft();
-        final int toYDelta = frame.top - child.getTop();
 
         Interpolator interpolator = mExpanded ? new AccelerateInterpolator() : new BounceInterpolator();
         final long startOffset = computeStartOffset(childCount, mExpanded, index, 0.1f, duration, interpolator);
 
-//        ViewPropertyAnimator animator = child.animate();
-//        if (animator != null) {
-            if (mExpanded)
-                createShrinkAnimation(null, 0, toXDelta, 0, toYDelta, startOffset, duration, interpolator);
-            else
-                createExpandAnimation(null, 0, toXDelta, 0, toYDelta, startOffset, duration, interpolator);
-
-//            animator.setListener(new AnimatorListenerAdapter() {
-//
-//                @Override
-//                public void onAnimationStart(Animator animation) {
-//                    if (mExpanded) child.setVisibility(VISIBLE);
-//                }
-//
-//                @Override
-//                public void onAnimationEnd(Animator animation) {
-//                    if (!mExpanded) child.setVisibility(INVISIBLE);
-//                }
-//            });
-//        }
+        if (mExpanded)
+            createShrinkAnimation(startOffset, duration);
+        else
+            createExpandAnimation(startOffset, duration);
     }
 
     public boolean isExpanded() {
@@ -284,7 +261,7 @@ public class ArcLayout extends ViewGroup {
         if (showAnimation) {
             final int childCount = getChildCount();
             for (int i = 0; i < childCount; i++) {
-                bindChildAnimation(getChildAt(i), i, 300);
+                bindChildAnimation(i, 500);
             }
         }
 

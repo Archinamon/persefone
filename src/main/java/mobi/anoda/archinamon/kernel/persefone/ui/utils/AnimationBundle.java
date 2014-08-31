@@ -12,20 +12,20 @@ public class AnimationBundle extends ArrayList<Tweener> {
             return; // ignore attempts to start animations
         }
         for (Tweener anim : this) {
-            anim.animator.start();
+            anim.getAnimator().start();
         }
     }
 
     public void cancel() {
         for (Tweener anim : this) {
-            anim.animator.cancel();
+            anim.getAnimator().cancel();
         }
         clear();
     }
 
     public void stop() {
         for (Tweener anim : this) {
-            anim.animator.end();
+            anim.getAnimator().end();
         }
         clear();
     }

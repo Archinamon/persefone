@@ -7,7 +7,8 @@
             android:layout_width = "wrap_content"
             android:layout_height = "wrap_content"
             android:layout_centerInParent = "true"
-            custom:childSize = "44px"
+            android:layout_gravity = "bottom|center"
+            custom:childSize = "48dp"
             custom:fromDegrees = "270.0"
             custom:toDegrees = "360.0" />
 

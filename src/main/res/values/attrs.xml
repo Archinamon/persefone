@@ -57,24 +57,41 @@
         <attr name = "seekArcStyle" format = "reference" />
     </declare-styleable>
 
-    <attr name="fromDegrees" format="float|reference" />
-    <attr name="toDegrees" format="float|reference" />
-    <attr name="childSize" format="dimension|reference" />
+    <attr name = "fromDegrees" format = "float|reference" />
+    <attr name = "toDegrees" format = "float|reference" />
+    <attr name = "childSize" format = "dimension|reference" />
 
-    <declare-styleable name="ArcLayout">
-        <attr name="fromDegrees"/>
-        <attr name="toDegrees"/>
-        <attr name="childSize"/>
+    <declare-styleable name = "ArcLayout">
+        <attr name = "fromDegrees" />
+        <attr name = "toDegrees" />
+        <attr name = "childSize" />
     </declare-styleable>
 
-    <declare-styleable name="ArcMenu">
-        <attr name="fromDegrees"/>
-        <attr name="toDegrees"/>
-        <attr name="childSize"/>
+    <declare-styleable name = "ArcMenu">
+        <attr name = "fromDegrees" />
+        <attr name = "toDegrees" />
+        <attr name = "childSize" />
     </declare-styleable>
 
-    <declare-styleable name="RayLayout">
-        <attr name="leftHolderWidth" format="dimension" />
+    <declare-styleable name = "RayLayout">
+        <attr name = "leftHolderWidth" format = "dimension" />
+    </declare-styleable>
+
+    <declare-styleable name = "GlowPadView">
+        <attr name = "android:gravity" />
+        <attr name = "targetDrawables" format = "reference" />
+        <attr name = "targetDescriptions" format = "reference" />
+        <attr name = "directionDescriptions" format = "reference" />
+        <attr name = "handleDrawable" format = "reference" />
+        <attr name = "outerRingDrawable" format = "reference" />
+        <attr name = "pointDrawable" format = "reference" />
+        <attr name = "innerRadius" format = "dimension" />
+        <attr name = "outerRadius" format = "dimension" />
+        <attr name = "glowRadius" format = "dimension" />
+        <attr name = "vibrationDuration" format = "integer" />
+        <attr name = "snapMargin" format = "dimension" />
+        <attr name = "feedbackCount" format = "integer" />
+        <attr name = "alwaysTrackFinger" format = "boolean" />
     </declare-styleable>
 
 </resources>

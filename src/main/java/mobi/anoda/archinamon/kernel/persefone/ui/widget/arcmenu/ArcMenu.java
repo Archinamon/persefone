@@ -99,7 +99,7 @@ public class ArcMenu extends RelativeLayout {
 
     public void addItem(View item, OnClickListener listener) {
         mArcLayout.addView(item);
-//        item.setVisibility(mArcLayout.isExpanded() ? VISIBLE : INVISIBLE);
+        item.setVisibility(mArcLayout.isExpanded() ? VISIBLE : INVISIBLE);
         item.setOnClickListener(getItemClickListener(listener));
     }
 
