@@ -91,6 +91,19 @@ public class ArcMenu extends RelativeLayout {
         }
     }
 
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+
+        int dilateBottom = mDilateSwitcher.getHeight() / 2;
+        int self = getHeight() / 2;
+        final int margin = dilateBottom - self;
+
+        MarginLayoutParams margins = MarginLayoutParams.class.cast(getLayoutParams());
+        margins.bottomMargin = margin < 0 ? margin : (~(margin - 1));
+        setLayoutParams(margins);
+    }
+
     public boolean isExpanded() {
         return mArcLayout.isExpanded();
     }
@@ -121,7 +134,7 @@ public class ArcMenu extends RelativeLayout {
 
             @Override
             public void onClick(final View viewClicked) {
-                Animation animation = bindItemAnimation(viewClicked, true, 300);
+                Animation animation = bindItemAnimation(viewClicked, true, 350);
                 animation.setAnimationListener(new AnimationListener() {
 
                     @Implement public void onAnimationStart(Animation animation) {}
@@ -143,7 +156,7 @@ public class ArcMenu extends RelativeLayout {
                 for (int i = 0; i < itemCount; i++) {
                     View item = mArcLayout.getChildAt(i);
                     if (viewClicked != item) {
-                        bindItemAnimation(item, false, 300);
+                        bindItemAnimation(item, false, 350);
                     }
                 }
 
@@ -181,8 +194,7 @@ public class ArcMenu extends RelativeLayout {
 
     private static Animation createItemDisappearAnimation(final long duration, final boolean isClicked) {
         AnimationSet animationSet = new AnimationSet(true);
-        animationSet.addAnimation(new ScaleAnimation(1.0f, isClicked ? 2.0f : 0.0f, 1.0f, isClicked ? 2.0f : 0.0f,
-                Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f));
+        animationSet.addAnimation(new ScaleAnimation(1.0f, isClicked ? 2.0f : 0.0f, 1.0f, isClicked ? 2.0f : 0.0f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f));
         animationSet.addAnimation(new AlphaAnimation(1.0f, 0.0f));
 
         animationSet.setDuration(duration);
