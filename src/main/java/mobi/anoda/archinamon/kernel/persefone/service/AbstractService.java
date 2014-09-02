@@ -161,6 +161,12 @@ public abstract class AbstractService extends Service {
         startActivity(new Intent(action.getAction()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     }
 
+    public void startActivity(Broadcastable action, Bundle data) {
+        startActivity(new Intent(action.getAction())
+                              .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                              .putExtras(data));
+    }
+
     /* Simple broadcast sender*/
     public void sendBroadcast(Broadcastable command) {
         sendBroadcast(new Intent(command.getAction()));

@@ -151,7 +151,7 @@ public class ArcMenu extends RelativeLayout {
     }
 
     private Animation bindItemAnimation(final View child, final boolean isClicked, final long duration) {
-        Animation animation = createItemDisapperAnimation(duration, isClicked);
+        Animation animation = createItemDisappearAnimation(duration, isClicked);
         child.setAnimation(animation);
 
         return animation;
@@ -162,12 +162,13 @@ public class ArcMenu extends RelativeLayout {
         for (int i = 0; i < itemCount; i++) {
             View item = mArcLayout.getChildAt(i);
             item.clearAnimation();
+            item.setVisibility(INVISIBLE);
         }
 
         mArcLayout.switchState(false);
     }
 
-    private static Animation createItemDisapperAnimation(final long duration, final boolean isClicked) {
+    private static Animation createItemDisappearAnimation(final long duration, final boolean isClicked) {
         AnimationSet animationSet = new AnimationSet(true);
         animationSet.addAnimation(new ScaleAnimation(1.0f, isClicked ? 2.0f : 0.0f, 1.0f, isClicked ? 2.0f : 0.0f,
                 Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f));

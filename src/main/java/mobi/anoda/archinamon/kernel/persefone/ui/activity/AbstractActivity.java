@@ -818,7 +818,7 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
         }
     }
 
-    protected boolean assertInternetAccess() {
+    public boolean assertInternetAccess() {
         final boolean status = accessAllowed();
         if (!status) openPopup(NoInternetDialog.class, getString(R.string.no_internet_access));
 

@@ -8,20 +8,24 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import javax.annotation.Nonnull;
 import mobi.anoda.archinamon.kernel.persefone.R;
 import mobi.anoda.archinamon.kernel.persefone.ui.dialog.AbstractDialog;
 import mobi.anoda.archinamon.kernel.persefone.ui.dialog.WarningDialog;
@@ -35,7 +39,7 @@ public class BitmapCaptureHelper {
     public static final String TAG = BitmapCaptureHelper.class.getSimpleName();
 
     @Nullable
-    public static Uri launchCameraIntent(@NotNull final Activity context, @NotNull final Fragment fragment, final int CAMERA_REQUEST_CODE, @Nullable final String tag) {
+    public static Uri launchCameraIntent(@Nonnull final Activity context, @Nonnull final Fragment fragment, final int CAMERA_REQUEST_CODE, @Nullable final String tag) {
         Uri imageUri = null;
         try {
             Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -67,7 +71,7 @@ public class BitmapCaptureHelper {
         return imageUri;
     }
 
-    public static InputStream openInputStream(@NotNull Activity activity, Uri uri) throws FileNotFoundException {
+    public static InputStream openInputStream(@Nonnull Context activity, Uri uri) throws FileNotFoundException {
         if (TextUtils.equals(uri.getScheme(), ContentResolver.SCHEME_CONTENT)) {
             return activity.getContentResolver()
                            .openInputStream(uri);
@@ -84,7 +88,7 @@ public class BitmapCaptureHelper {
      * @param size     max size to scale image to; pass here -1 if no resize needed;
      * @return resized bitmap
      */
-    public static Bitmap getResizedBitmap(@NotNull Activity activity, Uri uri, int size) {
+    public static Bitmap getResizedBitmap(@Nonnull Activity activity, Uri uri, int size) {
         try {
             BitmapFactory.Options o = new BitmapFactory.Options();
             o.inJustDecodeBounds = true;
@@ -134,5 +138,17 @@ public class BitmapCaptureHelper {
         }
 
         return bm;
+    }
+
+    public static void saveToPictures(Context context, Bitmap image, String folderName, String fileName, MediaScannerConnection.OnScanCompletedListener listener) {
+        File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        File file = new File(path, folderName + "/" + fileName);
+        try {
+            file.getParentFile().mkdirs();
+            image.compress(CompressFormat.JPEG, 80, new FileOutputStream(file));
+            MediaScannerConnection.scanFile(context, new String[] {file.toString()}, null, listener);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 }
