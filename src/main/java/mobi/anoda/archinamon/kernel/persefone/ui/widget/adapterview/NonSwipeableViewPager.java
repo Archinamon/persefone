@@ -1,4 +1,4 @@
-package mobi.anoda.archinamon.kernel.persefone.ui.widget;
+package mobi.anoda.archinamon.kernel.persefone.ui.widget.adapterview;
 
 import android.content.Context;
 import android.support.v4.view.ViewPager;

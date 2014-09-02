@@ -27,7 +27,6 @@ import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationSet;
 import android.view.animation.DecelerateInterpolator;
-import android.view.animation.RotateAnimation;
 import android.view.animation.ScaleAnimation;
 import android.widget.CompoundButton;
 import android.widget.RelativeLayout;
@@ -46,6 +45,14 @@ import mobi.anoda.archinamon.kernel.persefone.utils.Common;
 public class ArcMenu extends RelativeLayout {
 
     private ArcLayout mArcLayout;
+    private ToggleButton mDilateSwitcher;
+    private CompoundButton.OnCheckedChangeListener mDilateListener = new CompoundButton.OnCheckedChangeListener() {
+
+        @Implement
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            mArcLayout.switchState(true);
+        }
+    };
 
     public ArcMenu(Context context) {
         super(context);
@@ -64,14 +71,8 @@ public class ArcMenu extends RelativeLayout {
 
         mArcLayout = (ArcLayout) findViewById(R.id.item_layout);
 
-        final ToggleButton switcher = (ToggleButton) findViewById(R.id.control_switcher);
-        switcher.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-
-            @Implement
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                mArcLayout.switchState(true);
-            }
-        });
+        mDilateSwitcher = (ToggleButton) findViewById(R.id.control_switcher);
+        mDilateSwitcher.setOnCheckedChangeListener(mDilateListener);
     }
 
     private void applyAttrs(AttributeSet attrs) {
@@ -88,6 +89,18 @@ public class ArcMenu extends RelativeLayout {
 
             a.recycle();
         }
+    }
+
+    public boolean isExpanded() {
+        return mArcLayout.isExpanded();
+    }
+
+    public void openArc() {
+        if (!mArcLayout.isExpanded()) mDilateSwitcher.setChecked(true);
+    }
+
+    public void closeArc() {
+        if (mArcLayout.isExpanded()) mDilateSwitcher.setChecked(false);
     }
 
     public void qualifyControlHint(@DrawableRes int imgRes, @StringRes int description) {
@@ -108,24 +121,17 @@ public class ArcMenu extends RelativeLayout {
 
             @Override
             public void onClick(final View viewClicked) {
-                Animation animation = bindItemAnimation(viewClicked, true, 400);
+                Animation animation = bindItemAnimation(viewClicked, true, 300);
                 animation.setAnimationListener(new AnimationListener() {
 
-                    @Override
-                    public void onAnimationStart(Animation animation) {
+                    @Implement public void onAnimationStart(Animation animation) {}
+                    @Implement public void onAnimationRepeat(Animation animation) {}
 
-                    }
-
-                    @Override
-                    public void onAnimationRepeat(Animation animation) {
-
-                    }
-
-                    @Override
+                    @Implement
                     public void onAnimationEnd(Animation animation) {
                         postDelayed(new Runnable() {
 
-                            @Override
+                            @Implement
                             public void run() {
                                 itemDidDisappear();
                             }
@@ -142,6 +148,11 @@ public class ArcMenu extends RelativeLayout {
                 }
 
                 mArcLayout.invalidate();
+
+                //drop switcher state to default avoiding switch anim processing
+                mDilateSwitcher.setOnCheckedChangeListener(null);
+                mDilateSwitcher.setChecked(false);
+                mDilateSwitcher.setOnCheckedChangeListener(mDilateListener);
 
                 if (listener != null) {
                     listener.onClick(viewClicked);
@@ -161,8 +172,8 @@ public class ArcMenu extends RelativeLayout {
         final int itemCount = mArcLayout.getChildCount();
         for (int i = 0; i < itemCount; i++) {
             View item = mArcLayout.getChildAt(i);
-            item.clearAnimation();
             item.setVisibility(INVISIBLE);
+            item.clearAnimation();
         }
 
         mArcLayout.switchState(false);
@@ -176,19 +187,8 @@ public class ArcMenu extends RelativeLayout {
 
         animationSet.setDuration(duration);
         animationSet.setInterpolator(new DecelerateInterpolator());
-        animationSet.setFillAfter(true);
+        animationSet.setFillEnabled(true);
 
         return animationSet;
-    }
-
-    private static Animation createHintSwitchAnimation(final boolean expanded) {
-        Animation animation = new RotateAnimation(expanded ? 45 : 0, expanded ? 0 : 45, Animation.RELATIVE_TO_SELF,
-                0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
-        animation.setStartOffset(0);
-        animation.setDuration(100);
-        animation.setInterpolator(new DecelerateInterpolator());
-        animation.setFillAfter(true);
-
-        return animation;
     }
 }

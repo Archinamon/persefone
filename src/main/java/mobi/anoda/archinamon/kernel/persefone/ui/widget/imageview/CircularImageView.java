@@ -1,4 +1,4 @@
-package mobi.anoda.archinamon.kernel.persefone.ui.widget;
+package mobi.anoda.archinamon.kernel.persefone.ui.widget.imageview;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
