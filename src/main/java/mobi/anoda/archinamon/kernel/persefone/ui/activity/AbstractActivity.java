@@ -654,6 +654,14 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
         startWorkflow(c, null);
     }
 
+    /* Launch new top activity with anim */
+    public void openActivityWithTaskRecreate(Class c) {
+        Intent intent = new Intent(mSelf, c);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+        overridePendingTransition(R.anim.grow_fade_in, R.anim.shrink_fade_out);
+    }
+
     /* Switch activity with anim */
     public void enterActivity(Class c) {
         startActivity(c, null);
