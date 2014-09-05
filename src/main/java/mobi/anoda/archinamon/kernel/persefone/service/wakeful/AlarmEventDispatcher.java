@@ -37,7 +37,7 @@ public class AlarmEventDispatcher extends AbstractReceiver {
                      .putLong(WakefulIntentService.LAST_ALARM, System.currentTimeMillis())
                      .apply();
 
-                listener.sendWakefulWork(context());
+                listener.sendWakefulWork(context(), data);
             } else {
                 WakefulIntentService.scheduleAlarms(listener, (Application) context(), true);
             }

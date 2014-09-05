@@ -13,9 +13,9 @@ public abstract class WakefulIntentService extends AbstractIntentService {
 
     public interface AlarmListener {
 
-        void scheduleAlarms(AlarmManager mgr, PendingIntent pi, Application application);
+        void scheduleAlarms(AlarmManager mgr, PendingIntent pi, Intent i, Application application);
 
-        void sendWakefulWork(Context context);
+        void sendWakefulWork(Context context, Intent intent);
 
         long getMaxAge();
     }
@@ -58,7 +58,7 @@ public abstract class WakefulIntentService extends AbstractIntentService {
             i.setAction(AlarmEventDispatcher.EVENT_META_ACTION);
             PendingIntent pi = PendingIntent.getBroadcast(application, 0, i, 0);
 
-            listener.scheduleAlarms(mgr, pi, application);
+            listener.scheduleAlarms(mgr, pi, i, application);
         }
     }
 

@@ -243,9 +243,7 @@ public abstract class AbstractDialog extends DialogFragment implements TaggedVie
         assert mContext != null;
 
         mAppDelegate = (AnodaApplicationDelegate) mContext.getApplication();
-
         mInflater = mContext.getLayoutInflater();
-        mThemeWrapper = new ContextThemeWrapper(mContext, mDialogTheme);
 
         if (mDialogParams != null) {
             if (mDialogParams.containsKey(IEXTRA_THEME))
@@ -258,6 +256,7 @@ public abstract class AbstractDialog extends DialogFragment implements TaggedVie
         }
 
         mIsReady = setup();
+        mThemeWrapper = new ContextThemeWrapper(mContext, mDialogTheme);
     }
 
     @Override
@@ -575,7 +574,7 @@ public abstract class AbstractDialog extends DialogFragment implements TaggedVie
     }
 
     private void buildCustom() {
-        mBuilder = new AlertDialog.Builder(mThemeWrapper);
+        mBuilder = new AlertDialog.Builder(mContext, mDialogTheme);
 
         if (mDialogTitle != null) {
             mBuilder.setTitle(mDialogTitle);
