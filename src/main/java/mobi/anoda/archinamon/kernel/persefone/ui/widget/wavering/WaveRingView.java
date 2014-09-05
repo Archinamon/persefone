@@ -29,6 +29,7 @@ import android.view.accessibility.AccessibilityManager;
 import java.util.ArrayList;
 import javax.annotation.Nonnull;
 import mobi.anoda.archinamon.kernel.persefone.R;
+import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
 import mobi.anoda.archinamon.kernel.persefone.ui.utils.AnimationBundle;
 import mobi.anoda.archinamon.kernel.persefone.ui.utils.Ease;
 import mobi.anoda.archinamon.kernel.persefone.ui.utils.Tweener;
@@ -49,6 +50,19 @@ public class WaveRingView extends View {
         public void onGrabbedStateChange(View v, int handle);
 
         public void onFinishFinalAnimation();
+    }
+
+    public static class OnTriggerListenerAdapter implements OnTriggerListener {
+
+        @Implement public void onGrabbed(View v, int handle) {}
+
+        @Implement public void onReleased(View v, int handle) {}
+
+        @Implement public void onTrigger(View v, int target) {}
+
+        @Implement public void onGrabbedStateChange(View v, int handle) {}
+
+        @Implement public void onFinishFinalAnimation() {}
     }
 
     private static final String                    TAG                                    = WaveRingView.class.getSimpleName();
