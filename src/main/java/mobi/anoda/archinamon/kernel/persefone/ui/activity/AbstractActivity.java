@@ -657,7 +657,9 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
     /* Launch new top activity with anim */
     public void openActivityWithTaskRecreate(Class c) {
         Intent intent = new Intent(mSelf, c);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
         overridePendingTransition(R.anim.grow_fade_in, R.anim.shrink_fade_out);
     }
