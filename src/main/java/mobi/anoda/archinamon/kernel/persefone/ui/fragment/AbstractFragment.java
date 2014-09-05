@@ -271,6 +271,9 @@ public abstract class AbstractFragment extends Fragment implements TaggedView, O
         }
     }
 
+    public void onIntentDelivered(Intent intent) {
+    }
+
     protected View findViewById(int id) {
         View root = getView();
 
