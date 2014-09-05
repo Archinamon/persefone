@@ -77,7 +77,7 @@
         <attr name = "leftHolderWidth" format = "dimension" />
     </declare-styleable>
 
-    <declare-styleable name = "GlowPadView">
+    <declare-styleable name = "WaveRingView">
         <attr name = "android:gravity" />
         <attr name = "targetDrawables" format = "reference" />
         <attr name = "targetDescriptions" format = "reference" />

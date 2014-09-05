@@ -33,7 +33,7 @@ import mobi.anoda.archinamon.kernel.persefone.ui.utils.AnimationBundle;
 import mobi.anoda.archinamon.kernel.persefone.ui.utils.Ease;
 import mobi.anoda.archinamon.kernel.persefone.ui.utils.Tweener;
 
-public class GlowPadView extends View {
+public class WaveRingView extends View {
 
     public interface OnTriggerListener {
 
@@ -51,7 +51,7 @@ public class GlowPadView extends View {
         public void onFinishFinalAnimation();
     }
 
-    private static final String                    TAG                                    = GlowPadView.class.getSimpleName();
+    private static final String                    TAG                                    = WaveRingView.class.getSimpleName();
     private static final boolean                   DEBUG                                  = false;
     // Wave state machine
     private static final int                       STATE_IDLE                             = 0;
@@ -151,35 +151,35 @@ public class GlowPadView extends View {
     private int        mPointerId;
     private boolean    mShowTargetsOnIdle;
 
-    public GlowPadView(Context context) {
+    public WaveRingView(Context context) {
         this(context, null);
     }
 
-    public GlowPadView(Context context, AttributeSet attrs) {
+    public WaveRingView(Context context, AttributeSet attrs) {
         super(context, attrs);
         Resources res = context.getResources();
 
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.GlowPadView);
-        mInnerRadius = a.getDimension(R.styleable.GlowPadView_innerRadius, mInnerRadius);
-        mOuterRadius = a.getDimension(R.styleable.GlowPadView_outerRadius, mOuterRadius);
-        mSnapMargin = a.getDimension(R.styleable.GlowPadView_snapMargin, mSnapMargin);
-        mVibrationDuration = a.getInt(R.styleable.GlowPadView_vibrationDuration, mVibrationDuration);
-        mFeedbackCount = a.getInt(R.styleable.GlowPadView_feedbackCount, mFeedbackCount);
-        TypedValue handle = a.peekValue(R.styleable.GlowPadView_handleDrawable);
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.WaveRingView);
+        mInnerRadius = a.getDimension(R.styleable.WaveRingView_innerRadius, mInnerRadius);
+        mOuterRadius = a.getDimension(R.styleable.WaveRingView_outerRadius, mOuterRadius);
+        mSnapMargin = a.getDimension(R.styleable.WaveRingView_snapMargin, mSnapMargin);
+        mVibrationDuration = a.getInt(R.styleable.WaveRingView_vibrationDuration, mVibrationDuration);
+        mFeedbackCount = a.getInt(R.styleable.WaveRingView_feedbackCount, mFeedbackCount);
+        TypedValue handle = a.peekValue(R.styleable.WaveRingView_handleDrawable);
         mHandleDrawable = new TargetDrawable(res, handle != null ? handle.resourceId : 0, 2);
         mHandleDrawable.setState(TargetDrawable.STATE_INACTIVE);
-        mOuterRing = new TargetDrawable(res, getResourceId(a, R.styleable.GlowPadView_outerRingDrawable), 1);
+        mOuterRing = new TargetDrawable(res, getResourceId(a, R.styleable.WaveRingView_outerRingDrawable), 1);
 
-        mAlwaysTrackFinger = a.getBoolean(R.styleable.GlowPadView_alwaysTrackFinger, false);
+        mAlwaysTrackFinger = a.getBoolean(R.styleable.WaveRingView_alwaysTrackFinger, false);
 
-        int pointId = getResourceId(a, R.styleable.GlowPadView_pointDrawable);
+        int pointId = getResourceId(a, R.styleable.WaveRingView_pointDrawable);
         Drawable pointDrawable = pointId != 0 ? res.getDrawable(pointId) : null;
-        mGlowRadius = a.getDimension(R.styleable.GlowPadView_glowRadius, 0.0f);
+        mGlowRadius = a.getDimension(R.styleable.WaveRingView_glowRadius, 0.0f);
 
         TypedValue outValue = new TypedValue();
 
         // Read array of target drawables
-        if (a.getValue(R.styleable.GlowPadView_targetDrawables, outValue)) {
+        if (a.getValue(R.styleable.WaveRingView_targetDrawables, outValue)) {
             internalSetTargetResources(outValue.resourceId);
         }
         if (mTargetDrawables == null || mTargetDrawables.size() == 0) {
@@ -187,7 +187,7 @@ public class GlowPadView extends View {
         }
 
         // Read array of target descriptions
-        if (a.getValue(R.styleable.GlowPadView_targetDescriptions, outValue)) {
+        if (a.getValue(R.styleable.WaveRingView_targetDescriptions, outValue)) {
             final int resourceId = outValue.resourceId;
             if (resourceId == 0) {
                 throw new IllegalStateException("Must specify target descriptions");
@@ -196,7 +196,7 @@ public class GlowPadView extends View {
         }
 
         // Read array of direction descriptions
-        if (a.getValue(R.styleable.GlowPadView_directionDescriptions, outValue)) {
+        if (a.getValue(R.styleable.WaveRingView_directionDescriptions, outValue)) {
             final int resourceId = outValue.resourceId;
             if (resourceId == 0) {
                 throw new IllegalStateException("Must specify direction descriptions");
@@ -208,7 +208,7 @@ public class GlowPadView extends View {
 
         // Use gravity attribute from LinearLayout
         //a = context.obtainStyledAttributes(attrs, R.styleable.LinearLayout);
-        mGravity = a.getInt(R.styleable.GlowPadView_android_gravity, Gravity.TOP);
+        mGravity = a.getInt(R.styleable.WaveRingView_android_gravity, Gravity.TOP);
         a.recycle();
 
 
@@ -347,7 +347,7 @@ public class GlowPadView extends View {
                                        "delay", delay,
                                        "alpha", finalAlpha,
                                        "onUpdate", mUpdateListener,
-                                       "onComplete", finishListener));
+                                       "onStage", finishListener));
         mGlowAnimations.start();
     }
 
@@ -361,7 +361,7 @@ public class GlowPadView extends View {
                                        "x", 0.0f,
                                        "y", 0.0f,
                                        "onUpdate", mUpdateListener,
-                                       "onComplete", finishListener));
+                                       "onStage", finishListener));
         mGlowAnimations.start();
     }
 
@@ -462,7 +462,7 @@ public class GlowPadView extends View {
                                          "scaleY", ringScaleTarget,
                                          "delay", delay,
                                          "onUpdate", mUpdateListener,
-                                         "onComplete", mTargetUpdateListener));
+                                         "onStage", mTargetUpdateListener));
 
         mTargetAnimations.start();
     }
@@ -489,7 +489,7 @@ public class GlowPadView extends View {
                                          "scaleY", 1.0f,
                                          "delay", delay,
                                          "onUpdate", mUpdateListener,
-                                         "onComplete", mTargetUpdateListener));
+                                         "onStage", mTargetUpdateListener));
 
         mTargetAnimations.start();
     }
@@ -645,7 +645,7 @@ public class GlowPadView extends View {
                                        "delay", 0,
                                        "radius", 2.0f * mOuterRadius,
                                        "onUpdate", mUpdateListener,
-                                       "onComplete",
+                                       "onStage",
                                        new AnimatorListenerAdapter() {
 
             @Override
