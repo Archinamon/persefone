@@ -41,6 +41,7 @@ public final class RESTSignal {
         public final <Projection extends NetworkModel> Builder bindProjection(Projection model) {
             if (model != null) {
                 model.packModel();
+                this.mCoherenceTask.connectInputModel(model);
                 this.mCoherenceTask.coherence(model.getPackage());
             }
             return this;

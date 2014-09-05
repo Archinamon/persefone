@@ -4,7 +4,10 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Parcelable;
+import android.support.annotation.StringRes;
+import android.widget.Toast;
 import com.google.common.collect.ImmutableMap;
 import org.apache.http.message.BasicNameValuePair;
 import java.io.InputStream;
@@ -18,6 +21,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import mobi.anoda.archinamon.kernel.persefone.R;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
+import mobi.anoda.archinamon.kernel.persefone.model.NetworkModel;
 import mobi.anoda.archinamon.kernel.persefone.network.State;
 import mobi.anoda.archinamon.kernel.persefone.network.json.IJson;
 import mobi.anoda.archinamon.kernel.persefone.network.json.JSONHashMap;
@@ -46,16 +50,18 @@ public abstract class AbstractAsyncTask<Progress, Result> extends CoreAsyncTask<
     private final        Object  MUTEX                  = new Object();
     private volatile     int     mInternetAccess        = 1;
     private              boolean mIsSilent              = false;
-    protected AbstractActivity                mUiContext;
-    protected AbstractService                 mServiceContext;
-    protected AbstractDialog                  mProgressDialog;
-    protected Class<? extends AbstractDialog> mProgressTarget;
-    protected AbstractNetworkOperation        mOperation;
-    protected Broadcastable                   mActionCallback;
-    protected APIErrorCode                    mErrorTranslation;
-    protected IStrategyInterrupt              mErrorCallback;
-    private   List<BasicNameValuePair>        mCompiledValuableModel;
-    private   String                          mActualAction;
+    private final        Handler mHandler               = new Handler();
+    protected     AbstractActivity                mUiContext;
+    protected     AbstractService                 mServiceContext;
+    protected     AbstractDialog                  mProgressDialog;
+    protected     NetworkModel                    mPropagatorModel;
+    protected     Class<? extends AbstractDialog> mProgressTarget;
+    protected     AbstractNetworkOperation        mOperation;
+    protected     Broadcastable                   mActionCallback;
+    protected     APIErrorCode                    mErrorTranslation;
+    protected     IStrategyInterrupt              mErrorCallback;
+    private       List<BasicNameValuePair>        mCompiledValuableModel;
+    private       String                          mActualAction;
 
     public AbstractAsyncTask() {
     }
@@ -94,24 +100,28 @@ public abstract class AbstractAsyncTask<Progress, Result> extends CoreAsyncTask<
 
     public final synchronized void applySpinner(Class<? extends AbstractDialog> popupSpinner) {
         if (popupSpinner != null) {
-            mIsSilent = false;
-            mProgressTarget = popupSpinner;
+            this.mIsSilent = false;
+            this.mProgressTarget = popupSpinner;
         }
     }
 
     public final synchronized void applySpinner(AbstractDialog popupSpinner) {
         if (popupSpinner != null) {
-            mIsSilent = false;
-            mProgressDialog = popupSpinner;
+            this.mIsSilent = false;
+            this.mProgressDialog = popupSpinner;
         }
     }
 
+    public final synchronized void connectInputModel(NetworkModel model) {
+        this.mPropagatorModel = model;
+    }
+
     public final synchronized void coherence(List<BasicNameValuePair> chainedProjection) {
-        mCompiledValuableModel = chainedProjection;
+        this.mCompiledValuableModel = chainedProjection;
     }
 
     public final synchronized void defineAction(String action) {
-        mActualAction = action;
+        this.mActualAction = action;
     }
 
     /* CALLBACKS */
@@ -203,6 +213,26 @@ public abstract class AbstractAsyncTask<Progress, Result> extends CoreAsyncTask<
         super.finalize();
     }
 
+    protected final void shoutToast(final String message) {
+        mHandler.post(new Runnable() {
+
+            @Implement
+            public void run() {
+                Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    protected final void shoutToast(@StringRes final int message) {
+        mHandler.post(new Runnable() {
+
+            @Implement
+            public void run() {
+                Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
     @SuppressWarnings("unchecked")
     protected final void transcendError(JSONHashMap data) {
         ImmutableMap<String, String> error = data.getError();
@@ -235,6 +265,10 @@ public abstract class AbstractAsyncTask<Progress, Result> extends CoreAsyncTask<
 
         retData[0] = "-1";
         retData[1] = error.get(Projection.Error.ERROR_MESSAGE);
+    }
+
+    protected final NetworkModel getInputModel() {
+        return this.mPropagatorModel;
     }
 
     protected final <T extends Parcelable> void notifyService(Class<? extends Service> service, Broadcastable a, T data) {
