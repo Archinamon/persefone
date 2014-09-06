@@ -56,7 +56,7 @@ public abstract class AnodaApplicationDelegate extends Application {
         }
     }
 
-    protected final void setFlurryKey(String key) {
+    public final void setFlurryKey(String key) {
         sFlurryKey = key;
     }
 
