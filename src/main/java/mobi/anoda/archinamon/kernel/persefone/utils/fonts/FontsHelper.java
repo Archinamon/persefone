@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public class FontsHelper {
 
-    public static Typeface getCustomFont(Context context, AssetFont font) {
+    public static Typeface getCustomFont(Context context, IAssetFont font) {
         return Typeface.createFromAsset(context.getAssets(), font.getPath());
     }
 

@@ -53,7 +53,7 @@ import mobi.anoda.archinamon.kernel.persefone.utils.Common;
 import mobi.anoda.archinamon.kernel.persefone.utils.LogHelper;
 import mobi.anoda.archinamon.kernel.persefone.utils.MetricsHelper;
 import mobi.anoda.archinamon.kernel.persefone.utils.WordUtils;
-import mobi.anoda.archinamon.kernel.persefone.utils.fonts.AssetFont;
+import mobi.anoda.archinamon.kernel.persefone.utils.fonts.IAssetFont;
 import mobi.anoda.archinamon.kernel.persefone.utils.fonts.FontsHelper;
 
 /**
@@ -337,14 +337,14 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
         super.onPause();
     }
 
-    protected void setContentView(int layout, AssetFont typeface) {
+    protected void setContentView(int layout, IAssetFont typeface) {
         View v = getLayoutInflater().inflate(layout, null);
         setContentView(v);
 
         FontsHelper.applyFonts(v, FontsHelper.getCustomFont(this, typeface));
     }
 
-    protected void setContentView(View layout, AssetFont typeface) {
+    protected void setContentView(View layout, IAssetFont typeface) {
         setContentView(layout);
 
         FontsHelper.applyFonts(layout, FontsHelper.getCustomFont(this, typeface));
