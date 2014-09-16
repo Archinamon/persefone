@@ -10,6 +10,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcelable;
+import android.support.annotation.IdRes;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
@@ -22,6 +23,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager.LayoutParams;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.TextView;
 import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
@@ -476,6 +478,16 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
     public void showSoftInput(View v) {
         final InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.showSoftInput(v, InputMethodManager.SHOW_IMPLICIT);
+    }
+
+    public String getTextFromView(@IdRes int viewId) {
+        View v = findViewById(viewId);
+        if (v instanceof TextView) {
+            TextView view = (TextView) v;
+            return view.getText().toString();
+        } else {
+            return v.toString();
+        }
     }
 
     /* Helper to announce message to user */

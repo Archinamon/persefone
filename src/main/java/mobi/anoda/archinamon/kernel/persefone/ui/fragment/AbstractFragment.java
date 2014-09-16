@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.annotation.IdRes;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -16,6 +17,7 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Stack;
@@ -37,8 +39,6 @@ import mobi.anoda.archinamon.kernel.persefone.ui.dialog.AbstractDialog;
 import mobi.anoda.archinamon.kernel.persefone.ui.dialog.NoInternetDialog;
 import mobi.anoda.archinamon.kernel.persefone.ui.fragment.interfaces.IOptionsVisibilityListener;
 import mobi.anoda.archinamon.kernel.persefone.utils.LogHelper;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * @author: Archinamon
@@ -274,10 +274,22 @@ public abstract class AbstractFragment extends Fragment implements TaggedView, O
     public void onIntentDelivered(Intent intent) {
     }
 
-    protected View findViewById(int id) {
+    protected View findViewById(@IdRes int id) {
         View root = getView();
 
-        return checkNotNull(root).findViewById(id);
+        if (root != null) return root.findViewById(id);
+
+        return null;
+    }
+
+    public String getTextFromView(@IdRes int viewId) {
+        View v = findViewById(viewId);
+        if (v instanceof TextView) {
+            TextView view = (TextView) v;
+            return view.getText().toString();
+        } else {
+            return v.toString();
+        }
     }
 
     public final void registerAsyncReceiver(AsyncReceiver impl) {
