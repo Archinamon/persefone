@@ -1,28 +1,28 @@
 package mobi.anoda.archinamon.kernel.persefone.ui.activity;
 
-import android.app.ActionBar;
 import android.app.Activity;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
-import android.app.LoaderManager;
-import android.app.LoaderManager.LoaderCallbacks;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.Loader;
 import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcelable;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.Loader;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager.LayoutParams;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
-import com.flurry.android.FlurryAgent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
@@ -31,9 +31,9 @@ import mobi.anoda.archinamon.kernel.persefone.R;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
 import mobi.anoda.archinamon.kernel.persefone.network.State;
 import mobi.anoda.archinamon.kernel.persefone.network.operations.NetworkOperation.ErrorReport;
-import mobi.anoda.archinamon.kernel.persefone.service.async.AbstractAsyncServer;
 import mobi.anoda.archinamon.kernel.persefone.service.AbstractIntentService.RendezvousBinder;
 import mobi.anoda.archinamon.kernel.persefone.service.AbstractService;
+import mobi.anoda.archinamon.kernel.persefone.service.async.AbstractAsyncServer;
 import mobi.anoda.archinamon.kernel.persefone.service.async.AsyncRequest;
 import mobi.anoda.archinamon.kernel.persefone.service.notification.NetworkNotification;
 import mobi.anoda.archinamon.kernel.persefone.signals.AsyncReceiver;
@@ -60,7 +60,7 @@ import mobi.anoda.archinamon.kernel.persefone.utils.fonts.FontsHelper;
  * author: Archinamon
  * project: FavorMe
  */
-public abstract class AbstractActivity<Controllable extends AbstractFragment & StateControllable> extends Activity implements TaggedView {
+public abstract class AbstractActivity<Controllable extends AbstractFragment & StateControllable> extends ActionBarActivity implements TaggedView {
 
     public static final    int                 RESULT_EDITED      = 0xedf;
     public static final    int                 RESULT_DELETED     = 0xdef;
@@ -212,7 +212,7 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
     }
 
     protected Loader<Cursor> initLoader(int id, Bundle params, LoaderCallbacks<Cursor> mLoaderCallbacks) {
-        LoaderManager manager = getLoaderManager();
+        LoaderManager manager = getSupportLoaderManager();
         Loader<Cursor> loader = manager.getLoader(id);
 
         if (loader != null && !loader.isReset()) {
@@ -223,7 +223,7 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
     }
 
     protected Loader<Cursor> restartLoader(int id, Bundle params, LoaderCallbacks<Cursor> mLoaderCallbacks) {
-        LoaderManager manager = getLoaderManager();
+        LoaderManager manager = getSupportLoaderManager();
         Loader<Cursor> loader = manager.getLoader(id);
 
         if (loader != null && !loader.isReset()) {
@@ -306,7 +306,7 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
         requestWindowFeature(Window.FEATURE_ACTION_BAR);
         super.onCreate(savedInstanceState);
         try {
-            mActionBar = new ActionBarFactory(getActionBar());
+            mActionBar = new ActionBarFactory(getSupportActionBar());
         } catch (IllegalAccessException e) {
             logError(e);
         }
@@ -380,7 +380,7 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
     }
 
     public final void exitFragment() {
-        FragmentManager manager = getFragmentManager();
+        FragmentManager manager = getSupportFragmentManager();
         if (!manager.popBackStackImmediate()) {
             if (mCurrentFragment != null) {
                 syncState(mCurrentFragment.getState());
@@ -393,8 +393,6 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
     protected void onStop() {
         super.onStop();
         mAppDelegate.unregisterContext();
-
-        FlurryAgent.onEndSession(mSelf);
     }
 
     public void startService(Class<? extends AbstractService> service) {
@@ -520,7 +518,7 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
 
     private <TagFrmt extends AbstractFragment & TaggedView> void switchFragmentInternal(TagFrmt fragment, boolean isAddingToBackstack) {
         final String tag = fragment.getViewTag();
-        FragmentManager manager = getFragmentManager();
+        FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
 
         if (isAddingToBackstack) {
@@ -576,7 +574,7 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
 
     private <TagDialog extends AbstractDialog & TaggedView> TagDialog openPopupInternal(TagDialog popup) {
         final String tag = popup.getViewTag();
-        FragmentManager manager = getFragmentManager();
+        FragmentManager manager = getSupportFragmentManager();
 
         if (!popup.isShowing(tag)) {
             popup.show(manager, tag);

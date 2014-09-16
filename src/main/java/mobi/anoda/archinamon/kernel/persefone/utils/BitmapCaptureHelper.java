@@ -1,7 +1,6 @@
 package mobi.anoda.archinamon.kernel.persefone.utils;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -16,6 +15,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import org.jetbrains.annotations.Nullable;
@@ -39,7 +40,7 @@ public class BitmapCaptureHelper {
     public static final String TAG = BitmapCaptureHelper.class.getSimpleName();
 
     @Nullable
-    public static Uri launchCameraIntent(@Nonnull final Activity context, @Nonnull final Fragment fragment, final int CAMERA_REQUEST_CODE, @Nullable final String tag) {
+    public static Uri launchCameraIntent(@Nonnull final FragmentActivity context, @Nonnull final Fragment fragment, final int CAMERA_REQUEST_CODE, @Nullable final String tag) {
         Uri imageUri = null;
         try {
             Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -62,7 +63,7 @@ public class BitmapCaptureHelper {
             Bundle params = new Bundle();
             params.putString(WarningDialog.CUSTOM_DATA, context.getString(R.string.error_default));
             WarningDialog popup = (WarningDialog) AbstractDialog.newInstance(WarningDialog.class, params);
-            popup.show(context.getFragmentManager(),
+            popup.show(context.getSupportFragmentManager(),
                      tag != null
                      ? tag
                      : TAG);

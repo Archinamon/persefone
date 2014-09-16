@@ -3,10 +3,10 @@ package mobi.anoda.archinamon.kernel.persefone.network.json;
 import android.util.Log;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import static mobi.anoda.archinamon.kernel.persefone.network.json.Projection.Error;
 
@@ -66,19 +66,19 @@ public class JSONHashMap<SuccessMap extends HashMap<String, String>, ErrorMap ex
         }
     }
 
-    void addError(@NotNull HashMap data) {
+    void addError(@Nonnull HashMap data) {
         mError = ImmutableMap.<String, String>builder()
                              .putAll(data)
                              .build();
     }
 
-    void addResult(@NotNull HashMap data) {
+    void addResult(@Nonnull HashMap data) {
         mResult = ImmutableMap.<String, String>builder()
                               .putAll(data)
                               .build();
     }
 
-    void addArray(@NotNull ArrayList data) {
+    void addArray(@Nonnull ArrayList data) {
         mArray = ImmutableList.<HashMap>builder()
                               .addAll(data)
                               .build();

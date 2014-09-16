@@ -3,9 +3,6 @@ package mobi.anoda.archinamon.kernel.persefone.ui.dialog;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
-import android.app.FragmentManager;
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -13,6 +10,8 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentManager;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -259,6 +258,7 @@ public abstract class AbstractDialog extends DialogFragment implements TaggedVie
         mThemeWrapper = new ContextThemeWrapper(mContext, mDialogTheme);
     }
 
+    @Nonnull
     @Override
     public final Dialog onCreateDialog(Bundle savedInstanceState) {
         if (mIsReady) {
@@ -515,9 +515,9 @@ public abstract class AbstractDialog extends DialogFragment implements TaggedVie
 
     private void buildProgress() {
         final int style = mDialogTheme == mDialogThemeLight ? R.style.ProgressPopupLight : R.style.ProgressPopupDark;
-        mDialog = new ProgressDialog(mContext, style);
-        ((ProgressDialog) mDialog).setMessage(mDialogMessage);
-        ((ProgressDialog) mDialog).setProgressStyle(mProgressStyle);
+        mDialog = new android.app.ProgressDialog(mContext, style);
+        ((android.app.ProgressDialog) mDialog).setMessage(mDialogMessage);
+        ((android.app.ProgressDialog) mDialog).setProgressStyle(mProgressStyle);
     }
 
     private ListView buildList() {

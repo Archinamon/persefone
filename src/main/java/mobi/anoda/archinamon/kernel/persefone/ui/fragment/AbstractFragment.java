@@ -1,19 +1,19 @@
 package mobi.anoda.archinamon.kernel.persefone.ui.fragment;
 
-import android.app.ActionBar;
 import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
-import android.app.LoaderManager;
-import android.app.LoaderManager.LoaderCallbacks;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.Loader;
+import android.support.v7.app.ActionBar;
 import android.util.Log;
 import android.view.View;
 import java.lang.reflect.Field;
@@ -56,28 +56,28 @@ public abstract class AbstractFragment extends Fragment implements TaggedView, O
 
         @Implement
         public void onReceive(Context context, Intent intent) {
-        String action = intent.getAction();
-        assert action != null;
+            String action = intent.getAction();
+            assert action != null;
 
-        if (NetworkNotification.INTERNET_ACCESS_GRANTED.isEqual(action)) {
-            untwistStack();
-        }
+            if (NetworkNotification.INTERNET_ACCESS_GRANTED.isEqual(action)) {
+                untwistStack();
+            }
         }
     };
     private final          BroadcastReceiver   mAsyncReceiver   = new BroadcastReceiver() {
 
         @Implement
         public void onReceive(Context context, Intent intent) {
-        try {
-            String action = intent.getAction();
-            assert action != null;
+            try {
+                String action = intent.getAction();
+                assert action != null;
 
-            if (mFragmentListener != null) {
-                mFragmentListener.onReceive(action, intent);
+                if (mFragmentListener != null) {
+                    mFragmentListener.onReceive(action, intent);
+                }
+            } catch (Exception any) {
+                mFragmentListener.onException(any);
             }
-        } catch (Exception any) {
-            mFragmentListener.onException(any);
-        }
         }
     };
     protected              Bundle              mFragmentData    = new Bundle();

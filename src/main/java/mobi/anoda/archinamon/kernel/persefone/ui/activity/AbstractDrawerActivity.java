@@ -1,9 +1,9 @@
 package mobi.anoda.archinamon.kernel.persefone.ui.activity;
 
-import android.app.FragmentManager;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.view.Gravity;
@@ -37,8 +37,16 @@ public abstract class AbstractDrawerActivity<S extends AbstractFragment & StateC
             @Override
             public void onDrawerOpened(View drawerView) {
                 hideSoftInput(mDrawerLayout);
+                openDrawerCallback();
+            }
 
-                FragmentManager manager = getFragmentManager();
+            @Override
+            public void onDrawerClosed(View view) {
+                closeDrawerCallback();
+            }
+
+            private void openDrawerCallback() {
+                FragmentManager manager = getSupportFragmentManager();
                 AbstractFragment swipeMenu = (AbstractFragment) manager.findFragmentByTag("swipe_menu");
                 if (swipeMenu instanceof AbsSwyperListFragment) {
                     AbsSwyperListFragment.riseOnOpenDrawer((AbsSwyperListFragment) swipeMenu, true);
@@ -47,9 +55,8 @@ public abstract class AbstractDrawerActivity<S extends AbstractFragment & StateC
                 }
             }
 
-            @Override
-            public void onDrawerClosed(View view) {
-                FragmentManager manager = getFragmentManager();
+            private void closeDrawerCallback() {
+                FragmentManager manager = getSupportFragmentManager();
                 AbstractFragment swipeMenu = (AbstractFragment) manager.findFragmentByTag("swipe_menu");
                 if (swipeMenu instanceof AbsSwyperListFragment) {
                     AbsSwyperListFragment.riseOnCloseDrawer((AbsSwyperListFragment) swipeMenu, true);

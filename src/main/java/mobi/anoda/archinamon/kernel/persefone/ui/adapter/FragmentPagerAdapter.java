@@ -1,9 +1,9 @@
 package mobi.anoda.archinamon.kernel.persefone.ui.adapter;
 
-import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.PagerAdapter;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,14 +25,14 @@ public class FragmentPagerAdapter extends PagerAdapter {
     private FragmentTransaction mCurTransaction     = null;
     private Fragment            mCurrentPrimaryItem = null;
 
-    public FragmentPagerAdapter(Activity act, List<? extends AbstractFragment> objects) {
-        mFragmentManager = act.getFragmentManager();
+    public FragmentPagerAdapter(FragmentActivity act, List<? extends AbstractFragment> objects) {
+        mFragmentManager = act.getSupportFragmentManager();
         mFragmentsContainer = ImmutableList.copyOf(objects);
         mElementTitles = null;
     }
 
-    public FragmentPagerAdapter(Activity act, List<? extends AbstractFragment> objects, String[] titles) {
-        mFragmentManager = act.getFragmentManager();
+    public FragmentPagerAdapter(FragmentActivity act, List<? extends AbstractFragment> objects, String[] titles) {
+        mFragmentManager = act.getSupportFragmentManager();
         mFragmentsContainer = ImmutableList.copyOf(objects);
         mElementTitles = ImmutableList.copyOf(titles);
     }

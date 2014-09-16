@@ -1,11 +1,11 @@
 package mobi.anoda.archinamon.kernel.persefone.ui.utils;
 
-import android.app.ActionBar;
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.ActionBar;
 import java.util.HashMap;
 import mobi.anoda.archinamon.kernel.persefone.R;
 import mobi.anoda.archinamon.kernel.persefone.ui.fragment.AbstractFragment;
@@ -17,9 +17,9 @@ public class FragmentTabListener implements ActionBar.TabListener {
 
     private class TabContent {
 
-        private Bundle mBundle;
+        private Bundle   mBundle;
         private Fragment mFragment;
-        private Class mClass;
+        private Class    mClass;
 
         public boolean isAcivated() {
             return mFragment != null;
