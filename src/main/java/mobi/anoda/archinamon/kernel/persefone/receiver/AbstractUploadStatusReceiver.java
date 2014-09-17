@@ -3,7 +3,7 @@ package mobi.anoda.archinamon.kernel.persefone.receiver;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.IntentFilter;
-import javax.annotation.Nonnull;
+import android.support.annotation.NonNull;
 import javax.annotation.Nullable;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
 import mobi.anoda.archinamon.kernel.persefone.service.UploadService;
@@ -23,7 +23,7 @@ import mobi.anoda.archinamon.kernel.persefone.upload.UploadAction;
 public abstract class AbstractUploadStatusReceiver extends AbstractReceiver {
 
     @Implement
-    public void onReceive(@Nonnull final String action, @Nullable Intent data) {
+    public void onReceive(@NonNull final String action, @Nullable Intent data) {
         if (data != null) {
             if (UploadAction.POST_STATUS.isEqual(action)) {
                 final int status = data.getIntExtra(Extras.STATUS, 0);

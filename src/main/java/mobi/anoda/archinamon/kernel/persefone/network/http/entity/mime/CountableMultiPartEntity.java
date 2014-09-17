@@ -6,7 +6,7 @@ import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
-import javax.annotation.Nonnull;
+import android.support.annotation.NonNull;
 
 @SuppressWarnings("deprecation")
 public class CountableMultiPartEntity extends MultipartEntity {
@@ -30,7 +30,7 @@ public class CountableMultiPartEntity extends MultipartEntity {
         }
 
         @Override
-        public void write(@Nonnull byte[] b, int off, int len) throws IOException {
+        public void write(@NonNull byte[] b, int off, int len) throws IOException {
             out.write(b, off, len);
             this.mTransferred += len;
             this.mProgressListener.transferred(this.mTransferred, this.mTotalLength);

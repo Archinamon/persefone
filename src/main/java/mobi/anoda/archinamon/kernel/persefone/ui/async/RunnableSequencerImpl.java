@@ -4,7 +4,7 @@ import android.os.Handler;
 import android.os.Message;
 import com.google.common.collect.ImmutableMultiset;
 import java.util.Iterator;
-import javax.annotation.Nonnull;
+import android.support.annotation.NonNull;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
 import mobi.anoda.archinamon.kernel.persefone.ui.activity.AbstractActivity;
 
@@ -42,7 +42,7 @@ final class RunnableSequencerImpl implements ISequencer {
             }
         }
 
-        void preCompile(@Nonnull final FloatingRunnable task) {
+        void preCompile(@NonNull final FloatingRunnable task) {
             Runnable workTask = new Runnable() {
 
                 @Implement
@@ -85,7 +85,7 @@ final class RunnableSequencerImpl implements ISequencer {
             }
         }
 
-        void postCompile(@Nonnull final FloatingRunnable task) {
+        void postCompile(@NonNull final FloatingRunnable task) {
             if (task.isUiRunning()) {
                 mContext.runOnUiThread(new Runnable() {
 

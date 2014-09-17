@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import javax.annotation.Nonnull;
+import android.support.annotation.NonNull;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
 
 /**
@@ -191,7 +191,7 @@ public abstract class CoreAsyncTask<Params, Progress, Result> {
         Runnable mActive = null;
 
         @Implement
-        public synchronized void execute(@Nonnull final Runnable task) {
+        public synchronized void execute(@NonNull final Runnable task) {
             mTasks.offer(new Runnable() {
 
                 @Implement
@@ -271,7 +271,7 @@ public abstract class CoreAsyncTask<Params, Progress, Result> {
         private final AtomicInteger mCount = new AtomicInteger(1);
 
         @Implement
-        public Thread newThread(@Nonnull Runnable task) {
+        public Thread newThread(@NonNull Runnable task) {
             return new Thread(task, "AsyncTask #" + mCount.getAndIncrement());
         }
     };

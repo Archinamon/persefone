@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.os.IBinder;
 import java.io.UnsupportedEncodingException;
 import java.util.concurrent.ConcurrentSkipListMap;
-import javax.annotation.Nonnull;
+import android.support.annotation.NonNull;
 import javax.annotation.Nullable;
 import mobi.anoda.archinamon.kernel.persefone.AnodaApplicationDelegate;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
@@ -117,5 +117,5 @@ public abstract class AbstractAsyncServer extends WakefulIntentService {
         return SignalProcessor.getInstance();
     }
 
-    @Implement protected final void onAction(@Nonnull String action, @Nullable Intent data) {}
+    @Implement protected final void onAction(@NonNull String action, @Nullable Intent data) {}
 }

@@ -13,7 +13,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.widget.ImageView;
-import javax.annotation.Nonnull;
+import android.support.annotation.NonNull;
 import mobi.anoda.archinamon.kernel.persefone.R;
 
 /**
@@ -97,7 +97,7 @@ public class CircularImageView extends ImageView {
 
     @Override
     @SuppressLint("DrawAllocation")
-    public void onDraw(@Nonnull Canvas canvas) {
+    public void onDraw(@NonNull Canvas canvas) {
         // load the bitmap
         loadBitmap();
 

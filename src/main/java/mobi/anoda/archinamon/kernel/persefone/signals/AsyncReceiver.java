@@ -2,7 +2,7 @@ package mobi.anoda.archinamon.kernel.persefone.signals;
 
 import android.content.Intent;
 import java.lang.Thread.UncaughtExceptionHandler;
-import javax.annotation.Nonnull;
+import android.support.annotation.NonNull;
 import mobi.anoda.archinamon.kernel.persefone.ui.activity.AbstractActivity;
 
 /**
@@ -18,7 +18,7 @@ public interface AsyncReceiver {
      *
      * @return #true if message was successfully delivered and processed; #false otherwise
      */
-    boolean onReceive(@Nonnull final String action, Intent incoming);
+    boolean onReceive(@NonNull final String action, Intent incoming);
 
     /**
      * Called if there was {@code UncaughtException} occured inside the pcall of {@code onReceive} method

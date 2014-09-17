@@ -1,6 +1,6 @@
 package mobi.anoda.archinamon.kernel.persefone.network.async;
 
-import javax.annotation.Nonnull;
+import android.support.annotation.NonNull;
 
 /**
  * @author: Archinamon
@@ -8,5 +8,5 @@ import javax.annotation.Nonnull;
  */
 public interface APIErrorCode {
 
-    int getMessage(@Nonnull String code);
+    int getMessage(@NonNull String code);
 }

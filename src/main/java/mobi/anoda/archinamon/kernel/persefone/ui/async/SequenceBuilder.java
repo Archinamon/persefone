@@ -4,7 +4,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import javax.annotation.Nonnull;
+import android.support.annotation.NonNull;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Sequence;
 import mobi.anoda.archinamon.kernel.persefone.annotation.SequenceTask;
@@ -61,7 +61,7 @@ public final class SequenceBuilder {
         return this;
     }
 
-    public SequenceBuilder parseSequence(@Nonnull final Object type) {
+    public SequenceBuilder parseSequence(@NonNull final Object type) {
         Class objClass = type.getClass();
         Annotation[] annotations = objClass.getAnnotations();
 
@@ -78,7 +78,7 @@ public final class SequenceBuilder {
         if (objClass.isSynthetic() && !seqAnnotation.synthetic())
             throw new IllegalArgumentException("sequence class should be annotated as synthetic or avoid synth access");
 
-        for (@Nonnull final Method method : objClass.getDeclaredMethods()) {
+        for (@NonNull final Method method : objClass.getDeclaredMethods()) {
             SequenceTask sequenceTask = method.getAnnotation(SequenceTask.class);
             if (sequenceTask == null)
                 continue;

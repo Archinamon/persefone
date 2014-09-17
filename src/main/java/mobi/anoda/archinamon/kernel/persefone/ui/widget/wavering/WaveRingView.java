@@ -27,7 +27,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityManager;
 import java.util.ArrayList;
-import javax.annotation.Nonnull;
+import android.support.annotation.NonNull;
 import mobi.anoda.archinamon.kernel.persefone.R;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
 import mobi.anoda.archinamon.kernel.persefone.ui.utils.AnimationBundle;
@@ -883,7 +883,7 @@ public class WaveRingView extends View {
     }
 
     @Override
-    public boolean onHoverEvent(@Nonnull MotionEvent event) {
+    public boolean onHoverEvent(@NonNull MotionEvent event) {
         final AccessibilityManager accessibilityManager = (AccessibilityManager) getContext().getSystemService(Context.ACCESSIBILITY_SERVICE);
         if (accessibilityManager.isTouchExplorationEnabled()) {
             final int action = event.getAction();

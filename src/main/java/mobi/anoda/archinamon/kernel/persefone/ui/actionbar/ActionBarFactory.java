@@ -6,7 +6,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBar.TabListener;
 import android.view.View;
 import android.widget.SpinnerAdapter;
-import javax.annotation.Nonnull;
+import android.support.annotation.NonNull;
 import javax.annotation.Nullable;
 import mobi.anoda.archinamon.kernel.persefone.ui.fragment.AbstractFragment;
 import mobi.anoda.archinamon.kernel.persefone.ui.utils.FragmentTabListener;
@@ -19,7 +19,7 @@ import mobi.anoda.archinamon.kernel.persefone.ui.utils.FragmentTabListener;
 public final class ActionBarFactory {
 
     private final Object MUTEX = new Object();
-    @Nonnull
+    @NonNull
     private final ActionBar        fBarInstance;
     private       ActionBarPattern mPattern;
 
@@ -331,7 +331,7 @@ public final class ActionBarFactory {
         return this;
     }
 
-    private void initTabs(@Nonnull final FragmentTabListener tabHost, final Class<? extends AbstractFragment>[] fragments, final String[] titles, Bundle[] params) {
+    private void initTabs(@NonNull final FragmentTabListener tabHost, final Class<? extends AbstractFragment>[] fragments, final String[] titles, Bundle[] params) {
         for (int p = 0; p < titles.length; p++) {
             ActionBar.Tab tab = this.fBarInstance.newTab();
             tabHost.addTab(tab,

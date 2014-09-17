@@ -7,7 +7,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
-import javax.annotation.Nonnull;
+import android.support.annotation.NonNull;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
 import mobi.anoda.archinamon.kernel.persefone.model.NetworkModel;
 import mobi.anoda.archinamon.kernel.persefone.network.processor.ISignal;
@@ -72,7 +72,7 @@ public final class AsyncRequest<Model extends NetworkModel> implements Parcelabl
         this.mProgressClass = popup;
     }
 
-    public static <Server extends AbstractAsyncServer> void send(@Nonnull final Context context, final AsyncRequest what, @Nonnull final Class<Server> where) {
+    public static <Server extends AbstractAsyncServer> void send(@NonNull final Context context, final AsyncRequest what, @NonNull final Class<Server> where) {
         Intent intent = new Intent(context, where);
         intent.setData(DATA)
               .putExtra(CallQueue.DATA, what);

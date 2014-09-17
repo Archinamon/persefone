@@ -1,6 +1,6 @@
 package mobi.anoda.archinamon.kernel.persefone.network.processor;
 
-import javax.annotation.Nonnull;
+import android.support.annotation.NonNull;
 import mobi.anoda.archinamon.kernel.persefone.model.NetworkModel;
 import mobi.anoda.archinamon.kernel.persefone.network.async.AbstractAsyncTask;
 import mobi.anoda.archinamon.kernel.persefone.network.async.Status;
@@ -18,7 +18,7 @@ public final class RESTSignal {
 
         public Builder() {}
 
-        public final Builder bindCoherentTask(@Nonnull final AbstractAsyncTask task) {
+        public final Builder bindCoherentTask(@NonNull final AbstractAsyncTask task) {
             this.mCoherenceTask = task;
             return this;
         }

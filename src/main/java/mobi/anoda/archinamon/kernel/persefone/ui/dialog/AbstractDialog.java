@@ -24,7 +24,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
-import javax.annotation.Nonnull;
+import android.support.annotation.NonNull;
 import javax.annotation.Nullable;
 import mobi.anoda.archinamon.kernel.persefone.AnodaApplicationDelegate;
 import mobi.anoda.archinamon.kernel.persefone.R;
@@ -222,7 +222,7 @@ public abstract class AbstractDialog extends DialogFragment implements TaggedVie
     }
 
     @Override
-    public void show(@Nonnull FragmentManager manager, String tag) {
+    public void show(@NonNull FragmentManager manager, String tag) {
         mCurrentTag = tag;
         super.show(manager, tag);
         svWorkingPopups.put(tag, true);
@@ -258,7 +258,7 @@ public abstract class AbstractDialog extends DialogFragment implements TaggedVie
         mThemeWrapper = new ContextThemeWrapper(mContext, mDialogTheme);
     }
 
-    @Nonnull
+    @NonNull
     @Override
     public final Dialog onCreateDialog(Bundle savedInstanceState) {
         if (mIsReady) {

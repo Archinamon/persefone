@@ -12,7 +12,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.view.Gravity;
 import android.widget.Toast;
 import org.intellij.lang.annotations.MagicConstant;
-import javax.annotation.Nonnull;
+import android.support.annotation.NonNull;
 import javax.annotation.Nullable;
 import mobi.anoda.archinamon.kernel.persefone.AnodaApplicationDelegate;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
@@ -32,7 +32,7 @@ public abstract class AbstractReceiver extends BroadcastReceiver {
     protected final        String TAG         = Common.obtainClassTag(this);
     protected AnodaApplicationDelegate mAppDelegate;
 
-    protected abstract void onReceive(@Nonnull final String action, @Nullable Intent data);
+    protected abstract void onReceive(@NonNull final String action, @Nullable Intent data);
 
     @Implement
     public void onReceive(Context context, Intent intent) {

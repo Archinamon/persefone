@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nonnull;
+import android.support.annotation.NonNull;
 import javax.annotation.Nullable;
 import mobi.anoda.archinamon.kernel.persefone.R;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
@@ -255,7 +255,7 @@ public abstract class AbstractAsyncTask<Progress, Result> extends CoreAsyncTask<
         reportError(NetworkNotification.ALERT_EXCEPTION, report);
     }
 
-    protected final void translateError(@Nonnull ImmutableMap<String, String> error, String[] retData) {
+    protected final void translateError(@NonNull ImmutableMap<String, String> error, String[] retData) {
         String code = error.get(Projection.Error.ERROR_CODE);
         if (code != null) {
             retData[0] = code;

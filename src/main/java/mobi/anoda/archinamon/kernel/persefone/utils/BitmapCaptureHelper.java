@@ -26,7 +26,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import javax.annotation.Nonnull;
+import android.support.annotation.NonNull;
 import mobi.anoda.archinamon.kernel.persefone.R;
 import mobi.anoda.archinamon.kernel.persefone.ui.dialog.AbstractDialog;
 import mobi.anoda.archinamon.kernel.persefone.ui.dialog.WarningDialog;
@@ -40,7 +40,7 @@ public class BitmapCaptureHelper {
     public static final String TAG = BitmapCaptureHelper.class.getSimpleName();
 
     @Nullable
-    public static Uri launchCameraIntent(@Nonnull final FragmentActivity context, @Nonnull final Fragment fragment, final int CAMERA_REQUEST_CODE, @Nullable final String tag) {
+    public static Uri launchCameraIntent(@NonNull final FragmentActivity context, @NonNull final Fragment fragment, final int CAMERA_REQUEST_CODE, @Nullable final String tag) {
         Uri imageUri = null;
         try {
             Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -72,7 +72,7 @@ public class BitmapCaptureHelper {
         return imageUri;
     }
 
-    public static InputStream openInputStream(@Nonnull Context activity, Uri uri) throws FileNotFoundException {
+    public static InputStream openInputStream(@NonNull Context activity, Uri uri) throws FileNotFoundException {
         if (TextUtils.equals(uri.getScheme(), ContentResolver.SCHEME_CONTENT)) {
             return activity.getContentResolver()
                            .openInputStream(uri);
@@ -89,7 +89,7 @@ public class BitmapCaptureHelper {
      * @param size     max size to scale image to; pass here -1 if no resize needed;
      * @return resized bitmap
      */
-    public static Bitmap getResizedBitmap(@Nonnull Activity activity, Uri uri, int size) {
+    public static Bitmap getResizedBitmap(@NonNull Activity activity, Uri uri, int size) {
         try {
             BitmapFactory.Options o = new BitmapFactory.Options();
             o.inJustDecodeBounds = true;

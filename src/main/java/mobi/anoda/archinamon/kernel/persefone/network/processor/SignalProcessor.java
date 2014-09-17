@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import javax.annotation.Nonnull;
+import android.support.annotation.NonNull;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
 
 /**
@@ -33,7 +33,7 @@ public class SignalProcessor implements Serializable {
     private SignalProcessor() {
     }
 
-    public final /*synthetic*/ synchronized void subscribe(@Nonnull RESTSignal signal) {
+    public final /*synthetic*/ synchronized void subscribe(@NonNull RESTSignal signal) {
         sSubscribedSignals.add(signal);
         sRefCount.incrementAndGet();
     }

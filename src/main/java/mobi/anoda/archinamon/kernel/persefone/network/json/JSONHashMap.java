@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.util.ArrayList;
 import java.util.HashMap;
-import javax.annotation.Nonnull;
+import android.support.annotation.NonNull;
 import javax.annotation.Nullable;
 
 import static mobi.anoda.archinamon.kernel.persefone.network.json.Projection.Error;
@@ -66,19 +66,19 @@ public class JSONHashMap<SuccessMap extends HashMap<String, String>, ErrorMap ex
         }
     }
 
-    void addError(@Nonnull HashMap data) {
+    void addError(@NonNull HashMap data) {
         mError = ImmutableMap.<String, String>builder()
                              .putAll(data)
                              .build();
     }
 
-    void addResult(@Nonnull HashMap data) {
+    void addResult(@NonNull HashMap data) {
         mResult = ImmutableMap.<String, String>builder()
                               .putAll(data)
                               .build();
     }
 
-    void addArray(@Nonnull ArrayList data) {
+    void addArray(@NonNull ArrayList data) {
         mArray = ImmutableList.<HashMap>builder()
                               .addAll(data)
                               .build();

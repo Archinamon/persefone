@@ -8,7 +8,7 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import javax.annotation.Nonnull;
+import android.support.annotation.NonNull;
 import javax.annotation.Nullable;
 import mobi.anoda.archinamon.kernel.persefone.utils.WordUtils;
 
@@ -139,5 +139,5 @@ public abstract class AbstractIntentService extends AbstractService {
         if (!WordUtils.isEmpty(action)) onAction(action, intent);
     }
 
-    protected abstract void onAction(@Nonnull final String action, @Nullable Intent data);
+    protected abstract void onAction(@NonNull final String action, @Nullable Intent data);
 }

@@ -12,7 +12,7 @@ import android.content.res.XmlResourceParser;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
-import javax.annotation.Nonnull;
+import android.support.annotation.NonNull;
 import javax.annotation.Nullable;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
 import mobi.anoda.archinamon.kernel.persefone.receiver.AbstractReceiver;
@@ -26,7 +26,7 @@ public class AlarmEventDispatcher extends AbstractReceiver {
     private static final String WAKEFUL_META_DATA = "wakefulAlarmProcessor";
 
     @Implement
-    public void onReceive(@Nonnull final String action, @Nullable Intent data) {
+    public void onReceive(@NonNull final String action, @Nullable Intent data) {
         AlarmListener listener = getListener(context());
 
         if (listener != null) {
