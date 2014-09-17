@@ -1,10 +1,10 @@
 package mobi.anoda.archinamon.kernel.persefone.ui.async;
 
+import android.support.annotation.NonNull;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import android.support.annotation.NonNull;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Sequence;
 import mobi.anoda.archinamon.kernel.persefone.annotation.SequenceTask;
@@ -78,7 +78,7 @@ public final class SequenceBuilder {
         if (objClass.isSynthetic() && !seqAnnotation.synthetic())
             throw new IllegalArgumentException("sequence class should be annotated as synthetic or avoid synth access");
 
-        for (@NonNull final Method method : objClass.getDeclaredMethods()) {
+        for (final Method method : objClass.getDeclaredMethods()) {
             SequenceTask sequenceTask = method.getAnnotation(SequenceTask.class);
             if (sequenceTask == null)
                 continue;
