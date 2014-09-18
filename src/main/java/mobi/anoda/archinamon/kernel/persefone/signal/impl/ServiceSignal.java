@@ -1,41 +1,42 @@
-package mobi.anoda.archinamon.kernel.persefone.signals;
+package mobi.anoda.archinamon.kernel.persefone.signal.impl;
 
 import android.os.Parcel;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
 import mobi.anoda.archinamon.kernel.persefone.network.processor.ISignal;
+import mobi.anoda.archinamon.kernel.persefone.signal.broadcast.Broadcastable;
 
 /**
  * @author: Archinamon
  * @project: FavorMe
  */
-class SignalImpl implements ISignal {
+class ServiceSignal implements ISignal {
 
-    public static final String              TAG     = SignalImpl.class.getSimpleName();
-    public static final Creator<SignalImpl> CREATOR = new Creator<SignalImpl>() {
+    public static final String                 TAG     = ServiceSignal.class.getSimpleName();
+    public static final Creator<ServiceSignal> CREATOR = new Creator<ServiceSignal>() {
 
         @Implement
-        public SignalImpl createFromParcel(Parcel source) {
-            SignalImpl sig = new SignalImpl();
+        public ServiceSignal createFromParcel(Parcel source) {
+            ServiceSignal sig = new ServiceSignal();
             sig.mCommandStr = source.readString();
 
             return sig;
         }
 
         @Implement
-        public SignalImpl[] newArray(int size) {
-            return new SignalImpl[size];
+        public ServiceSignal[] newArray(int size) {
+            return new ServiceSignal[size];
         }
     };
-    private String        mCommandStr;
+    private String mCommandStr;
 
-    private SignalImpl() {
+    private ServiceSignal() {
     }
 
-    SignalImpl(String action) {
+    ServiceSignal(String action) {
         mCommandStr = action;
     }
 
-    SignalImpl(Broadcastable action) {
+    ServiceSignal(Broadcastable action) {
         mCommandStr = action.getAction();
     }
 

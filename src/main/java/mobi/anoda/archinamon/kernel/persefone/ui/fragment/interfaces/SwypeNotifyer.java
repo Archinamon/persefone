@@ -1,6 +1,6 @@
 package mobi.anoda.archinamon.kernel.persefone.ui.fragment.interfaces;
 
-import mobi.anoda.archinamon.kernel.persefone.signals.Broadcastable;
+import mobi.anoda.archinamon.kernel.persefone.signal.broadcast.Broadcastable;
 
 public interface SwypeNotifyer extends Broadcastable {
 

@@ -32,7 +32,7 @@ import mobi.anoda.archinamon.kernel.persefone.network.processor.IStrategyInterru
 import mobi.anoda.archinamon.kernel.persefone.network.processor.InterruptSequencer;
 import mobi.anoda.archinamon.kernel.persefone.service.AbstractService;
 import mobi.anoda.archinamon.kernel.persefone.service.notification.NetworkNotification;
-import mobi.anoda.archinamon.kernel.persefone.signals.Broadcastable;
+import mobi.anoda.archinamon.kernel.persefone.signal.broadcast.Broadcastable;
 import mobi.anoda.archinamon.kernel.persefone.ui.activity.AbstractActivity;
 import mobi.anoda.archinamon.kernel.persefone.ui.dialog.AbstractDialog;
 import mobi.anoda.archinamon.kernel.persefone.ui.dialog.ProgressDialog;

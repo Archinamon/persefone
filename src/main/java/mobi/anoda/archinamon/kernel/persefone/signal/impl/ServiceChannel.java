@@ -1,13 +1,14 @@
-package mobi.anoda.archinamon.kernel.persefone.signals;
+package mobi.anoda.archinamon.kernel.persefone.signal.impl;
 
 import android.content.IntentFilter;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
+import mobi.anoda.archinamon.kernel.persefone.signal.broadcast.Broadcastable;
 
 /**
  * @author: Archinamon
  * @project: FavorMe
  */
-public enum Channel implements Broadcastable {
+public enum ServiceChannel implements Broadcastable {
 
     CALL_SOCIAL_API(".CALL_SOCIAL_API"),
     CALL_REST_API(".CALL_REST_API");
@@ -16,7 +17,7 @@ public enum Channel implements Broadcastable {
     private static final String BASE     = "mobi.anoda.archcore.persefone.services.channel";
     private String mChannelTarget;
 
-    private Channel(String name) {
+    private ServiceChannel(String name) {
         mChannelTarget = BASE + name;
     }
 

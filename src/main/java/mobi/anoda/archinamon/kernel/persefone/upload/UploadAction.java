@@ -1,7 +1,7 @@
 package mobi.anoda.archinamon.kernel.persefone.upload;
 
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
-import mobi.anoda.archinamon.kernel.persefone.signals.Broadcastable;
+import mobi.anoda.archinamon.kernel.persefone.signal.broadcast.Broadcastable;
 
 public enum UploadAction implements Broadcastable {
 

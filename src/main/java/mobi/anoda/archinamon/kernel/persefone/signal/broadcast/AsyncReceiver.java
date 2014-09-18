@@ -1,4 +1,4 @@
-package mobi.anoda.archinamon.kernel.persefone.signals;
+package mobi.anoda.archinamon.kernel.persefone.signal.broadcast;
 
 import android.content.Intent;
 import java.lang.Thread.UncaughtExceptionHandler;

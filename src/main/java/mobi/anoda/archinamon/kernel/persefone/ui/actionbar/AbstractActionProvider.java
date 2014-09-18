@@ -5,7 +5,7 @@ import android.os.Parcelable;
 import android.view.ActionProvider;
 import mobi.anoda.archinamon.kernel.persefone.AnodaApplicationDelegate;
 import mobi.anoda.archinamon.kernel.persefone.annotation.ProxyMethod;
-import mobi.anoda.archinamon.kernel.persefone.signals.Broadcastable;
+import mobi.anoda.archinamon.kernel.persefone.signal.broadcast.Broadcastable;
 import mobi.anoda.archinamon.kernel.persefone.ui.activity.AbstractActivity;
 
 import static com.google.common.base.Preconditions.checkArgument;

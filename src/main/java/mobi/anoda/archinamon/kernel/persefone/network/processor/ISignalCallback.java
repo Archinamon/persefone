@@ -1,7 +1,7 @@
 package mobi.anoda.archinamon.kernel.persefone.network.processor;
 
 import mobi.anoda.archinamon.kernel.persefone.network.operations.NetworkOperation.ErrorReport;
-import mobi.anoda.archinamon.kernel.persefone.signals.Channel;
+import mobi.anoda.archinamon.kernel.persefone.signal.impl.ServiceChannel;
 
 /**
  * @author: Archinamon
@@ -9,5 +9,5 @@ import mobi.anoda.archinamon.kernel.persefone.signals.Channel;
  */
 public interface ISignalCallback {
 
-    void $(Channel gate, ErrorReport report);
+    void $(ServiceChannel gate, ErrorReport report);
 }

@@ -14,8 +14,8 @@ import mobi.anoda.archinamon.kernel.persefone.network.processor.RESTSignal;
 import mobi.anoda.archinamon.kernel.persefone.network.processor.SignalProcessor;
 import mobi.anoda.archinamon.kernel.persefone.service.AbstractService;
 import mobi.anoda.archinamon.kernel.persefone.service.wakeful.WakefulIntentService;
-import mobi.anoda.archinamon.kernel.persefone.signals.Broadcastable;
-import mobi.anoda.archinamon.kernel.persefone.signals.Channel;
+import mobi.anoda.archinamon.kernel.persefone.signal.broadcast.Broadcastable;
+import mobi.anoda.archinamon.kernel.persefone.signal.impl.ServiceChannel;
 import mobi.anoda.archinamon.kernel.persefone.ui.activity.AbstractActivity;
 import mobi.anoda.archinamon.kernel.persefone.utils.LogHelper;
 
@@ -27,25 +27,26 @@ public abstract class AbstractAsyncServer extends WakefulIntentService {
 
     protected static final class SignalMap {
 
-        final static ConcurrentSkipListMap<Channel, ConcurrentSkipListMap<String, Class<? extends AbstractAsyncTask>>> sTaskMap;
+        final static ConcurrentSkipListMap<ServiceChannel, ConcurrentSkipListMap<String, Class<? extends AbstractAsyncTask>>> sTaskMap;
 
         static {
             sTaskMap = new ConcurrentSkipListMap<>();
-            sTaskMap.put(Channel.CALL_REST_API, create());
-            sTaskMap.put(Channel.CALL_SOCIAL_API, create());
+            sTaskMap.put(ServiceChannel.CALL_REST_API, create());
+            sTaskMap.put(ServiceChannel.CALL_SOCIAL_API, create());
         }
 
         static ConcurrentSkipListMap<String, Class<? extends AbstractAsyncTask>> create() {
             return new ConcurrentSkipListMap<>();
         }
 
-        static Class<? extends AbstractAsyncTask> getTaskByGate(Channel gate, String what) {
+        static Class<? extends AbstractAsyncTask> getTaskByGate(ServiceChannel gate, String what) {
             return sTaskMap.get(gate)
                            .get(what);
         }
 
-        public static void add(Channel gate, Broadcastable callback, Class<? extends AbstractAsyncTask> task) {
-            sTaskMap.get(gate).putIfAbsent(callback.getAction(), task);
+        public static void add(ServiceChannel gate, Broadcastable callback, Class<? extends AbstractAsyncTask> task) {
+            sTaskMap.get(gate)
+                    .putIfAbsent(callback.getAction(), task);
         }
     }
 

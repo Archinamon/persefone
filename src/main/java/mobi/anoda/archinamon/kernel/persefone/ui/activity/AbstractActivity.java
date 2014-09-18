@@ -38,11 +38,11 @@ import mobi.anoda.archinamon.kernel.persefone.service.AbstractService;
 import mobi.anoda.archinamon.kernel.persefone.service.async.AbstractAsyncServer;
 import mobi.anoda.archinamon.kernel.persefone.service.async.AsyncRequest;
 import mobi.anoda.archinamon.kernel.persefone.service.notification.NetworkNotification;
-import mobi.anoda.archinamon.kernel.persefone.signals.AsyncReceiver;
-import mobi.anoda.archinamon.kernel.persefone.signals.BroadcastFilter;
-import mobi.anoda.archinamon.kernel.persefone.signals.Broadcastable;
-import mobi.anoda.archinamon.kernel.persefone.signals.Channel;
-import mobi.anoda.archinamon.kernel.persefone.signals.Permission;
+import mobi.anoda.archinamon.kernel.persefone.signal.broadcast.AsyncReceiver;
+import mobi.anoda.archinamon.kernel.persefone.signal.broadcast.BroadcastFilter;
+import mobi.anoda.archinamon.kernel.persefone.signal.broadcast.Broadcastable;
+import mobi.anoda.archinamon.kernel.persefone.signal.impl.ServiceChannel;
+import mobi.anoda.archinamon.kernel.persefone.signal.broadcast.Permission;
 import mobi.anoda.archinamon.kernel.persefone.ui.TaggedView;
 import mobi.anoda.archinamon.kernel.persefone.ui.actionbar.ActionBarFactory;
 import mobi.anoda.archinamon.kernel.persefone.ui.activity.interfaces.OnServerReady;
@@ -81,7 +81,7 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
             String action = intent.getAction();
             assert action != null;
 
-            final ErrorReport report = intent.getParcelableExtra(Channel.KEY_DATA);
+            final ErrorReport report = intent.getParcelableExtra(ServiceChannel.KEY_DATA);
             if (NetworkNotification.FORCE_LOGOUT.isEqual(action)) {
                 if (sfOnForceLogoutScreen != null)
                     switchWorkflow(sfOnForceLogoutScreen);
@@ -461,23 +461,6 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
         } else {
             addCallToStack(request);
         }
-    }
-
-    /* Helper to hide soft input KeyboardView */
-    public void hideSoftInput(final int view) {
-        final InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(findViewById(view).getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-    }
-
-    public void hideSoftInput(final View view) {
-        final InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-    }
-
-    /* Helper to show soft input KeyboardView */
-    public void showSoftInput(View v) {
-        final InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.showSoftInput(v, InputMethodManager.SHOW_IMPLICIT);
     }
 
     public String getTextFromView(@IdRes int viewId) {

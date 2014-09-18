@@ -11,8 +11,8 @@ import android.support.annotation.NonNull;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
 import mobi.anoda.archinamon.kernel.persefone.model.NetworkModel;
 import mobi.anoda.archinamon.kernel.persefone.network.processor.ISignal;
-import mobi.anoda.archinamon.kernel.persefone.signals.CallQueue;
-import mobi.anoda.archinamon.kernel.persefone.signals.Channel;
+import mobi.anoda.archinamon.kernel.persefone.signal.impl.CallQueue;
+import mobi.anoda.archinamon.kernel.persefone.signal.impl.ServiceChannel;
 import mobi.anoda.archinamon.kernel.persefone.ui.dialog.AbstractDialog;
 
 /**
@@ -27,7 +27,7 @@ public final class AsyncRequest<Model extends NetworkModel> implements Parcelabl
 
         @Implement
         public AsyncRequest createFromParcel(Parcel source) {
-            Channel gate = Channel.values()[source.readInt()];
+            ServiceChannel gate = ServiceChannel.values()[source.readInt()];
             ISignal signal = source.readParcelable(ISignal.class.getClassLoader());
             NetworkModel model = source.readParcelable(NetworkModel.class.getClassLoader());
             //parametrize section
@@ -46,19 +46,19 @@ public final class AsyncRequest<Model extends NetworkModel> implements Parcelabl
             return new AsyncRequest[size];
         }
     };
-    private Channel                         mGate;
+    private ServiceChannel                  mGate;
     private ISignal                         mCommand;
     private Model                           mModel;
     private Class<? extends AbstractDialog> mProgressClass;
     private boolean                         mIsDaemon;
 
-    public AsyncRequest(Channel action, ISignal call, Model params) {
+    public AsyncRequest(ServiceChannel action, ISignal call, Model params) {
         mGate = action;
         mCommand = call;
         mModel = params;
     }
 
-    public AsyncRequest(Channel action, ISignal call) {
+    public AsyncRequest(ServiceChannel action, ISignal call) {
         mGate = action;
         mCommand = call;
         mModel = null;
@@ -80,7 +80,7 @@ public final class AsyncRequest<Model extends NetworkModel> implements Parcelabl
         context.startService(intent);
     }
 
-    Channel getGate() {
+    ServiceChannel getGate() {
         return mGate;
     }
 
