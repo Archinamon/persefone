@@ -7,6 +7,8 @@ import mobi.anoda.archinamon.kernel.persefone.network.State;
 import mobi.anoda.archinamon.kernel.persefone.network.async.AbstractAsyncTask;
 import mobi.anoda.archinamon.kernel.persefone.network.client.ExtAndroidHttpClient;
 import mobi.anoda.archinamon.kernel.persefone.receiver.InternetAccessReceiver;
+import mobi.anoda.archinamon.kernel.persefone.service.notification.NetworkNotification;
+import mobi.anoda.archinamon.kernel.persefone.signal.broadcast.BroadcastFilter;
 import mobi.anoda.archinamon.kernel.persefone.ui.activity.AbstractActivity;
 import mobi.anoda.archinamon.kernel.persefone.ui.dialog.AbstractDialog;
 import mobi.anoda.archinamon.kernel.persefone.utils.LogHelper;
@@ -17,11 +19,19 @@ import mobi.anoda.archinamon.kernel.persefone.utils.LogHelper;
  */
 public abstract class AnodaApplicationDelegate extends Application {
 
-    public static final boolean DEBUG = true;
-    private static          String               sFlurryKey;
-    private static volatile ContextWrapper       sAppContextProxy;
-    protected               AbstractActivity     mContext;
-    protected               ExtAndroidHttpClient mHttpClient;
+    public static final boolean         DEBUG           = true;
+    private static final BroadcastFilter DEFAULT_FILTERS = new BroadcastFilter();
+    private static          String                            sFlurryKey;
+    private static volatile ContextWrapper                    sAppContextProxy;
+    protected               AbstractActivity                  mContext;
+    protected               ExtAndroidHttpClient              mHttpClient;
+
+    static {
+        DEFAULT_FILTERS.addAction(NetworkNotification.FORCE_LOGOUT);
+        DEFAULT_FILTERS.addAction(NetworkNotification.ALERT_EXCEPTION);
+        DEFAULT_FILTERS.addAction(NetworkNotification.ALERT_NO_INTERNET);
+        DEFAULT_FILTERS.addAction(NetworkNotification.INTERNET_ACCESS_GRANTED);
+    }
 
     @Override
     public void onCreate() {
@@ -38,6 +48,10 @@ public abstract class AnodaApplicationDelegate extends Application {
      */
     public final static Context getProxyContext() {
         return AnodaApplicationDelegate.sAppContextProxy;
+    }
+
+    public final BroadcastFilter getDefaultNetworkEvents() {
+        return DEFAULT_FILTERS;
     }
 
     protected final void setDefaultScreen(String who, Class<? extends AbstractActivity> screen) {

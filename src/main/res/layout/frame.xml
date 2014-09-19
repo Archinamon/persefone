@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:id="@+id/fragment_view"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent" >
+             android:layout_width="fill_parent"
+             android:layout_height="fill_parent">
+
+    <View   android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:layout_width="0px"
+            android:layout_height="0px"/>
+
+    <FrameLayout
+                 android:id="@+id/fragment_view"
+                 android:layout_width="match_parent"
+                 android:layout_height="match_parent" />
+
+    <FrameLayout
+            android:id="@+id/touch_interceptor"
+                 android:layout_width="fill_parent"
+                 android:layout_height="fill_parent"/>
+
 </FrameLayout>

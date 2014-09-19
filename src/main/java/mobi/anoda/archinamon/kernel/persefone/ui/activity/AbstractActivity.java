@@ -1,7 +1,6 @@
 package mobi.anoda.archinamon.kernel.persefone.ui.activity;
 
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -11,43 +10,45 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcelable;
 import android.support.annotation.IdRes;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
+import android.support.v4.view.WindowCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Gravity;
 import android.view.View;
-import android.view.Window;
 import android.view.WindowManager.LayoutParams;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
-import mobi.anoda.archinamon.kernel.persefone.AnodaApplicationDelegate;
 import mobi.anoda.archinamon.kernel.persefone.R;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
 import mobi.anoda.archinamon.kernel.persefone.network.State;
 import mobi.anoda.archinamon.kernel.persefone.network.operations.NetworkOperation.ErrorReport;
+import mobi.anoda.archinamon.kernel.persefone.receiver.AbstractReceiver;
 import mobi.anoda.archinamon.kernel.persefone.service.AbstractIntentService.RendezvousBinder;
 import mobi.anoda.archinamon.kernel.persefone.service.AbstractService;
 import mobi.anoda.archinamon.kernel.persefone.service.async.AbstractAsyncServer;
 import mobi.anoda.archinamon.kernel.persefone.service.async.AsyncRequest;
 import mobi.anoda.archinamon.kernel.persefone.service.notification.NetworkNotification;
-import mobi.anoda.archinamon.kernel.persefone.signal.broadcast.AsyncReceiver;
 import mobi.anoda.archinamon.kernel.persefone.signal.broadcast.BroadcastFilter;
 import mobi.anoda.archinamon.kernel.persefone.signal.broadcast.Broadcastable;
 import mobi.anoda.archinamon.kernel.persefone.signal.impl.ServiceChannel;
-import mobi.anoda.archinamon.kernel.persefone.signal.broadcast.Permission;
 import mobi.anoda.archinamon.kernel.persefone.ui.TaggedView;
 import mobi.anoda.archinamon.kernel.persefone.ui.actionbar.ActionBarFactory;
 import mobi.anoda.archinamon.kernel.persefone.ui.activity.interfaces.OnServerReady;
 import mobi.anoda.archinamon.kernel.persefone.ui.activity.interfaces.StateControllable;
 import mobi.anoda.archinamon.kernel.persefone.ui.activity.interfaces.StateControllable.FragmentState;
+import mobi.anoda.archinamon.kernel.persefone.ui.context.StableContext;
+import mobi.anoda.archinamon.kernel.persefone.ui.delegate.BroadcastBus;
+import mobi.anoda.archinamon.kernel.persefone.ui.delegate.SoftKeyboard;
 import mobi.anoda.archinamon.kernel.persefone.ui.dialog.AbstractDialog;
 import mobi.anoda.archinamon.kernel.persefone.ui.dialog.NoInternetDialog;
 import mobi.anoda.archinamon.kernel.persefone.ui.fragment.AbstractFragment;
@@ -55,69 +56,31 @@ import mobi.anoda.archinamon.kernel.persefone.utils.Common;
 import mobi.anoda.archinamon.kernel.persefone.utils.LogHelper;
 import mobi.anoda.archinamon.kernel.persefone.utils.MetricsHelper;
 import mobi.anoda.archinamon.kernel.persefone.utils.WordUtils;
-import mobi.anoda.archinamon.kernel.persefone.utils.fonts.IAssetFont;
 import mobi.anoda.archinamon.kernel.persefone.utils.fonts.FontsHelper;
+import mobi.anoda.archinamon.kernel.persefone.utils.fonts.IAssetFont;
 
 /**
- * author: Archinamon
- * project: FavorMe
+ * author: Archinamon project: FavorMe
  */
 public abstract class AbstractActivity<Controllable extends AbstractFragment & StateControllable> extends ActionBarActivity implements TaggedView {
 
-    public static final    int                 RESULT_EDITED      = 0xedf;
-    public static final    int                 RESULT_DELETED     = 0xdef;
-    public static final    String              CUSTOM_DATA        = ".custom:key_data";
-    protected static final Stack<AsyncRequest> POSTPONED_CALLS    = new Stack<>();
-    public static final    BroadcastFilter     DEFAULT_FILTERS    = new BroadcastFilter();
-    protected final        BroadcastFilter     FILTER             = new BroadcastFilter();
-    protected final        List<OnServerReady> mServerListeners   = new ArrayList<>();
-    private final          String              TAG                = ((Object) this).getClass()
-                                                                                   .getSimpleName();
-    private final          Object              MUTEX              = new Object();
-    private final          BroadcastReceiver   mErrorsReceiver    = new BroadcastReceiver() {
-
-        @Implement
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            assert action != null;
-
-            final ErrorReport report = intent.getParcelableExtra(ServiceChannel.KEY_DATA);
-            if (NetworkNotification.FORCE_LOGOUT.isEqual(action)) {
-                if (sfOnForceLogoutScreen != null)
-                    switchWorkflow(sfOnForceLogoutScreen);
-            } else if (NetworkNotification.ALERT_NO_INTERNET.isEqual(action)) {
-                openPopup(NoInternetDialog.class, getString(R.string.no_internet_access));
-                informError(null);
-            } else if (NetworkNotification.ALERT_EXCEPTION.isEqual(action)) {
-                informError(report);
-            } else if (NetworkNotification.INTERNET_ACCESS_GRANTED.isEqual(action)) {
-                untwistStack();
-            }
-        }
-    };
-    private final          BroadcastReceiver   mMainAsyncReceiver = new BroadcastReceiver() {
-
-        @Implement
-        public void onReceive(Context context, Intent intent) {
-            try {
-                String action = intent.getAction();
-                assert action != null;
-
-                if (mActivityListener != null) {
-                    mActivityListener.onReceive(action, intent);
-                }
-            } catch (Exception any) {
-                mActivityListener.onException(any);
-            }
-        }
-    };
+    public static final    int                 RESULT_EDITED    = 0xedf;
+    public static final    int                 RESULT_DELETED   = 0xdef;
+    public static final    String              CUSTOM_DATA      = ".custom:key_data";
+    protected static final Stack<AsyncRequest> POSTPONED_CALLS  = new Stack<>();
+    private final          BroadcastFilter     fActionsFilter   = new BroadcastFilter();
+    private final          List<OnServerReady> mServerListeners = new ArrayList<>();
+    private final          String              TAG              = ((Object) this).getClass()
+                                                                                 .getSimpleName();
+    private final          Object              MUTEX            = new Object();
     private static Class<? extends AbstractActivity>    sfOnForceLogoutScreen;
     private static Class<? extends AbstractDialog>      sfOnServerOfflineScreen;
-    protected      AnodaApplicationDelegate             mAppDelegate;
+    private        StableContext                        mStableContext;
+    protected      SoftKeyboard                         mKeyboardManagerDelegate;
+    protected      BroadcastBus                         mBroadcastBusDelegate;
     protected      Class<? extends AbstractAsyncServer> mAsyncServiceImpl;
     protected      AbstractActivity                     mSelf;
     protected      RendezvousBinder                     mServerBinder;
-    protected      AsyncReceiver                        mActivityListener;
     protected      LoaderCallbacks<Cursor>              mLoaderCallbacks;
     protected      ActionBarFactory                     mActionBar;
     protected      ActionBar                            mActionBarImpl;
@@ -125,6 +88,26 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
     protected volatile boolean           mIsBound         = false;
     protected volatile boolean           isPaused         = true;
     private volatile   Controllable      mCurrentFragment = null;
+    private final      AbstractReceiver  mErrorsReceiver  = new AbstractReceiver() {
+
+        @Implement
+        public void onReceive(@NonNull final String action, @Nullable Intent data) {
+            if (data != null) {
+                final ErrorReport report = data.getParcelableExtra(ServiceChannel.KEY_DATA);
+                if (NetworkNotification.FORCE_LOGOUT.isEqual(action)) {
+                    if (sfOnForceLogoutScreen != null)
+                        switchWorkflow(sfOnForceLogoutScreen);
+                } else if (NetworkNotification.ALERT_NO_INTERNET.isEqual(action)) {
+                    openPopup(NoInternetDialog.class, getString(R.string.no_internet_access));
+                    informError(null);
+                } else if (NetworkNotification.ALERT_EXCEPTION.isEqual(action)) {
+                    informError(report);
+                } else if (NetworkNotification.INTERNET_ACCESS_GRANTED.isEqual(action)) {
+                    untwistStack();
+                }
+            }
+        }
+    };
     private            ServiceConnection mConnection      = new ServiceConnection() {
 
         @Implement
@@ -157,13 +140,6 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
         }
     };
 
-    static {
-        DEFAULT_FILTERS.addAction(NetworkNotification.FORCE_LOGOUT);
-        DEFAULT_FILTERS.addAction(NetworkNotification.ALERT_EXCEPTION);
-        DEFAULT_FILTERS.addAction(NetworkNotification.ALERT_NO_INTERNET);
-        DEFAULT_FILTERS.addAction(NetworkNotification.INTERNET_ACCESS_GRANTED);
-    }
-
     /**
      * @hide
      */
@@ -190,8 +166,12 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
         sfOnServerOfflineScreen = klass;
     }
 
-    public final AnodaApplicationDelegate getAppDelegate() {
-        return mAppDelegate;
+    public final AbstractReceiver getDefaultNetworkListener() {
+        return this.mErrorsReceiver;
+    }
+
+    public void listenFor(Broadcastable action) {
+        fActionsFilter.addAction(action);
     }
 
     public final ActionBar getActionBarImpl() {
@@ -214,7 +194,7 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
     }
 
     protected Loader<Cursor> initLoader(int id, Bundle params, LoaderCallbacks<Cursor> mLoaderCallbacks) {
-        LoaderManager manager = getSupportLoaderManager();
+        LoaderManager manager = super.getSupportLoaderManager();
         Loader<Cursor> loader = manager.getLoader(id);
 
         if (loader != null && !loader.isReset()) {
@@ -225,7 +205,7 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
     }
 
     protected Loader<Cursor> restartLoader(int id, Bundle params, LoaderCallbacks<Cursor> mLoaderCallbacks) {
-        LoaderManager manager = getSupportLoaderManager();
+        LoaderManager manager = super.getSupportLoaderManager();
         Loader<Cursor> loader = manager.getLoader(id);
 
         if (loader != null && !loader.isReset()) {
@@ -237,7 +217,7 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
 
     protected void doBindService(Class<? extends AbstractAsyncServer> service) {
         mAsyncServiceImpl = service;
-        bindService(new Intent(mSelf, service), mConnection, Context.BIND_AUTO_CREATE);
+        super.bindService(new Intent(mSelf, service), mConnection, Context.BIND_AUTO_CREATE);
     }
 
     /**
@@ -245,8 +225,8 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
      */
     void doUnbindService() {
         if (mIsBound) {
-            unbindService(mConnection);
-            mConnection.onServiceDisconnected(getCallingActivity());
+            super.unbindService(mConnection);
+            mConnection.onServiceDisconnected(super.getCallingActivity());
         }
     }
 
@@ -287,7 +267,8 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
                 break;
         }
 
-        LayoutParams params = getWindow().getAttributes();
+        LayoutParams params = super.getWindow()
+                                   .getAttributes();
         params.height = metrics[0];
         params.width = metrics[1];
         params.alpha = 1f;
@@ -295,23 +276,30 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
         params.gravity = Gravity.TOP | Gravity.CENTER;
         params.y = isTablet ? marginTop << 2 : marginTop << 1;
 
-        getWindow().setFlags(LayoutParams.FLAG_DIM_BEHIND, LayoutParams.FLAG_DIM_BEHIND);
-        getWindow().setAttributes(params);
-        requestWindowFeature(Window.FEATURE_ACTION_BAR);
+        super.getWindow()
+             .setFlags(LayoutParams.FLAG_DIM_BEHIND, LayoutParams.FLAG_DIM_BEHIND);
+        super.getWindow()
+             .setAttributes(params);
+        super.supportRequestWindowFeature(WindowCompat.FEATURE_ACTION_BAR);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        mSelf = this;
-        mAppDelegate = (AnodaApplicationDelegate) getApplication();
+        mStableContext = StableContext.<AbstractActivity>instantiate(this);
 
-        requestWindowFeature(Window.FEATURE_ACTION_BAR);
+        super.supportRequestWindowFeature(WindowCompat.FEATURE_ACTION_BAR);
         super.onCreate(savedInstanceState);
         try {
-            mActionBar = new ActionBarFactory(getSupportActionBar());
+            mActionBar = new ActionBarFactory(super.getSupportActionBar());
         } catch (IllegalAccessException e) {
             logError(e);
         }
+
+        mKeyboardManagerDelegate = new SoftKeyboard(mStableContext);
+        mKeyboardManagerDelegate.initTouchInterceptor();
+        mKeyboardManagerDelegate.initKeyboardShowListener();
+
+        mBroadcastBusDelegate = new BroadcastBus(mStableContext);
     }
 
     @Override
@@ -321,39 +309,51 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
         }
 
         super.onResume();
-
         isPaused = false;
-
-        registerReceiver(mMainAsyncReceiver, FILTER);
-        registerReceiver(mErrorsReceiver, DEFAULT_FILTERS);
     }
 
     @Override
     protected void onPause() {
-        unregisterReceiver(mMainAsyncReceiver);
-        unregisterReceiver(mErrorsReceiver);
+        isPaused = true;
+        super.onPause();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        mBroadcastBusDelegate.registerNetworkEventsForCurrentUiContext();
+        mBroadcastBusDelegate.register(fActionsFilter);
+    }
+
+    @Override
+    protected void onStop() {
+        mBroadcastBusDelegate.unregisterNetworkEventsForCurrentUiContext();
+        mBroadcastBusDelegate.unregister();
         doUnbindService();
 
-        isPaused = true;
+        super.onStop();
+    }
 
-        super.onPause();
+    public SoftKeyboard getKeyboardDelegate() {
+        return this.mKeyboardManagerDelegate;
+    }
+
+    public BroadcastBus getBroadcastBusDelegate() {
+        return this.mBroadcastBusDelegate;
     }
 
     protected void setContentView(int layout, IAssetFont typeface) {
         View v = getLayoutInflater().inflate(layout, null);
-        setContentView(v);
+        super.setContentView(v);
 
         FontsHelper.applyFonts(v, FontsHelper.getCustomFont(this, typeface));
     }
 
     protected void setContentView(View layout, IAssetFont typeface) {
-        setContentView(layout);
+        super.setContentView(layout);
 
         FontsHelper.applyFonts(layout, FontsHelper.getCustomFont(this, typeface));
-    }
-
-    public final void registerAsyncReceiver(AsyncReceiver impl) {
-        mActivityListener = impl;
     }
 
     public final synchronized void registerControllable(Controllable fragment) {
@@ -382,7 +382,7 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
     }
 
     public final void exitFragment() {
-        FragmentManager manager = getSupportFragmentManager();
+        FragmentManager manager = super.getSupportFragmentManager();
         if (!manager.popBackStackImmediate()) {
             if (mCurrentFragment != null) {
                 syncState(mCurrentFragment.getState());
@@ -391,67 +391,14 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
         }
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        mAppDelegate.unregisterContext();
-    }
-
     public void startService(Class<? extends AbstractService> service) {
         Intent intent = new Intent(this, service);
-        startService(intent);
+        super.startService(intent);
     }
 
     public void stopService(Class<? extends AbstractService> service) {
         Intent intent = new Intent(this, service);
-        stopService(intent);
-    }
-
-    public void startServiceWithAction(Broadcastable command, Class<? extends AbstractService> service) {
-        Intent intent = new Intent(this, service);
-        intent.setAction(command.getAction());
-        startService(intent);
-    }
-
-    public <T extends Parcelable> void startServiceWithAction(Broadcastable command, Class<? extends AbstractService> service, T data) {
-        Intent intent = new Intent(this, service);
-        intent.setAction(command.getAction());
-        intent.putExtra(Broadcastable.KEY_DATA, data);
-        startService(intent);
-    }
-
-    public <T extends Parcelable> void startServiceWithAction(Broadcastable command, Class<? extends AbstractService> service, ArrayList<T> data) {
-        Intent intent = new Intent(this, service);
-        intent.setAction(command.getAction());
-        intent.putExtra(Broadcastable.KEY_DATA, data);
-        startService(intent);
-    }
-
-    public void sendOrderedBroadcastWithCallback(Broadcastable command, Permission permission, Broadcastable callbackCommand) {
-        sendOrderedBroadcast(new Intent(command.getAction()).putExtra(CUSTOM_DATA, callbackCommand.getAction()), permission.getPermission());
-    }
-
-    /* universal broadcaster */
-    public void sendBroadcast(Broadcastable command) {
-        sendBroadcast(command, (Parcelable) null);
-    }
-
-    public void sendBroadcast(Broadcastable command, String data) {
-        Bundle params = new Bundle();
-        params.putString(CUSTOM_DATA, data);
-        sendBroadcast(command, params);
-    }
-
-    public void sendBroadcast(Broadcastable command, int data) {
-        Bundle params = new Bundle();
-        params.putInt(CUSTOM_DATA, data);
-        sendBroadcast(command, params);
-    }
-
-    public <Model extends Parcelable> void sendBroadcast(Broadcastable command, Model data) {
-        Intent intent = new Intent(command.getAction());
-        intent.putExtra(CUSTOM_DATA, data);
-        sendBroadcast(intent);
+        super.stopService(intent);
     }
 
     /* Helper to postpone REST tasks */
@@ -464,10 +411,11 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
     }
 
     public String getTextFromView(@IdRes int viewId) {
-        View v = findViewById(viewId);
+        View v = super.findViewById(viewId);
         if (v instanceof TextView) {
             TextView view = (TextView) v;
-            return view.getText().toString();
+            return view.getText()
+                       .toString();
         } else {
             return v.toString();
         }
@@ -475,7 +423,8 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
 
     /* Helper to announce message to user */
     public void shoutToast(String msg) {
-        if (WordUtils.isEmpty(msg)) return;
+        if (WordUtils.isEmpty(msg))
+            return;
 
         Toast info = Toast.makeText(mSelf, msg, Toast.LENGTH_SHORT);
 
@@ -513,7 +462,7 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
 
     private <TagFrmt extends AbstractFragment & TaggedView> void switchFragmentInternal(TagFrmt fragment, boolean isAddingToBackstack) {
         final String tag = fragment.getViewTag();
-        FragmentManager manager = getSupportFragmentManager();
+        FragmentManager manager = super.getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
 
         if (isAddingToBackstack) {
@@ -569,7 +518,7 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
 
     private <TagDialog extends AbstractDialog & TaggedView> TagDialog openPopupInternal(TagDialog popup) {
         final String tag = popup.getViewTag();
-        FragmentManager manager = getSupportFragmentManager();
+        FragmentManager manager = super.getSupportFragmentManager();
 
         if (!popup.isShowing(tag)) {
             popup.show(manager, tag);
@@ -580,37 +529,35 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
     }
 
     public void startActivity(Broadcastable action) {
-        startActivity(new Intent(action.getAction()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        super.startActivity(new Intent(action.getAction()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     }
 
     public void startDisorderedActivity(Broadcastable action) {
-        startActivity(new Intent(action.getAction()).setPackage(getPackageName()));
+        super.startActivity(new Intent(action.getAction()).setPackage(super.getPackageName()));
     }
 
     public void startDisorderedActivity(Broadcastable action, Bundle params) {
         Intent activity = new Intent(action.getAction());
-        activity.setPackage(getPackageName());
+        activity.setPackage(super.getPackageName());
         activity.putExtras(params);
-        startActivity(activity);
+        super.startActivity(activity);
     }
 
     public void startDisorderedActivity(Broadcastable action, Class<? extends Activity> activity) {
-        Intent intent = new Intent(mSelf, activity)
-                .setClassName(getPackageName(), activity.getName())
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                .setAction(action.getAction())
-                .setPackage(getPackageName());
-        startActivity(intent);
+        Intent intent = new Intent(mSelf, activity).setClassName(super.getPackageName(), activity.getName())
+                                                   .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                                   .setAction(action.getAction())
+                                                   .setPackage(super.getPackageName());
+        super.startActivity(intent);
     }
 
     public void startDisorderedActivity(Broadcastable action, Class<? extends Activity> activity, Bundle params) {
-        Intent intent = new Intent(mSelf, activity)
-                .setClassName(getPackageName(), activity.getName())
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                .setAction(action.getAction())
-                .setPackage(getPackageName())
-                .putExtras(params);
-        startActivity(intent);
+        Intent intent = new Intent(mSelf, activity).setClassName(super.getPackageName(), activity.getName())
+                                                   .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                                   .setAction(action.getAction())
+                                                   .setPackage(super.getPackageName())
+                                                   .putExtras(params);
+        super.startActivity(intent);
     }
 
 
@@ -618,21 +565,21 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
         Intent i = new Intent(action.getAction());
         i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         i.putExtras(params);
-        startActivity(i);
+        super.startActivity(i);
     }
 
     public <Data extends Parcelable> void startActivity(Broadcastable action, Data params) {
         Intent i = new Intent(action.getAction());
         i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         i.putExtra(CUSTOM_DATA, params);
-        startActivity(i);
+        super.startActivity(i);
     }
 
     public <Data extends Parcelable> void startActivity(Broadcastable action, ArrayList<Data> params) {
         Intent i = new Intent(action.getAction());
         i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         i.putParcelableArrayListExtra(CUSTOM_DATA, params);
-        startActivity(i);
+        super.startActivity(i);
     }
 
     /* Switch activity with anim */
@@ -653,14 +600,14 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
-        overridePendingTransition(R.anim.grow_fade_in, R.anim.shrink_fade_out);
+        super.startActivity(intent);
+        super.overridePendingTransition(R.anim.grow_fade_in, R.anim.shrink_fade_out);
     }
 
     /* Switch activity with anim */
     public void enterActivity(Class c) {
         startActivity(c, null);
-        overridePendingTransition(R.anim.in_right, R.anim.out_left);
+        super.overridePendingTransition(R.anim.in_right, R.anim.out_left);
     }
 
     /* Switch activity */
@@ -681,7 +628,7 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
         }
 
         startActivity(c, intent);
-        overridePendingTransition(R.anim.in_right, R.anim.out_left);
+        super.overridePendingTransition(R.anim.in_right, R.anim.out_left);
     }
 
     /* Switch activity with anim */
@@ -690,7 +637,7 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
         intent.putExtra(CUSTOM_DATA, data);
 
         startActivity(c, intent);
-        overridePendingTransition(R.anim.in_right, R.anim.out_left);
+        super.overridePendingTransition(R.anim.in_right, R.anim.out_left);
     }
 
     /* Switch activity for result with anim */
@@ -700,8 +647,8 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
             intent.putExtra(CUSTOM_DATA, data);
         }
 
-        startActivityForResult(intent, code);
-        overridePendingTransition(R.anim.in_right, R.anim.out_left);
+        super.startActivityForResult(intent, code);
+        super.overridePendingTransition(R.anim.in_right, R.anim.out_left);
     }
 
     /* Switch activity for result without anim */
@@ -711,7 +658,7 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
             intent.putExtra(CUSTOM_DATA, data);
         }
 
-        startActivityForResult(intent, code);
+        super.startActivityForResult(intent, code);
     }
 
     /* Switch activity for result without anim */
@@ -719,7 +666,7 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
         Intent intent = new Intent(mSelf, c);
         intent.putExtra(CUSTOM_DATA, data);
 
-        startActivityForResult(intent, code);
+        super.startActivityForResult(intent, code);
     }
 
     /* Switch activity for result without anim */
@@ -729,7 +676,7 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
             intent.putExtra(CUSTOM_DATA, data);
         }
 
-        startActivityForResult(intent, code);
+        super.startActivityForResult(intent, code);
     }
 
     /* Exit to concrete activity with anim */
@@ -737,23 +684,24 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
         if (c != null) {
             startActivity(c, null);
         }
-        hideSoftInput(getWindow().getDecorView());
-        finish();
-        overridePendingTransition(R.anim.in_left, R.anim.out_right);
+
+        mKeyboardManagerDelegate.hideSoftInput();
+        super.finish();
+        super.overridePendingTransition(R.anim.in_left, R.anim.out_right);
     }
 
     /* Return to previous activity with anim */
     public void exitActivity() {
-        hideSoftInput(getWindow().getDecorView());
-        finish();
-        overridePendingTransition(R.anim.in_left, R.anim.out_right);
+        mKeyboardManagerDelegate.hideSoftInput();
+        super.finish();
+        super.overridePendingTransition(R.anim.in_left, R.anim.out_right);
     }
 
     /* Transcend result to launcher-activity and finish with anim */
     public void deliverResult(int r, Intent i) {
-        setResult(r, i);
-        finish();
-        overridePendingTransition(R.anim.in_left, R.anim.out_right);
+        super.setResult(r, i);
+        super.finish();
+        super.overridePendingTransition(R.anim.in_left, R.anim.out_right);
     }
 
     /* Generalized REST errors parser */
@@ -770,14 +718,14 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
     private void startActivity(Class c, Intent i) {
         Intent intent = i != null ? i : new Intent(mSelf, c);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
+        super.startActivity(intent);
     }
 
     /* Helper to open new activity with anim */
     private void startWorkflow(Class c, Intent i) {
         Intent intent = i != null ? i : new Intent(mSelf, c);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
+        super.startActivity(intent);
     }
 
     /* Simple Throwable processor */
@@ -823,7 +771,8 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
 
     public boolean assertInternetAccess() {
         final boolean status = accessAllowed();
-        if (!status) openPopup(NoInternetDialog.class, getString(R.string.no_internet_access));
+        if (!status)
+            openPopup(NoInternetDialog.class, getString(R.string.no_internet_access));
 
         return status;
     }

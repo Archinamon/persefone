@@ -7,10 +7,17 @@ import mobi.anoda.archinamon.kernel.persefone.utils.Singleton;
 /**
  * Created by matsukov-ea on 18.09.2014.
  */
-public final class EventBus extends Singleton<Bus> {
+public final class EventBus {
 
-    @Implement
-    protected final Bus create() {
-        return new Bus();
+    private static final Singleton<Bus> gDefault = new Singleton<Bus>() {
+
+        @Implement
+        protected final Bus create() {
+            return new Bus();
+        }
+    };
+
+    public static Bus instantiate() {
+        return gDefault.getInstance();
     }
 }
