@@ -1,4 +1,4 @@
-package mobi.anoda.archinamon.kernel.persefone.ui.async;
+package mobi.anoda.archinamon.kernel.persefone.ui.async.sequence;
 
 import android.support.annotation.NonNull;
 import java.lang.annotation.Annotation;

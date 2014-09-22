@@ -14,7 +14,6 @@ import mobi.anoda.archinamon.kernel.persefone.signal.broadcast.AsyncReceiver;
 import mobi.anoda.archinamon.kernel.persefone.signal.broadcast.BroadcastFilter;
 import mobi.anoda.archinamon.kernel.persefone.signal.broadcast.Broadcastable;
 import mobi.anoda.archinamon.kernel.persefone.signal.broadcast.Permission;
-import mobi.anoda.archinamon.kernel.persefone.ui.activity.AbstractActivity;
 import mobi.anoda.archinamon.kernel.persefone.ui.context.StableContext;
 
 /**
@@ -22,7 +21,7 @@ import mobi.anoda.archinamon.kernel.persefone.ui.context.StableContext;
  */
 public final class BroadcastBus {
 
-    public static final String CUSTOM_DATA = ".custom:key_data";
+    public static final String CUSTOM_DATA = ".bus:key_data";
     private final StableContext mStableContext;
     private       AsyncReceiver mAsyncListener;
     private final AbstractReceiver mMainAsyncReceiver = new AbstractReceiver() {
@@ -66,14 +65,14 @@ public final class BroadcastBus {
     }
 
     public final void registerNetworkEventsForCurrentUiContext() {
-        final AbstractActivity uiContext = mStableContext.obtainUiContext();
+        final NetworkState networkWatchdog = NetworkState.obtain(mStableContext);
         final AnodaApplicationDelegate appContext = mStableContext.obtainAppContext();
-        mStableContext.registerReceiver(uiContext.getDefaultNetworkListener(), appContext.getDefaultNetworkEvents());
+        mStableContext.registerReceiver(networkWatchdog.getNetworkErrorProcessor(), appContext.getDefaultNetworkEvents());
     }
 
     public final void unregisterNetworkEventsForCurrentUiContext() {
-        final AbstractActivity uiContext = mStableContext.obtainUiContext();
-        mStableContext.unregisterReceiver(uiContext.getDefaultNetworkListener());
+        final NetworkState networkWatchdog = NetworkState.obtain(mStableContext);
+        mStableContext.unregisterReceiver(networkWatchdog.getNetworkErrorProcessor());
     }
 
     /* Synthetic broadcastable commands */

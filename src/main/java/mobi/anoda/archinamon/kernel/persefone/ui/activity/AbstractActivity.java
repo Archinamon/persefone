@@ -1,22 +1,14 @@
 package mobi.anoda.archinamon.kernel.persefone.ui.activity;
 
 import android.app.Activity;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
-import android.database.Cursor;
+import android.os.Build;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.Parcelable;
 import android.support.annotation.IdRes;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.app.LoaderManager.LoaderCallbacks;
-import android.support.v4.content.Loader;
+import android.support.v4.content.IntentCompat;
 import android.support.v4.view.WindowCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -24,233 +16,65 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager.LayoutParams;
 import android.widget.TextView;
-import android.widget.Toast;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
 import mobi.anoda.archinamon.kernel.persefone.R;
-import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
-import mobi.anoda.archinamon.kernel.persefone.network.State;
 import mobi.anoda.archinamon.kernel.persefone.network.operations.NetworkOperation.ErrorReport;
-import mobi.anoda.archinamon.kernel.persefone.receiver.AbstractReceiver;
-import mobi.anoda.archinamon.kernel.persefone.service.AbstractIntentService.RendezvousBinder;
 import mobi.anoda.archinamon.kernel.persefone.service.AbstractService;
-import mobi.anoda.archinamon.kernel.persefone.service.async.AbstractAsyncServer;
-import mobi.anoda.archinamon.kernel.persefone.service.async.AsyncRequest;
-import mobi.anoda.archinamon.kernel.persefone.service.notification.NetworkNotification;
 import mobi.anoda.archinamon.kernel.persefone.signal.broadcast.BroadcastFilter;
 import mobi.anoda.archinamon.kernel.persefone.signal.broadcast.Broadcastable;
-import mobi.anoda.archinamon.kernel.persefone.signal.impl.ServiceChannel;
 import mobi.anoda.archinamon.kernel.persefone.ui.TaggedView;
 import mobi.anoda.archinamon.kernel.persefone.ui.actionbar.ActionBarFactory;
-import mobi.anoda.archinamon.kernel.persefone.ui.activity.interfaces.OnServerReady;
 import mobi.anoda.archinamon.kernel.persefone.ui.activity.interfaces.StateControllable;
 import mobi.anoda.archinamon.kernel.persefone.ui.activity.interfaces.StateControllable.FragmentState;
+import mobi.anoda.archinamon.kernel.persefone.ui.async.binder.UiAffectionChain;
 import mobi.anoda.archinamon.kernel.persefone.ui.context.StableContext;
 import mobi.anoda.archinamon.kernel.persefone.ui.delegate.BroadcastBus;
+import mobi.anoda.archinamon.kernel.persefone.ui.delegate.DbLoader;
 import mobi.anoda.archinamon.kernel.persefone.ui.delegate.SoftKeyboard;
 import mobi.anoda.archinamon.kernel.persefone.ui.dialog.AbstractDialog;
-import mobi.anoda.archinamon.kernel.persefone.ui.dialog.NoInternetDialog;
 import mobi.anoda.archinamon.kernel.persefone.ui.fragment.AbstractFragment;
 import mobi.anoda.archinamon.kernel.persefone.utils.Common;
 import mobi.anoda.archinamon.kernel.persefone.utils.LogHelper;
 import mobi.anoda.archinamon.kernel.persefone.utils.MetricsHelper;
-import mobi.anoda.archinamon.kernel.persefone.utils.WordUtils;
-import mobi.anoda.archinamon.kernel.persefone.utils.fonts.FontsHelper;
-import mobi.anoda.archinamon.kernel.persefone.utils.fonts.IAssetFont;
 
 /**
  * author: Archinamon project: FavorMe
  */
 public abstract class AbstractActivity<Controllable extends AbstractFragment & StateControllable> extends ActionBarActivity implements TaggedView {
 
-    public static final    int                 RESULT_EDITED    = 0xedf;
-    public static final    int                 RESULT_DELETED   = 0xdef;
-    public static final    String              CUSTOM_DATA      = ".custom:key_data";
-    protected static final Stack<AsyncRequest> POSTPONED_CALLS  = new Stack<>();
-    private final          BroadcastFilter     fActionsFilter   = new BroadcastFilter();
-    private final          List<OnServerReady> mServerListeners = new ArrayList<>();
-    private final          String              TAG              = ((Object) this).getClass()
-                                                                                 .getSimpleName();
-    private final          Object              MUTEX            = new Object();
-    private static Class<? extends AbstractActivity>    sfOnForceLogoutScreen;
-    private static Class<? extends AbstractDialog>      sfOnServerOfflineScreen;
-    private        StableContext                        mStableContext;
-    protected      SoftKeyboard                         mKeyboardManagerDelegate;
-    protected      BroadcastBus                         mBroadcastBusDelegate;
-    protected      Class<? extends AbstractAsyncServer> mAsyncServiceImpl;
-    protected      AbstractActivity                     mSelf;
-    protected      RendezvousBinder                     mServerBinder;
-    protected      LoaderCallbacks<Cursor>              mLoaderCallbacks;
-    protected      ActionBarFactory                     mActionBar;
-    protected      ActionBar                            mActionBarImpl;
-    protected      int                                  mLoader;
-    protected volatile boolean           mIsBound         = false;
-    protected volatile boolean           isPaused         = true;
-    private volatile   Controllable      mCurrentFragment = null;
-    private final      AbstractReceiver  mErrorsReceiver  = new AbstractReceiver() {
+    protected enum PopupType {
 
-        @Implement
-        public void onReceive(@NonNull final String action, @Nullable Intent data) {
-            if (data != null) {
-                final ErrorReport report = data.getParcelableExtra(ServiceChannel.KEY_DATA);
-                if (NetworkNotification.FORCE_LOGOUT.isEqual(action)) {
-                    if (sfOnForceLogoutScreen != null)
-                        switchWorkflow(sfOnForceLogoutScreen);
-                } else if (NetworkNotification.ALERT_NO_INTERNET.isEqual(action)) {
-                    openPopup(NoInternetDialog.class, getString(R.string.no_internet_access));
-                    informError(null);
-                } else if (NetworkNotification.ALERT_EXCEPTION.isEqual(action)) {
-                    informError(report);
-                } else if (NetworkNotification.INTERNET_ACCESS_GRANTED.isEqual(action)) {
-                    untwistStack();
-                }
-            }
-        }
-    };
-    private            ServiceConnection mConnection      = new ServiceConnection() {
-
-        @Implement
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            mServerBinder = (RendezvousBinder) service;
-            mServerBinder.onAttach(mSelf);
-
-            mIsBound = true;
-
-            if (mServerListeners.size() > 0) {
-                for (OnServerReady listener : mServerListeners) {
-                    listener.onBind();
-                }
-            }
-
-            if (accessAllowed())
-                untwistStack();
-        }
-
-        @Implement
-        public void onServiceDisconnected(ComponentName className) {
-            mServerBinder = null;
-            mIsBound = false;
-
-            if (mServerListeners.size() > 0) {
-                for (OnServerReady listener : mServerListeners) {
-                    listener.onDisconnect();
-                }
-            }
-        }
-    };
-
-    /**
-     * @hide
-     */
-    @SuppressWarnings("FinalStaticMethod")
-    public final static void setDefaultOnForceLogoutScreen(Class<? extends AbstractActivity> klass) throws ClassNotFoundException, IllegalAccessException {
-        if (klass == null)
-            throw new ClassNotFoundException("Cannot find requested class declaration");
-        if (sfOnForceLogoutScreen != null)
-            throw new IllegalAccessException("Cannot assign new value to a final variable");
-
-        sfOnForceLogoutScreen = klass;
+        SMALL,
+        LARGE
     }
 
-    /**
-     * @hide
-     */
-    @SuppressWarnings("FinalStaticMethod")
-    public final static void setDefaultOnServerOfflineScreen(Class<? extends AbstractDialog> klass) throws ClassNotFoundException, IllegalAccessException {
-        if (klass == null)
-            throw new ClassNotFoundException("Cannot find requested class declaration");
-        if (sfOnServerOfflineScreen != null)
-            throw new IllegalAccessException("Cannot assign new value to a final variable");
-
-        sfOnServerOfflineScreen = klass;
-    }
-
-    public final AbstractReceiver getDefaultNetworkListener() {
-        return this.mErrorsReceiver;
-    }
+    public static final String          CUSTOM_DATA    = ".custom:key_data";
+    private final       String          TAG            = ((Object) this).getClass().getSimpleName();
+    private final       BroadcastFilter fActionsFilter = new BroadcastFilter();
+    protected        SoftKeyboard     mKeyboardManagerDelegate;
+    protected        BroadcastBus     mBroadcastBusDelegate;
+    protected        UiAffectionChain mUiAsyncChainBinder;
+    protected        DbLoader         mAsyncDbLoader;
+    protected        ActionBarFactory mActionBar;
+    protected        ActionBar        mActionBarImpl;
+    private volatile boolean          isPaused;
+    private volatile boolean          isAsyncChained;
+    private volatile Controllable mCurrentFragment = null;
 
     public void listenFor(Broadcastable action) {
         fActionsFilter.addAction(action);
     }
 
+    public void connectAsyncChainBinder() {
+        this.isAsyncChained = true;
+    }
+
+    public final boolean isPaused() {
+        return this.isPaused;
+    }
+
     public final ActionBar getActionBarImpl() {
         return this.mActionBarImpl;
-    }
-
-    protected /*virtual*/ void informError(ErrorReport report) {
-        boolean transcend = true;
-        if (mCurrentFragment != null && mCurrentFragment.getState() == FragmentState.ATTACHED) {
-            transcend = mCurrentFragment.informError(report);
-        }
-
-        if (transcend && report != null) {
-            String errorMsg = report.getMessage();
-            shoutToast(errorMsg);
-        }
-
-        if (transcend && report != null && report.getStatus() == 1234)
-            openPopup(sfOnServerOfflineScreen);
-    }
-
-    protected Loader<Cursor> initLoader(int id, Bundle params, LoaderCallbacks<Cursor> mLoaderCallbacks) {
-        LoaderManager manager = super.getSupportLoaderManager();
-        Loader<Cursor> loader = manager.getLoader(id);
-
-        if (loader != null && !loader.isReset()) {
-            return manager.restartLoader(id, params, mLoaderCallbacks);
-        } else {
-            return manager.initLoader(id, params, mLoaderCallbacks);
-        }
-    }
-
-    protected Loader<Cursor> restartLoader(int id, Bundle params, LoaderCallbacks<Cursor> mLoaderCallbacks) {
-        LoaderManager manager = super.getSupportLoaderManager();
-        Loader<Cursor> loader = manager.getLoader(id);
-
-        if (loader != null && !loader.isReset()) {
-            return manager.restartLoader(id, params, mLoaderCallbacks);
-        }
-
-        return null;
-    }
-
-    protected void doBindService(Class<? extends AbstractAsyncServer> service) {
-        mAsyncServiceImpl = service;
-        super.bindService(new Intent(mSelf, service), mConnection, Context.BIND_AUTO_CREATE);
-    }
-
-    /**
-     * Unbinding randevu binder always processing in abstract instance
-     */
-    void doUnbindService() {
-        if (mIsBound) {
-            super.unbindService(mConnection);
-            mConnection.onServiceDisconnected(super.getCallingActivity());
-        }
-    }
-
-    public final void setServerListener(OnServerReady l) {
-        mServerListeners.add(l);
-
-        if (mIsBound) {
-            l.onBind();
-        }
-    }
-
-    public final void removeServerListener(OnServerReady l) {
-        mServerListeners.remove(l);
-        l.onDisconnect();
-    }
-
-    public final Class<?> getServerImpl() {
-        return mAsyncServiceImpl;
-    }
-
-    protected enum PopupType {
-
-        SMALL,
-        LARGE
     }
 
     protected void buildAsPopup(PopupType type) {
@@ -267,8 +91,7 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
                 break;
         }
 
-        LayoutParams params = super.getWindow()
-                                   .getAttributes();
+        LayoutParams params = getWindow().getAttributes();
         params.height = metrics[0];
         params.width = metrics[1];
         params.alpha = 1f;
@@ -276,16 +99,14 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
         params.gravity = Gravity.TOP | Gravity.CENTER;
         params.y = isTablet ? marginTop << 2 : marginTop << 1;
 
-        super.getWindow()
-             .setFlags(LayoutParams.FLAG_DIM_BEHIND, LayoutParams.FLAG_DIM_BEHIND);
-        super.getWindow()
-             .setAttributes(params);
-        super.supportRequestWindowFeature(WindowCompat.FEATURE_ACTION_BAR);
+        getWindow().setAttributes(params);
+        getWindow().setFlags(LayoutParams.FLAG_DIM_BEHIND, LayoutParams.FLAG_DIM_BEHIND);
+        supportRequestWindowFeature(WindowCompat.FEATURE_ACTION_BAR);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        mStableContext = StableContext.<AbstractActivity>instantiate(this);
+        final StableContext stableContext = StableContext.instantiate(this);
 
         super.supportRequestWindowFeature(WindowCompat.FEATURE_ACTION_BAR);
         super.onCreate(savedInstanceState);
@@ -295,20 +116,21 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
             logError(e);
         }
 
-        mKeyboardManagerDelegate = new SoftKeyboard(mStableContext);
+        mUiAsyncChainBinder = new UiAffectionChain(stableContext);
+
+        mKeyboardManagerDelegate = new SoftKeyboard(stableContext);
         mKeyboardManagerDelegate.initTouchInterceptor();
         mKeyboardManagerDelegate.initKeyboardShowListener();
 
-        mBroadcastBusDelegate = new BroadcastBus(mStableContext);
+        mBroadcastBusDelegate = new BroadcastBus(stableContext);
+
+        mAsyncDbLoader = new DbLoader(stableContext);
     }
 
     @Override
     protected void onResume() {
-        if (mLoaderCallbacks != null) {
-            initLoader(mLoader, null, mLoaderCallbacks);
-        }
-
         super.onResume();
+        mAsyncDbLoader.onResume();
         isPaused = false;
     }
 
@@ -328,11 +150,15 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
 
     @Override
     protected void onStop() {
+        if (isAsyncChained) mUiAsyncChainBinder.doUnbindService();
         mBroadcastBusDelegate.unregisterNetworkEventsForCurrentUiContext();
         mBroadcastBusDelegate.unregister();
-        doUnbindService();
 
         super.onStop();
+    }
+
+    public UiAffectionChain getUiAsyncChainBinder() {
+        return this.mUiAsyncChainBinder;
     }
 
     public SoftKeyboard getKeyboardDelegate() {
@@ -343,17 +169,8 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
         return this.mBroadcastBusDelegate;
     }
 
-    protected void setContentView(int layout, IAssetFont typeface) {
-        View v = getLayoutInflater().inflate(layout, null);
-        super.setContentView(v);
-
-        FontsHelper.applyFonts(v, FontsHelper.getCustomFont(this, typeface));
-    }
-
-    protected void setContentView(View layout, IAssetFont typeface) {
-        super.setContentView(layout);
-
-        FontsHelper.applyFonts(layout, FontsHelper.getCustomFont(this, typeface));
+    public DbLoader getAsyncDbLoader() {
+        return this.mAsyncDbLoader;
     }
 
     public final synchronized void registerControllable(Controllable fragment) {
@@ -401,38 +218,14 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
         super.stopService(intent);
     }
 
-    /* Helper to postpone REST tasks */
-    public void postponeRequest(AsyncRequest request) {
-        if (accessAllowed() && !isPaused && mIsBound) {
-            startAsyncServer(request);
-        } else {
-            addCallToStack(request);
-        }
-    }
-
     public String getTextFromView(@IdRes int viewId) {
         View v = super.findViewById(viewId);
         if (v instanceof TextView) {
             TextView view = (TextView) v;
-            return view.getText()
-                       .toString();
+            return view.getText().toString();
         } else {
             return v.toString();
         }
-    }
-
-    /* Helper to announce message to user */
-    public void shoutToast(String msg) {
-        if (WordUtils.isEmpty(msg))
-            return;
-
-        Toast info = Toast.makeText(mSelf, msg, Toast.LENGTH_SHORT);
-
-        int y = info.getYOffset();
-        int x = info.getXOffset();
-
-        info.setGravity(Gravity.TOP | Gravity.CENTER, x / 2, y);
-        info.show();
     }
 
     /* Helper for opening new fragment */
@@ -466,7 +259,9 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
         FragmentTransaction transaction = manager.beginTransaction();
 
         if (isAddingToBackstack) {
-            transaction.setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                transaction.setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out);
+            }
             transaction.addToBackStack(tag);
         }
 
@@ -477,7 +272,9 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
             syncState(mCurrentFragment.getState());
         }
 
-        setServerListener(fragment);
+        if (isAsyncChained) {
+            mUiAsyncChainBinder.setServerListener(fragment);
+        }
     }
 
     /* Launch Popup dialog */
@@ -522,7 +319,10 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
 
         if (!popup.isShowing(tag)) {
             popup.show(manager, tag);
-            setServerListener(popup);
+
+            if (isAsyncChained) {
+                mUiAsyncChainBinder.setServerListener(popup);
+            }
         }
 
         return popup;
@@ -544,19 +344,19 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
     }
 
     public void startDisorderedActivity(Broadcastable action, Class<? extends Activity> activity) {
-        Intent intent = new Intent(mSelf, activity).setClassName(super.getPackageName(), activity.getName())
-                                                   .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                                   .setAction(action.getAction())
-                                                   .setPackage(super.getPackageName());
+        Intent intent = new Intent(this, activity).setClassName(super.getPackageName(), activity.getName())
+                                                  .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                                  .setAction(action.getAction())
+                                                  .setPackage(super.getPackageName());
         super.startActivity(intent);
     }
 
     public void startDisorderedActivity(Broadcastable action, Class<? extends Activity> activity, Bundle params) {
-        Intent intent = new Intent(mSelf, activity).setClassName(super.getPackageName(), activity.getName())
-                                                   .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                                   .setAction(action.getAction())
-                                                   .setPackage(super.getPackageName())
-                                                   .putExtras(params);
+        Intent intent = new Intent(this, activity).setClassName(super.getPackageName(), activity.getName())
+                                                  .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                                  .setAction(action.getAction())
+                                                  .setPackage(super.getPackageName())
+                                                  .putExtras(params);
         super.startActivity(intent);
     }
 
@@ -584,7 +384,7 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
 
     /* Switch activity with anim */
     public <T extends Parcelable> void switchWorkflow(Class c, T data) {
-        Intent intent = new Intent(mSelf, c);
+        Intent intent = new Intent(this, c);
         intent.putExtra(CUSTOM_DATA, data);
 
         startWorkflow(c, intent);
@@ -596,10 +396,9 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
 
     /* Launch new top activity with anim */
     public void openActivityWithTaskRecreate(Class c) {
-        Intent intent = new Intent(mSelf, c);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        Intent intent = new Intent(this, c).addFlags(IntentCompat.FLAG_ACTIVITY_CLEAR_TASK)
+                                           .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                                           .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         super.startActivity(intent);
         super.overridePendingTransition(R.anim.grow_fade_in, R.anim.shrink_fade_out);
     }
@@ -612,15 +411,14 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
 
     /* Switch activity */
     public void enterActivity(Class c, int data) {
-        Intent intent = new Intent(mSelf, c);
-        intent.putExtra(CUSTOM_DATA, data);
+        Intent intent = new Intent(this, c).putExtra(CUSTOM_DATA, data);
 
         startActivity(c, intent);
     }
 
     /* Switch activity with anim */
     public <T extends Parcelable> void enterActivity(Class c, T data) {
-        Intent intent = new Intent(mSelf, c);
+        Intent intent = new Intent(this, c);
         if (data instanceof Bundle) {
             intent.putExtras((Bundle) data);
         } else {
@@ -633,8 +431,7 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
 
     /* Switch activity with anim */
     public <T extends Parcelable> void enterActivity(Class c, ArrayList<T> data) {
-        Intent intent = new Intent(mSelf, c);
-        intent.putExtra(CUSTOM_DATA, data);
+        Intent intent = new Intent(this, c).putExtra(CUSTOM_DATA, data);
 
         startActivity(c, intent);
         super.overridePendingTransition(R.anim.in_right, R.anim.out_left);
@@ -642,7 +439,7 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
 
     /* Switch activity for result with anim */
     public <T extends Parcelable> void enterActivityForResult(Class c, int code, T data) {
-        Intent intent = new Intent(mSelf, c);
+        Intent intent = new Intent(this, c);
         if (data != null) {
             intent.putExtra(CUSTOM_DATA, data);
         }
@@ -653,7 +450,7 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
 
     /* Switch activity for result without anim */
     public <T extends Parcelable> void openActivityForResult(Class c, int code, T data) {
-        Intent intent = new Intent(mSelf, c);
+        Intent intent = new Intent(this, c);
         if (data != null) {
             intent.putExtra(CUSTOM_DATA, data);
         }
@@ -663,15 +460,14 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
 
     /* Switch activity for result without anim */
     public void openActivityForResult(Class c, int code, int data) {
-        Intent intent = new Intent(mSelf, c);
-        intent.putExtra(CUSTOM_DATA, data);
+        Intent intent = new Intent(this, c).putExtra(CUSTOM_DATA, data);
 
         super.startActivityForResult(intent, code);
     }
 
     /* Switch activity for result without anim */
     public <T extends Parcelable> void openActivityForResult(Class c, int code, ArrayList<T> data) {
-        Intent intent = new Intent(mSelf, c);
+        Intent intent = new Intent(this, c);
         if (data != null) {
             intent.putExtra(CUSTOM_DATA, data);
         }
@@ -716,68 +512,18 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
 
     /* Helper to open new activity with anim */
     private void startActivity(Class c, Intent i) {
-        Intent intent = i != null ? i : new Intent(mSelf, c);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        Intent intent = i != null ? i : new Intent(this, c).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         super.startActivity(intent);
     }
 
     /* Helper to open new activity with anim */
     private void startWorkflow(Class c, Intent i) {
-        Intent intent = i != null ? i : new Intent(mSelf, c);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        Intent intent = i != null ? i : new Intent(this, c).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | IntentCompat.FLAG_ACTIVITY_CLEAR_TASK);
         super.startActivity(intent);
     }
 
     /* Simple Throwable processor */
     protected final void logError(Throwable e) {
         LogHelper.println_error(TAG, e);
-    }
-
-    /* Helper for asynchronous starting REST requests */
-    private void startAsyncServer(AsyncRequest request) {
-        AsyncRequest.send(mSelf, request, mAsyncServiceImpl);
-
-        if (mServerListeners.size() > 0) {
-            for (OnServerReady listener : mServerListeners) {
-                listener.onRendezvous(request);
-            }
-        }
-    }
-
-    protected void addCallToStack(AsyncRequest request) {
-        assertInternetAccess();
-        synchronized (MUTEX) {
-            POSTPONED_CALLS.push(request);
-        }
-    }
-
-    /* Helper for untwisting postponed REST tasks */
-    private void untwistStack() {
-        if (!POSTPONED_CALLS.empty()) {
-            synchronized (MUTEX) {
-                while (!POSTPONED_CALLS.empty()) {
-                    AsyncRequest request = POSTPONED_CALLS.pop();
-                    AsyncRequest.send(mSelf, request, mAsyncServiceImpl);
-
-                    if (mServerListeners.size() > 0) {
-                        for (OnServerReady listener : mServerListeners) {
-                            listener.onRendezvous(request);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    public boolean assertInternetAccess() {
-        final boolean status = accessAllowed();
-        if (!status)
-            openPopup(NoInternetDialog.class, getString(R.string.no_internet_access));
-
-        return status;
-    }
-
-    private boolean accessAllowed() {
-        return State.svAccessState == State.ACCESS_GRANTED || State.svAccessState == State.ACCESS_UNKNOWN;
     }
 }

@@ -2,6 +2,7 @@ package mobi.anoda.archinamon.kernel.persefone.ui.context;
 
 import android.content.Context;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
+import mobi.anoda.archinamon.kernel.persefone.ui.delegate.NetworkState;
 import mobi.anoda.archinamon.kernel.persefone.utils.Singleton;
 
 /**

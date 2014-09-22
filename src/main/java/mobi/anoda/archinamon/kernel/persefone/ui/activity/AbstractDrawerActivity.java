@@ -36,7 +36,7 @@ public abstract class AbstractDrawerActivity<S extends AbstractFragment & StateC
 
             @Override
             public void onDrawerOpened(View drawerView) {
-                hideSoftInput(mDrawerLayout);
+                getKeyboardDelegate().hideSoftInput(mDrawerLayout);
                 openDrawerCallback();
             }
 

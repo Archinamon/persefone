@@ -1,4 +1,4 @@
-package mobi.anoda.archinamon.kernel.persefone.ui.async;
+package mobi.anoda.archinamon.kernel.persefone.ui.async.sequence;
 
 import java.util.Random;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;

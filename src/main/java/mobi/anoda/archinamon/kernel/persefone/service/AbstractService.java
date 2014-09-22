@@ -1,8 +1,6 @@
 package mobi.anoda.archinamon.kernel.persefone.service;
 
 import android.app.Service;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.Bundle;
@@ -12,18 +10,17 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
-import javax.annotation.Nullable;
-import mobi.anoda.archinamon.kernel.persefone.AnodaApplicationDelegate;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
 import mobi.anoda.archinamon.kernel.persefone.network.State;
 import mobi.anoda.archinamon.kernel.persefone.service.async.AbstractAsyncServer;
 import mobi.anoda.archinamon.kernel.persefone.service.async.AsyncRequest;
-import mobi.anoda.archinamon.kernel.persefone.signal.broadcast.AsyncReceiver;
 import mobi.anoda.archinamon.kernel.persefone.signal.broadcast.BroadcastFilter;
 import mobi.anoda.archinamon.kernel.persefone.signal.broadcast.Broadcastable;
 import mobi.anoda.archinamon.kernel.persefone.signal.broadcast.Permission;
 import mobi.anoda.archinamon.kernel.persefone.ui.activity.AbstractActivity;
 import mobi.anoda.archinamon.kernel.persefone.ui.activity.interfaces.OnServerReady;
+import mobi.anoda.archinamon.kernel.persefone.ui.context.StableContext;
+import mobi.anoda.archinamon.kernel.persefone.ui.delegate.BroadcastBus;
 import mobi.anoda.archinamon.kernel.persefone.utils.Common;
 import mobi.anoda.archinamon.kernel.persefone.utils.LogHelper;
 import mobi.anoda.archinamon.kernel.persefone.utils.WordUtils;
@@ -41,34 +38,24 @@ public abstract class AbstractService extends Service {
         }
     }
 
-    public static final    String              CUSTOM_DATA      = ".custom:key_data";
     protected static final Stack<AsyncRequest> POSTPONED_CALLS  = new Stack<>();
-    protected final        BroadcastFilter     FILTER           = new BroadcastFilter();
+    protected final        BroadcastFilter     fActionsFilter   = new BroadcastFilter();
     protected final        List<OnServerReady> mServerListeners = new ArrayList<>();
     protected final        List<Runnable>      mSessionTasks    = new ArrayList<>();
     protected final        IBinder             mBinder          = new GraphBinder();
     private final          String              TAG              = Common.obtainClassTag(this);
     private final          Object              MUTEX            = new Object();
-    protected volatile AbstractActivity                     mUiContext;
-    protected volatile AnodaApplicationDelegate             mAppDelegate;
+    protected volatile StableContext                        mStableContext;
+    protected          BroadcastBus                         mBroadcastBusDelegate;
     protected          Class<? extends AbstractAsyncServer> mAsyncServiceImpl;
-    protected          AsyncReceiver                        mServerListener;
-    private final BroadcastReceiver mMainAsyncReceiver = new BroadcastReceiver() {
 
-        @Implement
-        public void onReceive(Context context, Intent intent) {
-            try {
-                String action = intent.getAction();
-                assert action != null;
+    public void listenFor(Broadcastable action) {
+        fActionsFilter.addAction(action);
+    }
 
-                if (mServerListener != null) {
-                    mServerListener.onReceive(action, intent);
-                }
-            } catch (Exception any) {
-                mServerListener.onException(any);
-            }
-        }
-    };
+    public BroadcastBus getBroadcastBusDelegate() {
+        return this.mBroadcastBusDelegate;
+    }
 
     @Implement
     public IBinder onBind(Intent intent) {
@@ -82,37 +69,24 @@ public abstract class AbstractService extends Service {
 
     @Override
     public void onCreate() {
+        mStableContext = StableContext.instantiate(this);
         super.onCreate();
 
-        mAppDelegate = (AnodaApplicationDelegate) getApplication();
         untwistStack();
         initSession();
 
-        if (FILTER.countActions() > 0)
-            registerReceiver(mMainAsyncReceiver, FILTER);
+        mBroadcastBusDelegate = new BroadcastBus(mStableContext);
+        mBroadcastBusDelegate.register(fActionsFilter);
     }
 
     @Override
     public void onDestroy() {
-        if (FILTER.countActions() > 0)
-            unregisterReceiver(mMainAsyncReceiver);
+        mBroadcastBusDelegate.unregister();
 
         super.onDestroy();
     }
 
-    public final void registerAsyncReceiver(AsyncReceiver impl) {
-        mServerListener = impl;
-    }
-
-    @Nullable
-    protected synchronized final Context obtainUiContext() {
-        return mUiContext != null ? mUiContext : getApplicationContext();
-    }
-
     protected synchronized void attachContext(AbstractActivity context) {
-        mAppDelegate = context.getAppDelegate();
-        mUiContext = context;
-
         untwistStack();
         initSession();
     }

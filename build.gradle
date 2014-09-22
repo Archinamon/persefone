@@ -37,7 +37,6 @@ dependencies {
     compile 'com.android.support:support-v4:20.0.0'
     compile 'com.android.support:appcompat-v7:20.0.0'
     compile 'com.nhaarman.listviewanimations:library:2.6.0'
-    compile 'org.apache.servicemix.bundles:org.apache.servicemix.bundles.jsr305:2.0.3_1'
     compile('org.apache.httpcomponents:httpmime:4.3') {exclude module: "httpclient"}
     compile('org.apache.httpcomponents:httpcore:4.3') {exclude module: "httpclient"}
     compile files ('libs/annotations.jar')

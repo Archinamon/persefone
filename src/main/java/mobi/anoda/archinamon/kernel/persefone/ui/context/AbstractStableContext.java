@@ -2,13 +2,19 @@ package mobi.anoda.archinamon.kernel.persefone.ui.context;
 
 import android.app.Application;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.support.annotation.IdRes;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
+import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
+import android.widget.Toast;
 import org.intellij.lang.annotations.MagicConstant;
 import java.util.Observable;
 import java.util.Observer;
@@ -19,6 +25,7 @@ import mobi.anoda.archinamon.kernel.persefone.service.AbstractService;
 import mobi.anoda.archinamon.kernel.persefone.signal.broadcast.Permission;
 import mobi.anoda.archinamon.kernel.persefone.ui.activity.AbstractActivity;
 import mobi.anoda.archinamon.kernel.persefone.utils.ActivityUtils;
+import mobi.anoda.archinamon.kernel.persefone.utils.WordUtils;
 
 /**
  * Created by matsukov-ea on 18.09.2014.
@@ -87,6 +94,30 @@ abstract class AbstractStableContext extends Observable implements Observer {
         return findViewById(android.R.id.content);
     }
 
+    public ComponentName getInfo() {
+        Class highestComponent = obtainStable().getClass();
+        return new ComponentName(obtainStable().getPackageName(), highestComponent.getName());
+    }
+
+    /* Helper to announce message to user */
+    public void shoutToast(String msg) {
+        if (WordUtils.isEmpty(msg))
+            return;
+
+        Toast info = Toast.makeText(obtainStable(), msg, Toast.LENGTH_SHORT);
+
+        int y = info.getYOffset();
+        int x = info.getXOffset();
+
+        info.setGravity(Gravity.TOP | Gravity.CENTER, x / 2, y);
+        info.show();
+    }
+
+    @ProxyMethod
+    public String getString(@StringRes int id, Object... varargs) {
+        return obtainStable().getString(id, varargs);
+    }
+
     @Nullable
     @ProxyMethod
     public Window getWindow() {
@@ -104,8 +135,23 @@ abstract class AbstractStableContext extends Observable implements Observer {
     }
 
     @ProxyMethod
+    public void startActivity(Intent data) {
+        obtainStable().startActivity(data);
+    }
+
+    @ProxyMethod
     public Object getSystemService(@MagicConstant(valuesFromClass = Context.class) String name) {
         return obtainStable().getSystemService(name);
+    }
+
+    @ProxyMethod
+    public boolean bindService(@NonNull Intent callArgs, ServiceConnection callback, @MagicConstant(flagsFromClass = Context.class) int mode) {
+        return obtainStable().bindService(callArgs, callback, mode);
+    }
+
+    @ProxyMethod
+    public void unbindService(ServiceConnection callback) {
+        obtainStable().unbindService(callback);
     }
 
     @ProxyMethod
@@ -145,7 +191,8 @@ abstract class AbstractStableContext extends Observable implements Observer {
     }
 
     private Context obtainStable() {
-        if (mUiContext != null) return mUiContext; //ui has the highest priority to reference above
+        //ui has the highest priority to reference above
+        if (mUiContext != null) return mUiContext;
         if (mRiContext != null) return mRiContext;
         if (mNsContext != null) return mNsContext;
         return mAppContext;
