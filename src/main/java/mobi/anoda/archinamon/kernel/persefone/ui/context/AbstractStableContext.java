@@ -96,7 +96,11 @@ abstract class AbstractStableContext extends Observable implements Observer {
 
     public ComponentName getInfo() {
         Class highestComponent = obtainStable().getClass();
-        return new ComponentName(obtainStable().getPackageName(), highestComponent.getName());
+        return new ComponentName(getPackageName(), highestComponent.getName());
+    }
+
+    public String getPackageName() {
+        return obtainStable().getPackageName();
     }
 
     /* Helper to announce message to user */

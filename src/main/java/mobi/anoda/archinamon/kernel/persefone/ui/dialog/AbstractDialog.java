@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import android.support.annotation.NonNull;
-import javax.annotation.Nullable;
+import android.support.annotation.Nullable;
 import mobi.anoda.archinamon.kernel.persefone.AnodaApplicationDelegate;
 import mobi.anoda.archinamon.kernel.persefone.R;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;

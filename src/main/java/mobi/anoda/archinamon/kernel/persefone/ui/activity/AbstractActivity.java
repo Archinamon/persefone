@@ -1,6 +1,5 @@
 package mobi.anoda.archinamon.kernel.persefone.ui.activity;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -8,7 +7,6 @@ import android.os.Parcelable;
 import android.support.annotation.IdRes;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.IntentCompat;
 import android.support.v4.view.WindowCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -16,7 +14,6 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager.LayoutParams;
 import android.widget.TextView;
-import java.util.ArrayList;
 import mobi.anoda.archinamon.kernel.persefone.R;
 import mobi.anoda.archinamon.kernel.persefone.network.operations.NetworkOperation.ErrorReport;
 import mobi.anoda.archinamon.kernel.persefone.service.AbstractService;
@@ -28,6 +25,7 @@ import mobi.anoda.archinamon.kernel.persefone.ui.activity.interfaces.StateContro
 import mobi.anoda.archinamon.kernel.persefone.ui.activity.interfaces.StateControllable.FragmentState;
 import mobi.anoda.archinamon.kernel.persefone.ui.async.binder.UiAffectionChain;
 import mobi.anoda.archinamon.kernel.persefone.ui.context.StableContext;
+import mobi.anoda.archinamon.kernel.persefone.ui.delegate.ActivityLauncher;
 import mobi.anoda.archinamon.kernel.persefone.ui.delegate.BroadcastBus;
 import mobi.anoda.archinamon.kernel.persefone.ui.delegate.DbLoader;
 import mobi.anoda.archinamon.kernel.persefone.ui.delegate.SoftKeyboard;
@@ -48,12 +46,14 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
         LARGE
     }
 
-    public static final String          CUSTOM_DATA    = ".custom:key_data";
-    private final       String          TAG            = ((Object) this).getClass().getSimpleName();
-    private final       BroadcastFilter fActionsFilter = new BroadcastFilter();
+    private final String          TAG            = ((Object) this).getClass()
+                                                                  .getSimpleName();
+    private final BroadcastFilter fActionsFilter = new BroadcastFilter();
+    private          StableContext    mStableContext;
     protected        SoftKeyboard     mKeyboardManagerDelegate;
     protected        BroadcastBus     mBroadcastBusDelegate;
     protected        UiAffectionChain mUiAsyncChainBinder;
+    protected        ActivityLauncher mUiActivityLauncher;
     protected        DbLoader         mAsyncDbLoader;
     protected        ActionBarFactory mActionBar;
     protected        ActionBar        mActionBarImpl;
@@ -106,7 +106,7 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        final StableContext stableContext = StableContext.instantiate(this);
+        mStableContext = StableContext.instantiate(this);
 
         super.supportRequestWindowFeature(WindowCompat.FEATURE_ACTION_BAR);
         super.onCreate(savedInstanceState);
@@ -116,21 +116,16 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
             logError(e);
         }
 
-        mUiAsyncChainBinder = new UiAffectionChain(stableContext);
-
-        mKeyboardManagerDelegate = new SoftKeyboard(stableContext);
-        mKeyboardManagerDelegate.initTouchInterceptor();
-        mKeyboardManagerDelegate.initKeyboardShowListener();
-
-        mBroadcastBusDelegate = new BroadcastBus(stableContext);
-
-        mAsyncDbLoader = new DbLoader(stableContext);
+        this.mUiActivityLauncher = new ActivityLauncher(mStableContext);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mAsyncDbLoader.onResume();
+
+        if (mAsyncDbLoader != null)
+            mAsyncDbLoader.onResume();
+
         isPaused = false;
     }
 
@@ -144,32 +139,55 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
     protected void onStart() {
         super.onStart();
 
-        mBroadcastBusDelegate.registerNetworkEventsForCurrentUiContext();
-        mBroadcastBusDelegate.register(fActionsFilter);
+        if (mBroadcastBusDelegate != null) {
+            mBroadcastBusDelegate.registerNetworkEventsForCurrentUiContext();
+            mBroadcastBusDelegate.register(fActionsFilter);
+        }
     }
 
     @Override
     protected void onStop() {
         if (isAsyncChained) mUiAsyncChainBinder.doUnbindService();
-        mBroadcastBusDelegate.unregisterNetworkEventsForCurrentUiContext();
-        mBroadcastBusDelegate.unregister();
+        if (mBroadcastBusDelegate != null) {
+            mBroadcastBusDelegate.unregisterNetworkEventsForCurrentUiContext();
+            mBroadcastBusDelegate.unregister();
+        }
 
         super.onStop();
     }
 
     public UiAffectionChain getUiAsyncChainBinder() {
+        if (mUiAsyncChainBinder == null) {
+            mUiAsyncChainBinder = new UiAffectionChain(mStableContext);
+        }
+
         return this.mUiAsyncChainBinder;
     }
 
     public SoftKeyboard getKeyboardDelegate() {
+        if (mKeyboardManagerDelegate == null) {
+            mKeyboardManagerDelegate = new SoftKeyboard(mStableContext);
+        }
+
         return this.mKeyboardManagerDelegate;
     }
 
     public BroadcastBus getBroadcastBusDelegate() {
+        if (mBroadcastBusDelegate == null) {
+            mBroadcastBusDelegate = new BroadcastBus(mStableContext);
+        }
+
         return this.mBroadcastBusDelegate;
     }
 
+    public ActivityLauncher getUiActivityLauncher() {
+        return this.mUiActivityLauncher;
+    }
+
     public DbLoader getAsyncDbLoader() {
+        if (mAsyncDbLoader == null)
+            mAsyncDbLoader = new DbLoader(mStableContext);
+
         return this.mAsyncDbLoader;
     }
 
@@ -204,7 +222,7 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
             if (mCurrentFragment != null) {
                 syncState(mCurrentFragment.getState());
             }
-            exitActivity();
+            mUiActivityLauncher.exitActivity();
         }
     }
 
@@ -271,10 +289,6 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
         if (mCurrentFragment != null) {
             syncState(mCurrentFragment.getState());
         }
-
-        if (isAsyncChained) {
-            mUiAsyncChainBinder.setServerListener(fragment);
-        }
     }
 
     /* Launch Popup dialog */
@@ -328,178 +342,6 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
         return popup;
     }
 
-    public void startActivity(Broadcastable action) {
-        super.startActivity(new Intent(action.getAction()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-    }
-
-    public void startDisorderedActivity(Broadcastable action) {
-        super.startActivity(new Intent(action.getAction()).setPackage(super.getPackageName()));
-    }
-
-    public void startDisorderedActivity(Broadcastable action, Bundle params) {
-        Intent activity = new Intent(action.getAction());
-        activity.setPackage(super.getPackageName());
-        activity.putExtras(params);
-        super.startActivity(activity);
-    }
-
-    public void startDisorderedActivity(Broadcastable action, Class<? extends Activity> activity) {
-        Intent intent = new Intent(this, activity).setClassName(super.getPackageName(), activity.getName())
-                                                  .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                                  .setAction(action.getAction())
-                                                  .setPackage(super.getPackageName());
-        super.startActivity(intent);
-    }
-
-    public void startDisorderedActivity(Broadcastable action, Class<? extends Activity> activity, Bundle params) {
-        Intent intent = new Intent(this, activity).setClassName(super.getPackageName(), activity.getName())
-                                                  .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                                  .setAction(action.getAction())
-                                                  .setPackage(super.getPackageName())
-                                                  .putExtras(params);
-        super.startActivity(intent);
-    }
-
-
-    public void startActivity(Broadcastable action, Bundle params) {
-        Intent i = new Intent(action.getAction());
-        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        i.putExtras(params);
-        super.startActivity(i);
-    }
-
-    public <Data extends Parcelable> void startActivity(Broadcastable action, Data params) {
-        Intent i = new Intent(action.getAction());
-        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        i.putExtra(CUSTOM_DATA, params);
-        super.startActivity(i);
-    }
-
-    public <Data extends Parcelable> void startActivity(Broadcastable action, ArrayList<Data> params) {
-        Intent i = new Intent(action.getAction());
-        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        i.putParcelableArrayListExtra(CUSTOM_DATA, params);
-        super.startActivity(i);
-    }
-
-    /* Switch activity with anim */
-    public <T extends Parcelable> void switchWorkflow(Class c, T data) {
-        Intent intent = new Intent(this, c);
-        intent.putExtra(CUSTOM_DATA, data);
-
-        startWorkflow(c, intent);
-    }
-
-    public void switchWorkflow(Class c) {
-        startWorkflow(c, null);
-    }
-
-    /* Launch new top activity with anim */
-    public void openActivityWithTaskRecreate(Class c) {
-        Intent intent = new Intent(this, c).addFlags(IntentCompat.FLAG_ACTIVITY_CLEAR_TASK)
-                                           .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                                           .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        super.startActivity(intent);
-        super.overridePendingTransition(R.anim.grow_fade_in, R.anim.shrink_fade_out);
-    }
-
-    /* Switch activity with anim */
-    public void enterActivity(Class c) {
-        startActivity(c, null);
-        super.overridePendingTransition(R.anim.in_right, R.anim.out_left);
-    }
-
-    /* Switch activity */
-    public void enterActivity(Class c, int data) {
-        Intent intent = new Intent(this, c).putExtra(CUSTOM_DATA, data);
-
-        startActivity(c, intent);
-    }
-
-    /* Switch activity with anim */
-    public <T extends Parcelable> void enterActivity(Class c, T data) {
-        Intent intent = new Intent(this, c);
-        if (data instanceof Bundle) {
-            intent.putExtras((Bundle) data);
-        } else {
-            intent.putExtra(CUSTOM_DATA, data);
-        }
-
-        startActivity(c, intent);
-        super.overridePendingTransition(R.anim.in_right, R.anim.out_left);
-    }
-
-    /* Switch activity with anim */
-    public <T extends Parcelable> void enterActivity(Class c, ArrayList<T> data) {
-        Intent intent = new Intent(this, c).putExtra(CUSTOM_DATA, data);
-
-        startActivity(c, intent);
-        super.overridePendingTransition(R.anim.in_right, R.anim.out_left);
-    }
-
-    /* Switch activity for result with anim */
-    public <T extends Parcelable> void enterActivityForResult(Class c, int code, T data) {
-        Intent intent = new Intent(this, c);
-        if (data != null) {
-            intent.putExtra(CUSTOM_DATA, data);
-        }
-
-        super.startActivityForResult(intent, code);
-        super.overridePendingTransition(R.anim.in_right, R.anim.out_left);
-    }
-
-    /* Switch activity for result without anim */
-    public <T extends Parcelable> void openActivityForResult(Class c, int code, T data) {
-        Intent intent = new Intent(this, c);
-        if (data != null) {
-            intent.putExtra(CUSTOM_DATA, data);
-        }
-
-        super.startActivityForResult(intent, code);
-    }
-
-    /* Switch activity for result without anim */
-    public void openActivityForResult(Class c, int code, int data) {
-        Intent intent = new Intent(this, c).putExtra(CUSTOM_DATA, data);
-
-        super.startActivityForResult(intent, code);
-    }
-
-    /* Switch activity for result without anim */
-    public <T extends Parcelable> void openActivityForResult(Class c, int code, ArrayList<T> data) {
-        Intent intent = new Intent(this, c);
-        if (data != null) {
-            intent.putExtra(CUSTOM_DATA, data);
-        }
-
-        super.startActivityForResult(intent, code);
-    }
-
-    /* Exit to concrete activity with anim */
-    public void exitActivity(Class c) {
-        if (c != null) {
-            startActivity(c, null);
-        }
-
-        mKeyboardManagerDelegate.hideSoftInput();
-        super.finish();
-        super.overridePendingTransition(R.anim.in_left, R.anim.out_right);
-    }
-
-    /* Return to previous activity with anim */
-    public void exitActivity() {
-        mKeyboardManagerDelegate.hideSoftInput();
-        super.finish();
-        super.overridePendingTransition(R.anim.in_left, R.anim.out_right);
-    }
-
-    /* Transcend result to launcher-activity and finish with anim */
-    public void deliverResult(int r, Intent i) {
-        super.setResult(r, i);
-        super.finish();
-        super.overridePendingTransition(R.anim.in_left, R.anim.out_right);
-    }
-
     /* Generalized REST errors parser */
     protected String parseError(ErrorReport report) {
         String error = "";
@@ -508,18 +350,6 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
         }
 
         return error;
-    }
-
-    /* Helper to open new activity with anim */
-    private void startActivity(Class c, Intent i) {
-        Intent intent = i != null ? i : new Intent(this, c).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        super.startActivity(intent);
-    }
-
-    /* Helper to open new activity with anim */
-    private void startWorkflow(Class c, Intent i) {
-        Intent intent = i != null ? i : new Intent(this, c).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | IntentCompat.FLAG_ACTIVITY_CLEAR_TASK);
-        super.startActivity(intent);
     }
 
     /* Simple Throwable processor */
