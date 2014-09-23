@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import java.util.ArrayList;
 import mobi.anoda.archinamon.kernel.persefone.AnodaApplicationDelegate;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
@@ -24,6 +25,8 @@ public final class BroadcastBus {
     public static final String CUSTOM_DATA = ".bus:key_data";
     private final StableContext mStableContext;
     private       AsyncReceiver mAsyncListener;
+    private volatile boolean isExternalSignals;
+
     private final AbstractReceiver mMainAsyncReceiver = new AbstractReceiver() {
 
         @Implement
@@ -48,10 +51,12 @@ public final class BroadcastBus {
 
     public BroadcastBus(StableContext stableContext) {
         this.mStableContext = stableContext;
+        this.isExternalSignals = false;
     }
 
-    public void setAsyncReceiver(AsyncReceiver receiver) {
+    public void setAsyncReceiver(AsyncReceiver receiver, boolean isExternal) {
         mAsyncListener = receiver;
+        isExternalSignals = isExternal;
     }
 
     /* Registering and de-registering listeners and receivers from context */
@@ -98,7 +103,8 @@ public final class BroadcastBus {
     }
 
     public void sendOrderedBroadcastWithCallback(Broadcastable command, Permission permission, Broadcastable callbackCommand) {
-        mStableContext.sendBroadcast(new Intent(command.getAction()).putExtra(CUSTOM_DATA, callbackCommand.getAction()), permission);
+        Intent i = new Intent(command.getAction()).putExtra(CUSTOM_DATA, callbackCommand.getAction());
+        mStableContext.sendBroadcast(i, permission);
     }
 
     /* universal broadcaster */
@@ -121,6 +127,16 @@ public final class BroadcastBus {
     public <Model extends Parcelable> void sendBroadcast(Broadcastable command, Model data) {
         Intent intent = new Intent(command.getAction());
         intent.putExtra(CUSTOM_DATA, data);
-        mStableContext.sendBroadcast(intent);
+
+        if (isExternalSignals) mStableContext.sendBroadcast(intent);
+        else LocalBroadcastManager.getInstance(mStableContext.obtainAppContext()).sendBroadcast(intent);
+    }
+
+    /* LocalBroadcast sender with customizable params */
+    protected void sendLocalBroadcast(Broadcastable command, Bundle data) {
+        Intent i = new Intent(command.getAction());
+        i.putExtras(data);
+
+        LocalBroadcastManager.getInstance(mStableContext.obtainAppContext()).sendBroadcast(i);
     }
 }

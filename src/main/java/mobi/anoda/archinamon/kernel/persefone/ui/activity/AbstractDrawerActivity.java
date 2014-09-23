@@ -12,7 +12,6 @@ import android.view.MenuItem;
 import android.view.View;
 import org.intellij.lang.annotations.MagicConstant;
 import mobi.anoda.archinamon.kernel.persefone.R;
-import mobi.anoda.archinamon.kernel.persefone.ui.activity.interfaces.StateControllable;
 import mobi.anoda.archinamon.kernel.persefone.ui.fragment.AbsSwyperFragment;
 import mobi.anoda.archinamon.kernel.persefone.ui.fragment.AbsSwyperListFragment;
 import mobi.anoda.archinamon.kernel.persefone.ui.fragment.AbstractFragment;
@@ -21,7 +20,7 @@ import mobi.anoda.archinamon.kernel.persefone.ui.fragment.AbstractFragment;
  * @author: Archinamon
  * @project: FavorMe
  */
-public abstract class AbstractDrawerActivity<S extends AbstractFragment & StateControllable> extends AbstractActivity<S> {
+public abstract class AbstractDrawerActivity extends AbstractActivity {
 
     protected DrawerLayout          mDrawerLayout;
     protected ActionBarDrawerToggle mDrawerToggle;
@@ -32,7 +31,7 @@ public abstract class AbstractDrawerActivity<S extends AbstractFragment & StateC
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
 
-        mDrawerToggle = new ActionBarDrawerToggle(mSelf, mDrawerLayout, R.drawable.navbar_btn_menu, R.string.drawer_open, R.string.drawer_close) {
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.drawable.navbar_btn_menu, R.string.drawer_open, R.string.drawer_close) {
 
             @Override
             public void onDrawerOpened(View drawerView) {

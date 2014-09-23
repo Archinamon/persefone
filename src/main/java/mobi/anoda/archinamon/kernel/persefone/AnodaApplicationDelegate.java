@@ -10,6 +10,7 @@ import mobi.anoda.archinamon.kernel.persefone.receiver.InternetAccessReceiver;
 import mobi.anoda.archinamon.kernel.persefone.service.notification.NetworkNotification;
 import mobi.anoda.archinamon.kernel.persefone.signal.broadcast.BroadcastFilter;
 import mobi.anoda.archinamon.kernel.persefone.ui.activity.AbstractActivity;
+import mobi.anoda.archinamon.kernel.persefone.ui.delegate.NetworkState;
 import mobi.anoda.archinamon.kernel.persefone.ui.dialog.AbstractDialog;
 import mobi.anoda.archinamon.kernel.persefone.utils.LogHelper;
 
@@ -19,12 +20,11 @@ import mobi.anoda.archinamon.kernel.persefone.utils.LogHelper;
  */
 public abstract class AnodaApplicationDelegate extends Application {
 
-    public static final boolean         DEBUG           = true;
+    public static final  boolean         DEBUG           = true;
     private static final BroadcastFilter DEFAULT_FILTERS = new BroadcastFilter();
-    private static          String                            sFlurryKey;
-    private static volatile ContextWrapper                    sAppContextProxy;
-    protected               AbstractActivity                  mContext;
-    protected               ExtAndroidHttpClient              mHttpClient;
+    private static volatile ContextWrapper       sAppContextProxy;
+    protected               AbstractActivity     mContext;
+    protected               ExtAndroidHttpClient mHttpClient;
 
     static {
         DEFAULT_FILTERS.addAction(NetworkNotification.FORCE_LOGOUT);
@@ -46,7 +46,7 @@ public abstract class AnodaApplicationDelegate extends Application {
      * @return an Application as ContextWrapper proxy instance
      * @hide
      */
-    public final static Context getProxyContext() {
+    public static Context getProxyContext() {
         return AnodaApplicationDelegate.sAppContextProxy;
     }
 
@@ -56,7 +56,7 @@ public abstract class AnodaApplicationDelegate extends Application {
 
     protected final void setDefaultScreen(String who, Class<? extends AbstractActivity> screen) {
         try {
-            AbstractActivity.setDefaultOnForceLogoutScreen(screen);
+            NetworkState.setDefaultOnForceLogoutScreen(screen);
         } catch (ClassNotFoundException | IllegalAccessException e) {
             LogHelper.println_error(who, e);
         }
@@ -64,25 +64,11 @@ public abstract class AnodaApplicationDelegate extends Application {
 
     protected final void setServerOfflineScreen(String who, Class<? extends AbstractDialog> screen) {
         try {
-            AbstractActivity.setDefaultOnServerOfflineScreen(screen);
+            NetworkState.setDefaultOnServerOfflineScreen(screen);
         } catch (ClassNotFoundException | IllegalAccessException e) {
             LogHelper.println_error(who, e);
         }
     }
-
-    public final void setFlurryKey(String key) {
-        sFlurryKey = key;
-    }
-
-    public final String getFlurryKey() {
-        return sFlurryKey;
-    }
-
-    public abstract void registerContext(AbstractActivity context);
-
-    public abstract void unregisterContext();
-
-    public abstract AbstractActivity getContext();
 
     public abstract ExtAndroidHttpClient getHttpClient();
 }

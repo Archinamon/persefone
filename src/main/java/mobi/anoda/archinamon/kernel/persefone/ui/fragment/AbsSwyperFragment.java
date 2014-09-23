@@ -2,7 +2,6 @@ package mobi.anoda.archinamon.kernel.persefone.ui.fragment;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.os.Handler;
 import android.os.Parcelable;
 import mobi.anoda.archinamon.kernel.persefone.ui.TaggedView;
 import mobi.anoda.archinamon.kernel.persefone.ui.activity.AbstractDrawerActivity;
@@ -14,8 +13,7 @@ import mobi.anoda.archinamon.kernel.persefone.ui.fragment.interfaces.SwypeNotify
  */
 public abstract class AbsSwyperFragment extends AbstractFragment implements TaggedView {
 
-    public static final              String  TAG      = AbsSwyperFragment.class.getSimpleName();
-    protected static final transient Handler sHandler = new Handler();
+    public static final String TAG = AbsSwyperFragment.class.getSimpleName();
     protected AbstractDrawerActivity mContext;
 
     public static void riseOnOpenDrawer(AbsSwyperFragment ctx, boolean single) {
@@ -55,7 +53,7 @@ public abstract class AbsSwyperFragment extends AbstractFragment implements Tagg
     protected <ParcelData extends Parcelable> void sendBroadcast(SwypeNotifyer command, ParcelData data) {
         if (mContext != null) {
             Intent intent = new Intent(command.getAction());
-            intent.putExtra(CUSTOM_DATA, data);
+            intent.putExtra(SwypeNotifyer.IDATA, data);
 
             mContext.sendBroadcast(intent);
         }

@@ -2,16 +2,12 @@ package mobi.anoda.archinamon.kernel.persefone.ui.fragment;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.annotation.IdRes;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.util.Log;
 import android.view.View;
-import android.widget.TextView;
 import java.lang.reflect.Field;
 import mobi.anoda.archinamon.kernel.persefone.signal.broadcast.BroadcastFilter;
 import mobi.anoda.archinamon.kernel.persefone.signal.broadcast.Broadcastable;
@@ -23,8 +19,9 @@ import mobi.anoda.archinamon.kernel.persefone.ui.context.StableContext;
 import mobi.anoda.archinamon.kernel.persefone.ui.delegate.ActivityLauncher;
 import mobi.anoda.archinamon.kernel.persefone.ui.delegate.BroadcastBus;
 import mobi.anoda.archinamon.kernel.persefone.ui.delegate.DbLoader;
+import mobi.anoda.archinamon.kernel.persefone.ui.delegate.DialogLauncher;
+import mobi.anoda.archinamon.kernel.persefone.ui.delegate.FragmentSwitcher;
 import mobi.anoda.archinamon.kernel.persefone.ui.delegate.SoftKeyboard;
-import mobi.anoda.archinamon.kernel.persefone.ui.dialog.AbstractDialog;
 import mobi.anoda.archinamon.kernel.persefone.ui.fragment.interfaces.IOptionsVisibilityListener;
 import mobi.anoda.archinamon.kernel.persefone.utils.LogHelper;
 
@@ -43,15 +40,17 @@ public abstract class AbstractFragment extends Fragment implements TaggedView {
     private          boolean                    mHasMenuReplica;
     private          IOptionsVisibilityListener mOptionsVisibilityListener;
 
-    private   StableContext    mStableContext;
-    protected SoftKeyboard     mKeyboardManagerDelegate;
-    protected BroadcastBus     mBroadcastBusDelegate;
-    private   ActivityLauncher mUiActivityLauncher;
-    protected UiAffectionChain mUiAsyncChainBinder;
-    protected DbLoader         mAsyncDbLoader;
+    private StableContext    mStableContext;
+    private SoftKeyboard     mKeyboardManagerDelegate;
+    private BroadcastBus     mBroadcastBusDelegate;
+    private ActivityLauncher mUiActivityLauncher;
+    private FragmentSwitcher mUiFragmentSwitcher;
+    private DialogLauncher   mUiDialogLauncher;
+    private UiAffectionChain mUiAsyncChainBinder;
+    private DbLoader         mAsyncDbLoader;
 
     public static AbstractFragment newInstance(Class<? extends AbstractFragment> klass, Bundle params) {
-        final StableContext stableContext = StableContext.obtain();
+        final StableContext stableContext = StableContext.Impl.obtain();
         AbstractFragment instance = null;
         try {
             instance = klass.newInstance();
@@ -59,6 +58,10 @@ public abstract class AbstractFragment extends Fragment implements TaggedView {
             instance.mStableContext = stableContext;
             instance.mUiActivityLauncher = new ActivityLauncher(stableContext);
             instance.mUiActivityLauncher.setFragment(instance);
+            instance.mUiFragmentSwitcher = new FragmentSwitcher(stableContext);
+            instance.mUiFragmentSwitcher.setFragment(instance);
+            instance.mUiDialogLauncher = new DialogLauncher(stableContext);
+            instance.mUiDialogLauncher.setFragment(instance);
         } catch (Exception e) {
             LogHelper.println_error(TAG, e);
         }
@@ -157,7 +160,7 @@ public abstract class AbstractFragment extends Fragment implements TaggedView {
 
     @Override
     public void setMenuVisibility(final boolean menuVisible) {
-        boolean menuVisibility = false;//default value
+        boolean menuVisibility;
         boolean isAccesible;
         Field field;
 
@@ -215,6 +218,14 @@ public abstract class AbstractFragment extends Fragment implements TaggedView {
         return this.mUiActivityLauncher;
     }
 
+    public FragmentSwitcher getUiFragmentSwitcher() {
+        return this.mUiFragmentSwitcher;
+    }
+
+    public DialogLauncher getUiDialogLauncher() {
+        return this.mUiDialogLauncher;
+    }
+
     public DbLoader getAsyncDbLoader() {
         if (mAsyncDbLoader == null)
             mAsyncDbLoader = new DbLoader(mStableContext);
@@ -229,104 +240,5 @@ public abstract class AbstractFragment extends Fragment implements TaggedView {
             return root.findViewById(id);
 
         return null;
-    }
-
-    public String getTextFromView(@IdRes int viewId) {
-        View v = findViewById(viewId);
-        if (v instanceof TextView) {
-            TextView view = (TextView) v;
-            return view.getText()
-                       .toString();
-        } else {
-            return v.toString();
-        }
-    }
-
-    /* Switch fragment inside nested fragment */
-    public AbstractFragment switchFragment(Class<? extends AbstractFragment> fragmentClass, int resId, boolean addToStack) {
-        AbstractFragment fragment = AbstractFragment.newInstance(fragmentClass, null);
-
-        switchFragmentInternal(fragment, resId, addToStack);
-
-        return fragment;
-    }
-
-    public AbstractFragment switchFragment(Class<? extends AbstractFragment> fragmentClass, int resId, Bundle params, boolean addToStack) {
-        AbstractFragment fragment = AbstractFragment.newInstance(fragmentClass, params);
-
-        switchFragmentInternal(fragment, resId, addToStack);
-
-        return fragment;
-    }
-
-    public <D extends Parcelable> AbstractFragment switchFragment(Class<? extends AbstractFragment> fragmentClass, int resId, D data, boolean addToStack) {
-        Bundle params = new Bundle();
-        params.putParcelable(CUSTOM_DATA, data);
-        AbstractFragment fragment = AbstractFragment.newInstance(fragmentClass, params);
-
-        switchFragmentInternal(fragment, resId, addToStack);
-
-        return fragment;
-    }
-
-    private <TagFrmt extends AbstractFragment & TaggedView> void switchFragmentInternal(TagFrmt fragment, int resId, boolean isAddingToBackstack) {
-        final String tag = fragment.getViewTag();
-        FragmentManager manager = getFragmentManager();
-        FragmentTransaction transaction = manager.beginTransaction();
-
-        if (isAddingToBackstack) {
-            transaction.setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out);
-            transaction.addToBackStack(tag);
-        }
-
-        transaction.replace(resId, fragment, tag);
-        transaction.commit();
-    }
-
-    /* Launch Popup dialog */
-    public AbstractDialog openPopup(Class<? extends AbstractDialog> dialogClass) {
-        AbstractDialog dialog = AbstractDialog.newInstance(dialogClass, null);
-        return openPopupInternal(dialog);
-    }
-
-    public AbstractDialog openPopup(Class<? extends AbstractDialog> dialogClass, Bundle params) {
-        AbstractDialog dialog = AbstractDialog.newInstance(dialogClass, params);
-        return openPopupInternal(dialog);
-    }
-
-    public AbstractDialog openPopup(Class<? extends AbstractDialog> dialogClass, Parcelable data) {
-        final Bundle params = new Bundle();
-        params.putParcelable(CUSTOM_DATA, data);
-
-        AbstractDialog dialog = AbstractDialog.newInstance(dialogClass, params);
-        return openPopupInternal(dialog);
-    }
-
-    public AbstractDialog openPopup(Class<? extends AbstractDialog> dialogClass, String message) {
-        final Bundle params = new Bundle();
-        params.putString(AbstractDialog.IEXTRA_MESSAGE, message);
-
-        AbstractDialog dialog = AbstractDialog.newInstance(dialogClass, params);
-        return openPopupInternal(dialog);
-    }
-
-    public AbstractDialog openPopup(Class<? extends AbstractDialog> dialogClass, String title, String message) {
-        final Bundle params = new Bundle();
-        params.putString(AbstractDialog.IEXTRA_TITLE, title);
-        params.putString(AbstractDialog.IEXTRA_MESSAGE, message);
-
-        AbstractDialog dialog = AbstractDialog.newInstance(dialogClass, params);
-        return openPopupInternal(dialog);
-    }
-
-    private <TagDialog extends AbstractDialog & TaggedView> TagDialog openPopupInternal(TagDialog popup) {
-        final String tag = popup.getViewTag();
-        FragmentManager manager = getFragmentManager();
-
-        if (manager != null) {
-            popup.show(manager, tag);
-        }
-
-        return popup;
     }
 }

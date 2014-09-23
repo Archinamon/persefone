@@ -15,12 +15,10 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
 import android.widget.Toast;
-import org.intellij.lang.annotations.MagicConstant;
 import java.util.Observable;
 import java.util.Observer;
 import mobi.anoda.archinamon.kernel.persefone.AnodaApplicationDelegate;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
-import mobi.anoda.archinamon.kernel.persefone.annotation.ProxyMethod;
 import mobi.anoda.archinamon.kernel.persefone.service.AbstractService;
 import mobi.anoda.archinamon.kernel.persefone.signal.broadcast.Permission;
 import mobi.anoda.archinamon.kernel.persefone.ui.activity.AbstractActivity;
@@ -30,7 +28,7 @@ import mobi.anoda.archinamon.kernel.persefone.utils.WordUtils;
 /**
  * Created by matsukov-ea on 18.09.2014.
  */
-abstract class AbstractStableContext extends Observable implements Observer {
+abstract class ProxyContextWrapper extends Observable implements StableContext, Observer {
 
     private volatile AbstractActivity         mUiContext; //user interface context;
     private volatile AbstractService          mRiContext; //remote interface context;
@@ -57,53 +55,59 @@ abstract class AbstractStableContext extends Observable implements Observer {
         }
     }
 
+    @Implement
     public final boolean isUiContextRegistered() {
         return this.mUiContext != null;
     }
 
+    @Implement
     public final boolean isRiContextRegistered() {
         return this.mRiContext != null;
     }
 
+    @Implement
     public final boolean isNsContextRegistered() {
         return this.mNsContext != null;
     }
 
+    @Implement
     @SuppressWarnings("unchecked")
     public <Impl extends AbstractActivity> Impl obtainUiContext() {
         return (Impl) this.mUiContext;
     }
 
+    @Implement
     @SuppressWarnings("unchecked")
     public <Impl extends AbstractService> Impl obtainRiContext() {
         return (Impl) this.mRiContext;
     }
 
+    @Implement
     @SuppressWarnings("unchecked")
     public <Impl extends Context> Impl obtainNsContext() {
         return (Impl) this.mNsContext;
     }
 
+    @Implement
     @SuppressWarnings("unchecked")
     public <Impl extends AnodaApplicationDelegate> Impl obtainAppContext() {
         return (Impl) this.mAppContext;
     }
 
     @Nullable
+    @Implement
     public View getView() {
         return findViewById(android.R.id.content);
     }
 
+    @Implement
     public ComponentName getInfo() {
         Class highestComponent = obtainStable().getClass();
         return new ComponentName(getPackageName(), highestComponent.getName());
     }
 
-    public String getPackageName() {
-        return obtainStable().getPackageName();
-    }
-
     /* Helper to announce message to user */
+    @Implement
     public void shoutToast(String msg) {
         if (WordUtils.isEmpty(msg))
             return;
@@ -117,13 +121,18 @@ abstract class AbstractStableContext extends Observable implements Observer {
         info.show();
     }
 
-    @ProxyMethod
+    @Implement
+    public String getPackageName() {
+        return obtainStable().getPackageName();
+    }
+
+    @Implement
     public String getString(@StringRes int id, Object... varargs) {
         return obtainStable().getString(id, varargs);
     }
 
     @Nullable
-    @ProxyMethod
+    @Implement
     public Window getWindow() {
         if (isUiContextRegistered()) return mUiContext.getWindow();
 
@@ -131,64 +140,64 @@ abstract class AbstractStableContext extends Observable implements Observer {
     }
 
     @Nullable
-    @ProxyMethod
+    @Implement
     public View findViewById(@IdRes int id) {
         if (isUiContextRegistered()) return mUiContext.findViewById(id);
 
         return null;
     }
 
-    @ProxyMethod
+    @Implement
     public void startActivity(Intent data) {
         obtainStable().startActivity(data);
     }
 
-    @ProxyMethod
-    public Object getSystemService(@MagicConstant(valuesFromClass = Context.class) String name) {
+    @Implement
+    public Object getSystemService(String name) {
         return obtainStable().getSystemService(name);
     }
 
-    @ProxyMethod
-    public boolean bindService(@NonNull Intent callArgs, ServiceConnection callback, @MagicConstant(flagsFromClass = Context.class) int mode) {
+    @Implement
+    public boolean bindService(@NonNull Intent callArgs, ServiceConnection callback, int mode) {
         return obtainStable().bindService(callArgs, callback, mode);
     }
 
-    @ProxyMethod
+    @Implement
     public void unbindService(ServiceConnection callback) {
         obtainStable().unbindService(callback);
     }
 
-    @ProxyMethod
+    @Implement
     public void registerReceiver(BroadcastReceiver receiver, IntentFilter filter) {
         obtainStable().registerReceiver(receiver, filter);
     }
 
-    @ProxyMethod
+    @Implement
     public void registerReceiver(BroadcastReceiver receiver, IntentFilter filter, Permission permission) {
         obtainStable().registerReceiver(receiver, filter, permission.getPermission(), null);
     }
 
-    @ProxyMethod
+    @Implement
     public void unregisterReceiver(BroadcastReceiver receiver) {
         obtainStable().unregisterReceiver(receiver);
     }
 
-    @ProxyMethod
+    @Implement
     public void startService(Intent intent) {
         obtainStable().startService(intent);
     }
 
-    @ProxyMethod
+    @Implement
     public void sendBroadcast(Intent intent) {
         obtainStable().sendBroadcast(intent);
     }
 
-    @ProxyMethod
+    @Implement
     public void sendBroadcast(Intent intent, Permission receiverPermission) {
         obtainStable().sendBroadcast(intent, receiverPermission.getPermission());
     }
 
-    @ProxyMethod
+    @Implement
     public View getCurrentFocus() {
         if (isUiContextRegistered()) return mUiContext.getCurrentFocus();
         return null;

@@ -1,10 +1,12 @@
 package mobi.anoda.archinamon.kernel.persefone.network.processor;
 
-import java.io.InvalidObjectException;
 import android.support.annotation.NonNull;
+import java.io.InvalidObjectException;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
 import mobi.anoda.archinamon.kernel.persefone.network.operations.NetworkOperation.ErrorReport;
 import mobi.anoda.archinamon.kernel.persefone.ui.activity.AbstractActivity;
+import mobi.anoda.archinamon.kernel.persefone.ui.context.StableContext;
+import mobi.anoda.archinamon.kernel.persefone.ui.delegate.ActivityLauncher;
 
 /**
  * @author: Archinamon
@@ -61,8 +63,9 @@ public final class InterruptSequencer implements IStrategyInterrupt {
     private InterruptSequencer() {}
 
     @Implement
-    public final void jump(@NonNull AbstractActivity context, Class<? extends AbstractActivity> lngjump_to) {
-        context.switchWorkflow(lngjump_to);
+    public final void jump(@NonNull StableContext context, Class<? extends AbstractActivity> lngjump_to) {
+        ActivityLauncher launcher = new ActivityLauncher(context);
+        launcher.switchWorkflow(lngjump_to);
     }
 
     @Implement

@@ -35,8 +35,6 @@ public final class UiAffectionChain {
         @Implement
         public void onServiceConnected(ComponentName className, IBinder service) {
             mServerBinder = (RendezvousBinder) service;
-            mServerBinder.onAttach(mStableContext.obtainUiContext());
-
             mIsBound = true;
 
             if (mServerListeners.size() > 0) {

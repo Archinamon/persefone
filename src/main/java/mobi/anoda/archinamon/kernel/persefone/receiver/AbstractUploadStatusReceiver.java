@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.annotation.NonNull;
-import javax.annotation.Nullable;
+import android.support.annotation.Nullable;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
 import mobi.anoda.archinamon.kernel.persefone.service.UploadService;
 import mobi.anoda.archinamon.kernel.persefone.upload.Extras;

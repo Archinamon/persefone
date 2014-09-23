@@ -10,6 +10,7 @@ import java.util.List;
  */
 public class WordUtils {
 
+    public static final String EMPTY = "";
     public static final String LINE_SEPARATOR = getSystemProperty("line.separator");
 
     /**

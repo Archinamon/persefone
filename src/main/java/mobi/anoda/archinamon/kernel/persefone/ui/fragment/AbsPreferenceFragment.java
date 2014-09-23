@@ -12,6 +12,7 @@ import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
+import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -19,15 +20,12 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import javax.annotation.Nullable;
-import mobi.anoda.archinamon.kernel.persefone.AnodaApplicationDelegate;
 import mobi.anoda.archinamon.kernel.persefone.R;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
 import mobi.anoda.archinamon.kernel.persefone.settings.MobiSettings;
 import mobi.anoda.archinamon.kernel.persefone.ui.TaggedView;
-import mobi.anoda.archinamon.kernel.persefone.ui.activity.AbstractActivity;
+import mobi.anoda.archinamon.kernel.persefone.ui.context.StableContext;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static mobi.anoda.archinamon.kernel.persefone.settings.MobiSettings.getInstance;
 
 public abstract class AbsPreferenceFragment<Settings extends MobiSettings> extends AbsListFragment implements TaggedView, OnSharedPreferenceChangeListener {
@@ -36,6 +34,7 @@ public abstract class AbsPreferenceFragment<Settings extends MobiSettings> exten
     private static final long   POST_DELAY           = 500L;
     private static final int    FIRST_REQUEST_CODE   = 100;
     private static final int    MSG_BIND_PREFERENCES = 1;
+    private   StableContext            mStableContext;
     private   Handler                  mHandler;
     private   boolean                  mHavePrefs;
     private   boolean                  mInitDone;
@@ -43,8 +42,6 @@ public abstract class AbsPreferenceFragment<Settings extends MobiSettings> exten
     private   String                   mPreferenceTag;
     private   String                   mPreferenceName;
     private   int                      mResourceId;
-    protected AnodaApplicationDelegate mAppDelegate;
-    protected AbstractActivity         mContext;
     @Nullable
     protected Settings                 mSettings;
     protected SharedPreferences        mPreferences;
@@ -62,6 +59,7 @@ public abstract class AbsPreferenceFragment<Settings extends MobiSettings> exten
     }
 
     public AbsPreferenceFragment() {
+        mStableContext = StableContext.Impl.obtain();
         mHandler = new Handler() {
 
             @Override
@@ -95,10 +93,6 @@ public abstract class AbsPreferenceFragment<Settings extends MobiSettings> exten
     protected void onFinishCreate() {
     }
 
-    protected AbstractActivity getContext() {
-        return this.mContext;
-    }
-
     protected Settings getSettings() {
         return mSettings;
     }
@@ -110,7 +104,7 @@ public abstract class AbsPreferenceFragment<Settings extends MobiSettings> exten
 
     public void addPreferencesFromResource(int i) {
         requirePreferenceManager();
-        setPreferenceScreen(inflateFromResource(mContext, i, getPreferenceScreen()));
+        setPreferenceScreen(inflateFromResource(mStableContext.obtainAppContext(), i, getPreferenceScreen()));
     }
 
     public Preference findPreference(CharSequence charsequence) {
@@ -169,17 +163,6 @@ public abstract class AbsPreferenceFragment<Settings extends MobiSettings> exten
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        if (activity instanceof AbstractActivity) {
-            mContext = (AbstractActivity) activity;
-            checkNotNull(mContext);
-
-            mAppDelegate = mContext.getAppDelegate();
-        }
-    }
-
-    @Override
     public void onActivityCreated(Bundle bundle) {
         super.onActivityCreated(bundle);
 
@@ -225,7 +208,7 @@ public abstract class AbsPreferenceFragment<Settings extends MobiSettings> exten
         if (arguments != null && arguments.length > 0) {
             Class<Settings> type = (Class<Settings>) arguments[0];
 
-            mSettings = getInstance(mContext, mPreferenceTag, type);
+            mSettings = getInstance(mStableContext.obtainAppContext(), mPreferenceTag, type);
         }
 
         onFinishCreate();
@@ -284,7 +267,7 @@ public abstract class AbsPreferenceFragment<Settings extends MobiSettings> exten
             Constructor constructor = PreferenceManager.class.getDeclaredConstructor(aclass);
             constructor.setAccessible(true);
 
-            Object aobj[] = new Object[] {mContext, FIRST_REQUEST_CODE};
+            Object aobj[] = new Object[] {mStableContext.obtainAppContext(), FIRST_REQUEST_CODE};
             preferencemanager = (PreferenceManager) constructor.newInstance(aobj);
         } catch (Exception exception) {
             throw new RuntimeException(exception);

@@ -17,7 +17,7 @@ import mobi.anoda.archinamon.kernel.persefone.ui.fragment.interfaces.SwypeNotify
  */
 public abstract class AbsSwyperListFragment<Elements, Adapter extends AbstractAdapter<Elements>> extends AbsListFragment<Elements, Adapter> implements TaggedView {
 
-    public static final              String  TAG      = AbsSwyperListFragment.class.getSimpleName();
+    public static final String TAG = AbsSwyperListFragment.class.getSimpleName();
     protected AbstractDrawerActivity mContext;
 
     public static void riseOnOpenDrawer(AbsSwyperListFragment ctx, boolean single) {
@@ -64,7 +64,7 @@ public abstract class AbsSwyperListFragment<Elements, Adapter extends AbstractAd
     protected <ParcelData extends Parcelable> void sendBroadcast(SwypeNotifyer command, ParcelData data) {
         if (mContext != null) {
             Intent intent = new Intent(command.getAction());
-            intent.putExtra(CUSTOM_DATA, data);
+            intent.putExtra(SwypeNotifyer.IDATA, data);
 
             mContext.sendBroadcast(intent);
         }

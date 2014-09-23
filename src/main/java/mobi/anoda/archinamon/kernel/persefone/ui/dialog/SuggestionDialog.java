@@ -1,6 +1,7 @@
 package mobi.anoda.archinamon.kernel.persefone.ui.dialog;
 
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
+import mobi.anoda.archinamon.kernel.persefone.ui.context.StableContext;
 import mobi.anoda.archinamon.kernel.persefone.utils.Common;
 
 /**
@@ -22,7 +23,7 @@ public abstract class SuggestionDialog extends AbstractDialog {
     @Implement
     public boolean setup() {
         setDialogType(Popup.PROMPT_YES_NO);
-        setTitle(Common.getApplicationName(mContext));
+        setTitle(Common.getApplicationName(StableContext.Impl.obtain().obtainAppContext()));
 
         return true;
     }

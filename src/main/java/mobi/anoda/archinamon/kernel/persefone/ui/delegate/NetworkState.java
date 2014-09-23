@@ -28,22 +28,24 @@ public final class NetworkState {
     private static          Class<? extends AbstractActivity> sfOnForceLogoutScreen;
     private static          Class<? extends AbstractDialog>   sfOnServerOfflineScreen;
     private                 StableContext                     mStableContext;
-    private UiAffectionChain mAsyncChainBinder;
+    private                 UiAffectionChain                  mAsyncChainBinder;
+    private                 DialogLauncher                    mAlertLauncher;
 
-    private final AbstractReceiver mErrorsReceiver = new AbstractReceiver() {
+    private /*synthetic*/ final AbstractReceiver mErrorsReceiver = new AbstractReceiver() {
+
 
         @Implement
         public void onReceive(@NonNull final String action, @Nullable Intent data) {
             if (NetworkNotification.FORCE_LOGOUT.isEqual(action)) {
                 if (sfOnForceLogoutScreen != null) startWorkflow(sfOnForceLogoutScreen);
             } else if (NetworkNotification.ALERT_NO_INTERNET.isEqual(action)) {
-                openPopup(NoInternetDialog.class, getString(R.string.no_internet_access));
+                openPopup(NoInternetDialog.class, mStableContext.getString(R.string.no_internet_access));
                 informError(null);
             } else if (NetworkNotification.ALERT_EXCEPTION.isEqual(action)) {
                 final ErrorReport report = data != null ? data.<ErrorReport>getParcelableExtra(ServiceChannel.KEY_DATA) : null;
                 informError(report);
             } else if (NetworkNotification.INTERNET_ACCESS_GRANTED.isEqual(action)) {
-                if (mAsyncChainBinder != null) mAsyncChainBinder.untwistStack();
+                if (mAsyncChainBinder != null)  mAsyncChainBinder.untwistStack();
             }
         }
     };
@@ -62,8 +64,10 @@ public final class NetworkState {
      * @hide
      */
     public final static void setDefaultOnForceLogoutScreen(Class<? extends AbstractActivity> klass) throws ClassNotFoundException, IllegalAccessException {
-        if (klass == null) throw new ClassNotFoundException("Cannot find requested class declaration");
-        if (sfOnForceLogoutScreen != null) throw new IllegalAccessException("Cannot assign new value to a final variable");
+        if (klass == null)
+            throw new ClassNotFoundException("Cannot find requested class declaration");
+        if (sfOnForceLogoutScreen != null)
+            throw new IllegalAccessException("Cannot assign new value to a final variable");
 
         sfOnForceLogoutScreen = klass;
     }
@@ -72,14 +76,17 @@ public final class NetworkState {
      * @hide
      */
     public final static void setDefaultOnServerOfflineScreen(Class<? extends AbstractDialog> klass) throws ClassNotFoundException, IllegalAccessException {
-        if (klass == null) throw new ClassNotFoundException("Cannot find requested class declaration");
-        if (sfOnServerOfflineScreen != null) throw new IllegalAccessException("Cannot assign new value to a final variable");
+        if (klass == null)
+            throw new ClassNotFoundException("Cannot find requested class declaration");
+        if (sfOnServerOfflineScreen != null)
+            throw new IllegalAccessException("Cannot assign new value to a final variable");
 
         sfOnServerOfflineScreen = klass;
     }
 
     private NetworkState(@NonNull StableContext stableContext) {
         this.mStableContext = stableContext;
+        this.mAlertLauncher = new DialogLauncher(mStableContext);
     }
 
     public AbstractReceiver getNetworkErrorProcessor() {
@@ -119,7 +126,7 @@ public final class NetworkState {
 
     private void openPopup(Class<? extends AbstractDialog> dialogClass, String message) {
         if (!mStableContext.isUiContextRegistered()) return;
-        mStableContext.obtainUiContext().openPopup(dialogClass, message);
+        mAlertLauncher.openPopup(dialogClass, message);
     }
 
     private boolean isAccessAllowed() {

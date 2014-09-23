@@ -1,6 +1,5 @@
 package mobi.anoda.archinamon.kernel.persefone.service.wakeful;
 
-import android.app.Application;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -9,11 +8,11 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.XmlResourceParser;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
-import android.support.annotation.NonNull;
-import javax.annotation.Nullable;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
 import mobi.anoda.archinamon.kernel.persefone.receiver.AbstractReceiver;
 import mobi.anoda.archinamon.kernel.persefone.service.wakeful.WakefulIntentService.AlarmListener;
@@ -27,19 +26,19 @@ public class AlarmEventDispatcher extends AbstractReceiver {
 
     @Implement
     public void onReceive(@NonNull final String action, @Nullable Intent data) {
-        AlarmListener listener = getListener(context());
+        AlarmListener listener = getListener(mStableContext.obtainAppContext());
 
         if (listener != null) {
             if (!WordUtils.isEmpty(action)) {
-                SharedPreferences prefs = context().getSharedPreferences(WakefulIntentService.NAME, 0);
+                SharedPreferences prefs = mStableContext.obtainAppContext().getSharedPreferences(WakefulIntentService.NAME, 0);
 
                 prefs.edit()
                      .putLong(WakefulIntentService.LAST_ALARM, System.currentTimeMillis())
                      .apply();
 
-                listener.sendWakefulWork(context(), data);
+                listener.sendWakefulWork(mStableContext.obtainAppContext(), data);
             } else {
-                WakefulIntentService.scheduleAlarms(listener, (Application) context(), true);
+                WakefulIntentService.scheduleAlarms(listener, mStableContext.obtainAppContext(), true);
             }
         }
     }

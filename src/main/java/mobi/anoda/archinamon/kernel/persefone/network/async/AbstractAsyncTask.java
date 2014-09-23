@@ -1,11 +1,12 @@
 package mobi.anoda.archinamon.kernel.persefone.network.async;
 
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.widget.Toast;
 import com.google.common.collect.ImmutableMap;
@@ -17,8 +18,6 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import android.support.annotation.NonNull;
-import javax.annotation.Nullable;
 import mobi.anoda.archinamon.kernel.persefone.R;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
 import mobi.anoda.archinamon.kernel.persefone.model.NetworkModel;
@@ -30,10 +29,10 @@ import mobi.anoda.archinamon.kernel.persefone.network.operations.AbstractNetwork
 import mobi.anoda.archinamon.kernel.persefone.network.operations.NetworkOperation.ErrorReport;
 import mobi.anoda.archinamon.kernel.persefone.network.processor.IStrategyInterrupt;
 import mobi.anoda.archinamon.kernel.persefone.network.processor.InterruptSequencer;
-import mobi.anoda.archinamon.kernel.persefone.service.AbstractService;
 import mobi.anoda.archinamon.kernel.persefone.service.notification.NetworkNotification;
 import mobi.anoda.archinamon.kernel.persefone.signal.broadcast.Broadcastable;
-import mobi.anoda.archinamon.kernel.persefone.ui.activity.AbstractActivity;
+import mobi.anoda.archinamon.kernel.persefone.ui.context.StableContext;
+import mobi.anoda.archinamon.kernel.persefone.ui.delegate.DialogLauncher;
 import mobi.anoda.archinamon.kernel.persefone.ui.dialog.AbstractDialog;
 import mobi.anoda.archinamon.kernel.persefone.ui.dialog.ProgressDialog;
 import mobi.anoda.archinamon.kernel.persefone.utils.LogHelper;
@@ -51,38 +50,26 @@ public abstract class AbstractAsyncTask<Progress, Result> extends CoreAsyncTask<
     private volatile     int     mInternetAccess        = 1;
     private              boolean mIsSilent              = false;
     private final        Handler mHandler               = new Handler();
-    protected     AbstractActivity                mUiContext;
-    protected     AbstractService                 mServiceContext;
-    protected     AbstractDialog                  mProgressDialog;
-    protected     NetworkModel                    mPropagatorModel;
-    protected     Class<? extends AbstractDialog> mProgressTarget;
-    protected     AbstractNetworkOperation        mOperation;
-    protected     Broadcastable                   mActionCallback;
-    protected     APIErrorCode                    mErrorTranslation;
-    protected     IStrategyInterrupt              mErrorCallback;
-    private       List<BasicNameValuePair>        mCompiledValuableModel;
-    private       String                          mActualAction;
+    protected StableContext                   mStableContext;
+    protected AbstractDialog                  mProgressDialog;
+    protected NetworkModel                    mPropagatorModel;
+    protected Class<? extends AbstractDialog> mProgressTarget;
+    protected AbstractNetworkOperation        mOperation;
+    protected Broadcastable                   mActionCallback;
+    protected APIErrorCode                    mErrorTranslation;
+    protected IStrategyInterrupt              mErrorCallback;
+    private   List<BasicNameValuePair>        mCompiledValuableModel;
+    private   String                          mActualAction;
 
     public AbstractAsyncTask() {
     }
 
-    public final void init(AbstractActivity context) {
-        mUiContext = context;
+    public final void prepare() {
+        mStableContext = StableContext.Impl.obtain();
         mProgressTarget = ProgressDialog.class;
         mErrorCallback = InterruptSequencer.getInstance();
 
-        CoreAsyncTask.sWakeLock = CoreAsyncTask.getLock(context);
-
-        onPostInit();
-    }
-
-    public final void init(AbstractService context) {
-        mUiContext = null;
-        mServiceContext = context;
-        mProgressTarget = ProgressDialog.class;
-        mErrorCallback = InterruptSequencer.getInstance();
-
-        CoreAsyncTask.sWakeLock = CoreAsyncTask.getLock(context);
+        CoreAsyncTask.sWakeLock = CoreAsyncTask.getLock(mStableContext.obtainAppContext());
 
         onPostInit();
     }
@@ -129,8 +116,9 @@ public abstract class AbstractAsyncTask<Progress, Result> extends CoreAsyncTask<
     @Override
     protected void onPreExecute() {
         if (!mIsSilent) {
-            if (mProgressDialog == null && mUiContext != null) {
-                mProgressDialog = mUiContext.openPopup(mProgressTarget);
+            if (mProgressDialog == null && mStableContext.isUiContextRegistered()) {
+                DialogLauncher launcher = new DialogLauncher(mStableContext);
+                mProgressDialog = launcher.openPopup(mProgressTarget);
             }
         }
 
@@ -218,7 +206,7 @@ public abstract class AbstractAsyncTask<Progress, Result> extends CoreAsyncTask<
 
             @Implement
             public void run() {
-                Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+                Toast.makeText(mStableContext.obtainAppContext(), message, Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -228,7 +216,7 @@ public abstract class AbstractAsyncTask<Progress, Result> extends CoreAsyncTask<
 
             @Implement
             public void run() {
-                Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+                Toast.makeText(mStableContext.obtainAppContext(), message, Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -272,51 +260,51 @@ public abstract class AbstractAsyncTask<Progress, Result> extends CoreAsyncTask<
     }
 
     protected final <T extends Parcelable> void notifyService(Class<? extends Service> service, Broadcastable a, T data) {
-        Intent intent = new Intent(getContext(), service);
+        Intent intent = new Intent(mStableContext.obtainAppContext(), service);
         intent.setAction(a.getAction());
         intent.putExtra(Broadcastable.KEY_DATA, data);
-        getContext().startService(intent);
+        mStableContext.startService(intent);
     }
 
     protected final <T extends Parcelable> void notifyService(Class<? extends Service> service, Broadcastable a, ArrayList<T> data) {
-        Intent intent = new Intent(getContext(), service);
+        Intent intent = new Intent(mStableContext.obtainAppContext(), service);
         intent.setAction(a.getAction());
         intent.putExtra(Broadcastable.KEY_DATA, data);
-        getContext().startService(intent);
+        mStableContext.startService(intent);
     }
 
     protected final <T extends Parcelable> void sendBroadcast(Broadcastable a, ArrayList<T> data) {
         Intent i = new Intent(a.getAction());
         i.putParcelableArrayListExtra(Broadcastable.KEY_DATA, data);
 
-        getContext().sendBroadcast(i);
+        mStableContext.sendBroadcast(i);
     }
 
     protected final <T extends Parcelable> void sendBroadcast(Broadcastable a, T data) {
         Intent i = new Intent(a.getAction());
         i.putExtra(Broadcastable.KEY_DATA, data);
 
-        getContext().sendBroadcast(i);
+        mStableContext.sendBroadcast(i);
     }
 
     protected final void sendBroadcast(Broadcastable a, Bundle data) {
         Intent i = new Intent(a.getAction());
         i.putExtra(Broadcastable.KEY_DATA, data);
 
-        getContext().sendBroadcast(i);
+        mStableContext.sendBroadcast(i);
     }
 
     protected final void sendBroadcast(Broadcastable a) {
         Intent i = new Intent(a.getAction());
 
-        getContext().sendBroadcast(i);
+        mStableContext.sendBroadcast(i);
     }
 
     protected final <T extends Parcelable> void reportError(NetworkNotification a, T data) {
         Intent i = new Intent(a.getAction());
         i.putExtra(NetworkNotification.KEY_DATA, data);
 
-        getContext().sendBroadcast(i);
+        mStableContext.sendBroadcast(i);
 
         dismissLoadingPopup();
     }
@@ -326,13 +314,8 @@ public abstract class AbstractAsyncTask<Progress, Result> extends CoreAsyncTask<
     }
 
     @Implement
-    public final String getString(int id) {
-        return getContext().getString(id);
-    }
-
-    @Implement
     public final String getString(int id, Object... modifiers) {
-        return getContext().getString(id, modifiers);
+        return mStableContext.getString(id, modifiers);
     }
 
     protected final void logError(String tag, Exception e) {
@@ -391,9 +374,5 @@ public abstract class AbstractAsyncTask<Progress, Result> extends CoreAsyncTask<
             mProgressDialog.dismiss();
             mProgressDialog = null;
         }
-    }
-
-    protected final Context getContext() {
-        return mUiContext != null ? mUiContext : mServiceContext;
     }
 }

@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import mobi.anoda.archinamon.kernel.persefone.R;
 import mobi.anoda.archinamon.kernel.persefone.signal.broadcast.Broadcastable;
 import mobi.anoda.archinamon.kernel.persefone.ui.context.StableContext;
+import mobi.anoda.archinamon.kernel.persefone.ui.dialog.AbstractDialog;
 import mobi.anoda.archinamon.kernel.persefone.ui.fragment.AbstractFragment;
 
 /**
@@ -19,16 +20,24 @@ public final class ActivityLauncher {
     public static final String CUSTOM_DATA = ".ui:key_data";
     private final    StableContext    mStableContext;
     private          AbstractFragment mFragment;
+    private          AbstractDialog   mDialog;
     private volatile boolean          isViaFragment;
+    private volatile boolean          isViaDialog;
 
     public ActivityLauncher(StableContext stableContext) {
         this.mStableContext = stableContext;
         this.isViaFragment = false;
+        this.isViaDialog = false;
     }
 
     public void setFragment(AbstractFragment fragment) {
         this.mFragment = fragment;
         this.isViaFragment = true;
+    }
+
+    public void setDialog(AbstractDialog dialog) {
+        this.mDialog = dialog;
+        this.isViaDialog = true;
     }
 
     public void startActivity(Broadcastable action) {
@@ -234,6 +243,8 @@ public final class ActivityLauncher {
     private void startSimpleInner(Intent command) {
         if (isViaFragment)
             mFragment.startActivity(command);
+        else if (isViaDialog)
+            mDialog.startActivity(command);
         else
             mStableContext.startActivity(command);
     }
@@ -241,6 +252,8 @@ public final class ActivityLauncher {
     private void startForResultInner(Intent command, int resultCode) {
         if (isViaFragment)
             mFragment.startActivityForResult(command, resultCode);
+        else if (isViaDialog)
+            mDialog.startActivityForResult(command, resultCode);
         else
             mStableContext.obtainUiContext()
                           .startActivityForResult(command, resultCode);

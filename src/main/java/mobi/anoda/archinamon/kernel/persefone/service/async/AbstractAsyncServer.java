@@ -1,22 +1,19 @@
 package mobi.anoda.archinamon.kernel.persefone.service.async;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import java.io.UnsupportedEncodingException;
 import java.util.concurrent.ConcurrentSkipListMap;
-import android.support.annotation.NonNull;
-import javax.annotation.Nullable;
-import mobi.anoda.archinamon.kernel.persefone.AnodaApplicationDelegate;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
 import mobi.anoda.archinamon.kernel.persefone.network.async.AbstractAsyncTask;
 import mobi.anoda.archinamon.kernel.persefone.network.processor.RESTSignal;
 import mobi.anoda.archinamon.kernel.persefone.network.processor.SignalProcessor;
-import mobi.anoda.archinamon.kernel.persefone.service.AbstractService;
 import mobi.anoda.archinamon.kernel.persefone.service.wakeful.WakefulIntentService;
 import mobi.anoda.archinamon.kernel.persefone.signal.broadcast.Broadcastable;
 import mobi.anoda.archinamon.kernel.persefone.signal.impl.ServiceChannel;
-import mobi.anoda.archinamon.kernel.persefone.ui.activity.AbstractActivity;
+import mobi.anoda.archinamon.kernel.persefone.ui.context.StableContext;
 import mobi.anoda.archinamon.kernel.persefone.utils.LogHelper;
 
 /**
@@ -52,8 +49,7 @@ public abstract class AbstractAsyncServer extends WakefulIntentService {
 
     private static final String  TAG     = AbstractAsyncServer.class.getSimpleName();
     protected final      IBinder mBinder = new RendezvousBinder();
-    protected volatile AnodaApplicationDelegate mAppDelegate;
-    protected volatile AbstractActivity         mUiContext;
+    protected volatile StableContext mStableContext;
 
     /**
      * Creates an IntentService.  Invoked by your subclass's constructor.
@@ -62,23 +58,6 @@ public abstract class AbstractAsyncServer extends WakefulIntentService {
      */
     public AbstractAsyncServer(String name) {
         super(name);
-    }
-
-    /**
-     * We implement strongly different logic of Service binding mechanism
-     * The binding logic of core {@link AbstractService} is to handle {@link Context}
-     * in usual sync way. Here we should build a bridge to handle rendezvous events from {@link Context}s
-     *
-     * @param activity
-     */
-    @Override
-    public synchronized void attachContext(AbstractActivity activity) {
-        mAppDelegate = activity.getAppDelegate();
-        mUiContext = activity;
-
-        if (mAppDelegate == null) {
-            mAppDelegate = (AnodaApplicationDelegate) activity.getApplication();
-        }
     }
 
     @Override
@@ -91,9 +70,7 @@ public abstract class AbstractAsyncServer extends WakefulIntentService {
         try {
             Class<? extends AbstractAsyncTask> task = SignalMap.getTaskByGate(request.getGate(), request.getCommand());
             AbstractAsyncTask taskInstance = task.newInstance();
-            if (mUiContext != null) taskInstance.init(mUiContext);
-            else taskInstance.init(this);
-
+            taskInstance.prepare();
             taskInstance.defineAction(request.getCommand());
 
             RESTSignal.Builder signal = new RESTSignal.Builder().bindCoherentTask(taskInstance)
@@ -118,5 +95,7 @@ public abstract class AbstractAsyncServer extends WakefulIntentService {
         return SignalProcessor.getInstance();
     }
 
-    @Implement protected final void onAction(@NonNull String action, @Nullable Intent data) {}
+    @Implement
+    protected final void onAction(@NonNull String action, @Nullable Intent data) {
+    }
 }

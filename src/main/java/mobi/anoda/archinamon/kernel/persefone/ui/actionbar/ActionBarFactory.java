@@ -2,12 +2,12 @@ package mobi.anoda.archinamon.kernel.persefone.ui.actionbar;
 
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBar.TabListener;
 import android.view.View;
 import android.widget.SpinnerAdapter;
-import android.support.annotation.NonNull;
-import javax.annotation.Nullable;
 import mobi.anoda.archinamon.kernel.persefone.ui.fragment.AbstractFragment;
 import mobi.anoda.archinamon.kernel.persefone.ui.utils.FragmentTabListener;
 

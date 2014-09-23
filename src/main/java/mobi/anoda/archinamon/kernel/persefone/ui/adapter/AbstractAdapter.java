@@ -1,6 +1,5 @@
 package mobi.anoda.archinamon.kernel.persefone.ui.adapter;
 
-import android.app.Application;
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,7 +18,7 @@ import java.util.Comparator;
 import java.util.List;
 import mobi.anoda.archinamon.kernel.persefone.AnodaApplicationDelegate;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
-import mobi.anoda.archinamon.kernel.persefone.ui.activity.AbstractActivity;
+import mobi.anoda.archinamon.kernel.persefone.ui.context.StableContext;
 
 /**
  * @author: Archinamon
@@ -128,8 +127,7 @@ public abstract class AbstractAdapter<Element> extends BaseAdapter implements Fi
     public static final int    MODE_SEARCH_ALL   = 0x01;
     public static final int    MODE_SEARCH_START = 0x02;
     private final       Object MUTEX             = new Object();
-    protected AbstractActivity         mContext;
-    protected AnodaApplicationDelegate mApplication;
+    private   StableContext            mStableContext;
     protected LayoutInflater           mInflater;
     protected List<Element>            mObjects;
     protected int                      mItemResource;
@@ -141,39 +139,37 @@ public abstract class AbstractAdapter<Element> extends BaseAdapter implements Fi
     private   int                mSearchMode;
 
     public static ArrayAdapter<CharSequence> createFromResource(Context context, int textArrayResId, int textViewResId) {
-        CharSequence[] strings = context.getResources()
-                                        .getTextArray(textArrayResId);
+        CharSequence[] strings = context.getResources().getTextArray(textArrayResId);
         return new ArrayAdapter<>(context, textViewResId, strings);
     }
 
-    public AbstractAdapter(AbstractActivity context, Integer resource) {
-        init(context, resource, 0, new ArrayList<Element>());
+    public AbstractAdapter(Integer resource) {
+        init(resource, 0, new ArrayList<Element>());
     }
 
-    public AbstractAdapter(AbstractActivity context, Integer resource, Integer textViewResourceId) {
-        init(context, resource, textViewResourceId, new ArrayList<Element>());
+    public AbstractAdapter(Integer resource, Integer textViewResourceId) {
+        init(resource, textViewResourceId, new ArrayList<Element>());
     }
 
-    public AbstractAdapter(AbstractActivity context, Integer resource, Element[] objects) {
-        init(context, resource, 0, Arrays.asList(objects));
+    public AbstractAdapter(Integer resource, Element[] objects) {
+        init(resource, 0, Arrays.asList(objects));
     }
 
-    public AbstractAdapter(AbstractActivity context, Integer resource, Integer textViewResourceId, Element[] objects) {
-        init(context, resource, textViewResourceId, Arrays.asList(objects));
+    public AbstractAdapter(Integer resource, Integer textViewResourceId, Element[] objects) {
+        init(resource, textViewResourceId, Arrays.asList(objects));
     }
 
-    public AbstractAdapter(AbstractActivity context, Integer resource, List<Element> objects) {
-        init(context, resource, 0, objects);
+    public AbstractAdapter(Integer resource, List<Element> objects) {
+        init(resource, 0, objects);
     }
 
-    public AbstractAdapter(AbstractActivity context, Integer resource, Integer textViewResourceId, List<Element> objects) {
-        init(context, resource, textViewResourceId, objects);
+    public AbstractAdapter(Integer resource, Integer textViewResourceId, List<Element> objects) {
+        init(resource, textViewResourceId, objects);
     }
 
-    private void init(AbstractActivity context, int resource, int textViewResourceId, List<Element> objects) {
-        mContext = context;
-        mApplication = (AnodaApplicationDelegate) context.getApplication();
-        mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    private void init(int resource, int textViewResourceId, List<Element> objects) {
+        mStableContext = StableContext.Impl.obtain();
+        mInflater = (LayoutInflater) mStableContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mItemResource = mDropDownResource = resource;
         mObjects = new ArrayList<>(objects);
         mField = textViewResourceId;
@@ -185,20 +181,11 @@ public abstract class AbstractAdapter<Element> extends BaseAdapter implements Fi
     }
 
     protected final AnodaApplicationDelegate getApplication() {
-        Application app = mContext.getApplication();
-        if (app instanceof AnodaApplicationDelegate) {
-            return (AnodaApplicationDelegate) app;
-        }
-
-        throw new RuntimeException("Illegal application level access");
-    }
-
-    protected final String getString(int resId) {
-        return mContext.getString(resId);
+        return mStableContext.obtainAppContext();
     }
 
     protected final String getString(int resId, Object... modifiers) {
-        return mContext.getString(resId, modifiers);
+        return mStableContext.getString(resId, modifiers);
     }
 
     public void add(Element object) {
@@ -352,10 +339,6 @@ public abstract class AbstractAdapter<Element> extends BaseAdapter implements Fi
 
     public void setNotifyOnChange(boolean notifyOnChange) {
         mNotifyOnChange = notifyOnChange;
-    }
-
-    public Context getContext() {
-        return mContext;
     }
 
     @Implement

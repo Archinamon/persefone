@@ -1,9 +1,9 @@
 package mobi.anoda.archinamon.kernel.persefone.utils;
 
+import android.support.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import javax.annotation.Nullable;
 
 /**
  * author: Archinamon

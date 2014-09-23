@@ -1,36 +1,25 @@
 package mobi.anoda.archinamon.kernel.persefone.ui.activity;
 
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Parcelable;
-import android.support.annotation.IdRes;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.WindowCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Gravity;
-import android.view.View;
 import android.view.WindowManager.LayoutParams;
-import android.widget.TextView;
-import mobi.anoda.archinamon.kernel.persefone.R;
 import mobi.anoda.archinamon.kernel.persefone.network.operations.NetworkOperation.ErrorReport;
 import mobi.anoda.archinamon.kernel.persefone.service.AbstractService;
 import mobi.anoda.archinamon.kernel.persefone.signal.broadcast.BroadcastFilter;
 import mobi.anoda.archinamon.kernel.persefone.signal.broadcast.Broadcastable;
-import mobi.anoda.archinamon.kernel.persefone.ui.TaggedView;
 import mobi.anoda.archinamon.kernel.persefone.ui.actionbar.ActionBarFactory;
-import mobi.anoda.archinamon.kernel.persefone.ui.activity.interfaces.StateControllable;
-import mobi.anoda.archinamon.kernel.persefone.ui.activity.interfaces.StateControllable.FragmentState;
 import mobi.anoda.archinamon.kernel.persefone.ui.async.binder.UiAffectionChain;
 import mobi.anoda.archinamon.kernel.persefone.ui.context.StableContext;
 import mobi.anoda.archinamon.kernel.persefone.ui.delegate.ActivityLauncher;
 import mobi.anoda.archinamon.kernel.persefone.ui.delegate.BroadcastBus;
 import mobi.anoda.archinamon.kernel.persefone.ui.delegate.DbLoader;
+import mobi.anoda.archinamon.kernel.persefone.ui.delegate.DialogLauncher;
+import mobi.anoda.archinamon.kernel.persefone.ui.delegate.FragmentSwitcher;
 import mobi.anoda.archinamon.kernel.persefone.ui.delegate.SoftKeyboard;
-import mobi.anoda.archinamon.kernel.persefone.ui.dialog.AbstractDialog;
-import mobi.anoda.archinamon.kernel.persefone.ui.fragment.AbstractFragment;
 import mobi.anoda.archinamon.kernel.persefone.utils.Common;
 import mobi.anoda.archinamon.kernel.persefone.utils.LogHelper;
 import mobi.anoda.archinamon.kernel.persefone.utils.MetricsHelper;
@@ -38,7 +27,7 @@ import mobi.anoda.archinamon.kernel.persefone.utils.MetricsHelper;
 /**
  * author: Archinamon project: FavorMe
  */
-public abstract class AbstractActivity<Controllable extends AbstractFragment & StateControllable> extends ActionBarActivity implements TaggedView {
+public abstract class AbstractActivity extends ActionBarActivity {
 
     protected enum PopupType {
 
@@ -46,20 +35,20 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
         LARGE
     }
 
-    private final String          TAG            = ((Object) this).getClass()
-                                                                  .getSimpleName();
+    private final String          TAG            = Common.obtainClassTag(this);
     private final BroadcastFilter fActionsFilter = new BroadcastFilter();
     private          StableContext    mStableContext;
     protected        SoftKeyboard     mKeyboardManagerDelegate;
     protected        BroadcastBus     mBroadcastBusDelegate;
     protected        UiAffectionChain mUiAsyncChainBinder;
     protected        ActivityLauncher mUiActivityLauncher;
+    protected        FragmentSwitcher mUiFragmentSwitcher;
+    protected        DialogLauncher   mUiDialogLauncher;
     protected        DbLoader         mAsyncDbLoader;
     protected        ActionBarFactory mActionBar;
     protected        ActionBar        mActionBarImpl;
     private volatile boolean          isPaused;
     private volatile boolean          isAsyncChained;
-    private volatile Controllable mCurrentFragment = null;
 
     public void listenFor(Broadcastable action) {
         fActionsFilter.addAction(action);
@@ -106,8 +95,12 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        mStableContext = StableContext.instantiate(this);
+        super.onCreate(savedInstanceState);
 
+        initHandlers();
+    }
+
+    protected void onCreateWithActionBar(Bundle savedInstanceState) {
         super.supportRequestWindowFeature(WindowCompat.FEATURE_ACTION_BAR);
         super.onCreate(savedInstanceState);
         try {
@@ -116,7 +109,7 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
             logError(e);
         }
 
-        this.mUiActivityLauncher = new ActivityLauncher(mStableContext);
+        initHandlers();
     }
 
     @Override
@@ -184,46 +177,19 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
         return this.mUiActivityLauncher;
     }
 
+    public FragmentSwitcher getUiFragmentSwitcher() {
+        return this.mUiFragmentSwitcher;
+    }
+
+    public DialogLauncher getUiDialogLauncher() {
+        return this.mUiDialogLauncher;
+    }
+
     public DbLoader getAsyncDbLoader() {
         if (mAsyncDbLoader == null)
             mAsyncDbLoader = new DbLoader(mStableContext);
 
         return this.mAsyncDbLoader;
-    }
-
-    public final synchronized void registerControllable(Controllable fragment) {
-        mCurrentFragment = fragment;
-        syncState(FragmentState.INIT);
-    }
-
-    public final synchronized void syncState(FragmentState state) {
-        if (mCurrentFragment == null) {
-            LogHelper.println_verbose(TAG, "No fragment registered for AbstractStateMachine control");
-        }
-
-        switch (state) {
-            case INIT:
-            case DETACHED:
-                mCurrentFragment.onSwitch();
-                break;
-            case ATTACHED:
-                mCurrentFragment.onRemove();
-                break;
-            default:
-                throw new IllegalStateException("Non-acceptable fragment state received");
-        }
-
-        LogHelper.println_verbose(TAG, state.name());
-    }
-
-    public final void exitFragment() {
-        FragmentManager manager = super.getSupportFragmentManager();
-        if (!manager.popBackStackImmediate()) {
-            if (mCurrentFragment != null) {
-                syncState(mCurrentFragment.getState());
-            }
-            mUiActivityLauncher.exitActivity();
-        }
     }
 
     public void startService(Class<? extends AbstractService> service) {
@@ -234,112 +200,6 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
     public void stopService(Class<? extends AbstractService> service) {
         Intent intent = new Intent(this, service);
         super.stopService(intent);
-    }
-
-    public String getTextFromView(@IdRes int viewId) {
-        View v = super.findViewById(viewId);
-        if (v instanceof TextView) {
-            TextView view = (TextView) v;
-            return view.getText().toString();
-        } else {
-            return v.toString();
-        }
-    }
-
-    /* Helper for opening new fragment */
-    public AbstractFragment switchFragment(Class<? extends AbstractFragment> fragmentClass, boolean addToStack) {
-        AbstractFragment fragment = AbstractFragment.newInstance(fragmentClass, null);
-
-        switchFragmentInternal(fragment, addToStack);
-
-        return fragment;
-    }
-
-    public AbstractFragment switchFragment(Class<? extends AbstractFragment> fragmentClass, Bundle params, boolean addToStack) {
-        AbstractFragment fragment = AbstractFragment.newInstance(fragmentClass, params);
-
-        switchFragmentInternal(fragment, addToStack);
-
-        return fragment;
-    }
-
-    protected AbstractFragment switchFragment(Class<? extends AbstractFragment> fragmentClass, Bundle params) {
-        AbstractFragment fragment = AbstractFragment.newInstance(fragmentClass, params);
-
-        switchFragmentInternal(fragment, true);
-
-        return fragment;
-    }
-
-    private <TagFrmt extends AbstractFragment & TaggedView> void switchFragmentInternal(TagFrmt fragment, boolean isAddingToBackstack) {
-        final String tag = fragment.getViewTag();
-        FragmentManager manager = super.getSupportFragmentManager();
-        FragmentTransaction transaction = manager.beginTransaction();
-
-        if (isAddingToBackstack) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                transaction.setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out);
-            }
-            transaction.addToBackStack(tag);
-        }
-
-        transaction.replace(R.id.fragment_view, fragment, tag);
-        transaction.commit();
-
-        if (mCurrentFragment != null) {
-            syncState(mCurrentFragment.getState());
-        }
-    }
-
-    /* Launch Popup dialog */
-    public AbstractDialog openPopup(Class<? extends AbstractDialog> dialogClass) {
-        AbstractDialog dialog = AbstractDialog.newInstance(dialogClass, null);
-        return openPopupInternal(dialog);
-    }
-
-    public AbstractDialog openPopup(Class<? extends AbstractDialog> dialogClass, Bundle params) {
-        AbstractDialog dialog = AbstractDialog.newInstance(dialogClass, params);
-        return openPopupInternal(dialog);
-    }
-
-    public AbstractDialog openPopup(Class<? extends AbstractDialog> dialogClass, Parcelable data) {
-        final Bundle params = new Bundle();
-        params.putParcelable(CUSTOM_DATA, data);
-
-        AbstractDialog dialog = AbstractDialog.newInstance(dialogClass, params);
-        return openPopupInternal(dialog);
-    }
-
-    public AbstractDialog openPopup(Class<? extends AbstractDialog> dialogClass, String message) {
-        final Bundle params = new Bundle();
-        params.putString(AbstractDialog.IEXTRA_MESSAGE, message);
-
-        AbstractDialog dialog = AbstractDialog.newInstance(dialogClass, params);
-        return openPopupInternal(dialog);
-    }
-
-    public AbstractDialog openPopup(Class<? extends AbstractDialog> dialogClass, String title, String message) {
-        final Bundle params = new Bundle();
-        params.putString(AbstractDialog.IEXTRA_TITLE, title);
-        params.putString(AbstractDialog.IEXTRA_MESSAGE, message);
-
-        AbstractDialog dialog = AbstractDialog.newInstance(dialogClass, params);
-        return openPopupInternal(dialog);
-    }
-
-    private <TagDialog extends AbstractDialog & TaggedView> TagDialog openPopupInternal(TagDialog popup) {
-        final String tag = popup.getViewTag();
-        FragmentManager manager = super.getSupportFragmentManager();
-
-        if (!popup.isShowing(tag)) {
-            popup.show(manager, tag);
-
-            if (isAsyncChained) {
-                mUiAsyncChainBinder.setServerListener(popup);
-            }
-        }
-
-        return popup;
     }
 
     /* Generalized REST errors parser */
@@ -355,5 +215,12 @@ public abstract class AbstractActivity<Controllable extends AbstractFragment & S
     /* Simple Throwable processor */
     protected final void logError(Throwable e) {
         LogHelper.println_error(TAG, e);
+    }
+
+    private void initHandlers() {
+        this.mStableContext = StableContext.Impl.instantiate(this);
+        this.mUiActivityLauncher = new ActivityLauncher(mStableContext);
+        this.mUiFragmentSwitcher = new FragmentSwitcher(mStableContext);
+        this.mUiDialogLauncher = new DialogLauncher(mStableContext);
     }
 }

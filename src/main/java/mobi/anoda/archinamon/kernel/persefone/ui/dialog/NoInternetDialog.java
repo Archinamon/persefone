@@ -8,6 +8,7 @@ import android.os.Bundle;
 import mobi.anoda.archinamon.kernel.persefone.R;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
 import mobi.anoda.archinamon.kernel.persefone.service.notification.NetworkNotification;
+import mobi.anoda.archinamon.kernel.persefone.ui.context.StableContext;
 import mobi.anoda.archinamon.kernel.persefone.utils.Common;
 
 /**
@@ -40,13 +41,13 @@ public class NoInternetDialog extends AbstractDialog {
         super.onDismiss(dialog);
 
         if (!mIsNotified)
-            mContext.sendBroadcast(NetworkNotification.NOTIFY_DISMISS);
+            getBroadcastBusDelegate().sendBroadcast(NetworkNotification.NOTIFY_DISMISS);
     }
 
     @Implement
     public boolean setup() {
         setDialogType(Popup.PROMPT_YES_NO);
-        setTitle(Common.getApplicationName(mContext));
+        setTitle(Common.getApplicationName(StableContext.Impl.obtain().obtainAppContext()));
         setOkButton("Ok", new OnClickListener() {
 
             @Implement
@@ -58,7 +59,7 @@ public class NoInternetDialog extends AbstractDialog {
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                mContext.startActivity(new Intent(WifiManager.ACTION_PICK_WIFI_NETWORK));
+                StableContext.Impl.obtain().obtainAppContext().startActivity(new Intent(WifiManager.ACTION_PICK_WIFI_NETWORK));
             }
         });
 
@@ -66,7 +67,7 @@ public class NoInternetDialog extends AbstractDialog {
     }
 
     private void notifyRequester() {
-        mContext.sendBroadcast(NetworkNotification.INTERNET_ACCESS_DENIED);
+        getBroadcastBusDelegate().sendBroadcast(NetworkNotification.INTERNET_ACCESS_DENIED);
         mIsNotified = true;
     }
 }

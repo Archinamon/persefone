@@ -1,12 +1,12 @@
 package mobi.anoda.archinamon.kernel.persefone.network.json;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.util.ArrayList;
 import java.util.HashMap;
-import android.support.annotation.NonNull;
-import javax.annotation.Nullable;
 
 import static mobi.anoda.archinamon.kernel.persefone.network.json.Projection.Error;
 

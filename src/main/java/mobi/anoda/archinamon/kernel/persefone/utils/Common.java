@@ -29,7 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 import mobi.anoda.archinamon.kernel.persefone.R;
 import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
-import mobi.anoda.archinamon.kernel.persefone.ui.activity.AbstractActivity;
+import mobi.anoda.archinamon.kernel.persefone.ui.context.StableContext;
 
 /**
  * author: Archinamon project: FavorMe
@@ -162,8 +162,8 @@ public class Common {
         return list.size() > 0;
     }
 
-    public static void openApplicationByName(AbstractActivity context, final String appName) {
-        PackageManager manager = context.getPackageManager();
+    public static void openApplicationByName(StableContext context, final String appName) {
+        PackageManager manager = context.obtainAppContext().getPackageManager();
         assert manager != null;
 
         Intent intent = manager.getLaunchIntentForPackage(appName);

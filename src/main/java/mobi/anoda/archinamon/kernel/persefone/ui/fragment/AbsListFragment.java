@@ -1,7 +1,7 @@
 package mobi.anoda.archinamon.kernel.persefone.ui.fragment;
 
 import android.os.Bundle;
-import android.view.ActionMode;
+import android.support.v7.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,6 +22,7 @@ import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
 import mobi.anoda.archinamon.kernel.persefone.ui.TaggedView;
 import mobi.anoda.archinamon.kernel.persefone.ui.activity.AbstractActivity;
 import mobi.anoda.archinamon.kernel.persefone.ui.adapter.AbstractAdapter;
+import mobi.anoda.archinamon.kernel.persefone.ui.context.StableContext;
 import mobi.anoda.archinamon.kernel.persefone.ui.fragment.interfaces.ItemCheckProvider;
 
 /**
@@ -40,8 +41,8 @@ public abstract class AbsListFragment<Elements, CastedAdapter extends AbstractAd
 
         @Implement
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            mContext.getMenuInflater().inflate(mListManagementResId, menu);
-            mContext.getMenuInflater().inflate(R.menu.edit_mode, menu);
+            mStableContext.obtainUiContext().getMenuInflater().inflate(mListManagementResId, menu);
+            mStableContext.obtainUiContext().getMenuInflater().inflate(R.menu.edit_mode, menu);
             return true;
         }
 
@@ -118,11 +119,16 @@ public abstract class AbsListFragment<Elements, CastedAdapter extends AbstractAd
     protected           ActionMode.Callback          mCallback          = new ActionModeTransienceImpl();
     protected           ItemCheckProvider            mItemCheckProvider = new ImplItemCheckProvider();
     private final       LinkedHashMultiset<Elements> mObjectList        = LinkedHashMultiset.create();
+    private StableContext                mStableContext;
     private ActionMode                   mActionMode;
     private CastedAdapter                mAdapter;
     private int                          mListResourceId;
     private int                          mListManagementResId;
     private OnItemSelectedActionListener mOnItemSelectedListener;
+
+    public AbsListFragment() {
+        this.mStableContext = StableContext.Impl.obtain();
+    }
 
     protected abstract void onListItemClick(AdapterView<?> parentView, View view, int position, long id);
 
@@ -176,7 +182,7 @@ public abstract class AbsListFragment<Elements, CastedAdapter extends AbstractAd
         final int checkedCount = mCheckedPositions.size();
         if (checkedCount > 0) {
             if (mActionMode == null) {
-                mActionMode = mContext.startActionMode(mCallback);
+                mActionMode = mStableContext.obtainUiContext().startSupportActionMode(mCallback);
             }
         } else {
             if (mActionMode != null) {
@@ -238,11 +244,11 @@ public abstract class AbsListFragment<Elements, CastedAdapter extends AbstractAd
     }
 
     protected void applyAdapter(Class<? extends AbstractAdapter> adapterClass, int viewResource) {
-        instantiateAdapterObj(adapterClass, mContext, viewResource, getItems());
+        instantiateAdapterObj(adapterClass, viewResource, getItems());
     }
 
     protected void applyAdapter(Class<? extends AbstractAdapter> adapterClass, int viewResource, int dropDownResource) {
-        instantiateAdapterObj(adapterClass, mContext, viewResource, dropDownResource, getItems());
+        instantiateAdapterObj(adapterClass, viewResource, dropDownResource, getItems());
     }
 
     @SuppressWarnings("unchecked")

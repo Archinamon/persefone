@@ -44,7 +44,7 @@ import mobi.anoda.archinamon.kernel.persefone.utils.LogHelper;
 public class UploadService extends AbstractService {
 
     public static final  String TAG                         = UploadService.class.getSimpleName();
-    private static final int    UPLOAD_NOTIFICATION_ID      = 0xfa1166; // Something unique
+    private static final int    UPLOAD_NOTIFICATION_ID      = 0xfa1188; // Something unique
     private static final int    UPLOAD_NOTIFICATION_ID_DONE = 0xed1123; // Something unique
     private NotificationManager   mNotificationManager;
     private Notification.Builder  mNotification;
@@ -91,9 +91,9 @@ public class UploadService extends AbstractService {
             cookie.setDomain(domain);
             cookie.setPath(path);
 
-            mAppDelegate.getHttpClient()
-                        .getCookieStore()
-                        .addCookie(cookie);
+            mStableContext.obtainAppContext().getHttpClient()
+                                             .getCookieStore()
+                                             .addCookie(cookie);
         }
     };
 
@@ -152,7 +152,7 @@ public class UploadService extends AbstractService {
         }
 
         operation.setEntity(multipartEntity);
-        IJson response = operation.getJsonProjection(mAppDelegate);
+        IJson response = operation.getJsonProjection(mStableContext.obtainAppContext());
 
         int serverResponseCode = operation.getResponseCode();
         String serverResponseMessage = operation.getResponseMessage();
@@ -174,7 +174,7 @@ public class UploadService extends AbstractService {
         data.putInt(Extras.STATUS, Extras.STATUS_IN_PROGRESS);
         data.putInt(Extras.PROGRESS, progress);
 
-        sendBroadcast(UploadAction.POST_STATUS, data);
+        getBroadcastBusDelegate().sendBroadcast(UploadAction.POST_STATUS, data);
     }
 
     private synchronized void broadcastCompleted(final int responseCode, final String responseMessage, IJson response) {
@@ -198,7 +198,7 @@ public class UploadService extends AbstractService {
         data.putString(Extras.SERVER_RESPONSE_MESSAGE, filteredMessage);
         data.putString(Extras.API_RESPONSE_DATA, response.toString());
 
-        sendBroadcast(UploadAction.POST_STATUS, data);
+        getBroadcastBusDelegate().sendBroadcast(UploadAction.POST_STATUS, data);
     }
 
     private void broadcastError(final Exception exception) {
@@ -209,7 +209,7 @@ public class UploadService extends AbstractService {
         data.putInt(Extras.STATUS, Extras.STATUS_ERROR);
         data.putSerializable(Extras.ERROR_EXCEPTION, exception);
 
-        sendBroadcast(UploadAction.POST_STATUS, data);
+        getBroadcastBusDelegate().sendBroadcast(UploadAction.POST_STATUS, data);
     }
 
     private void createNotification() {

@@ -9,7 +9,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.support.annotation.NonNull;
-import javax.annotation.Nullable;
+import android.support.annotation.Nullable;
 import mobi.anoda.archinamon.kernel.persefone.utils.WordUtils;
 
 /**
