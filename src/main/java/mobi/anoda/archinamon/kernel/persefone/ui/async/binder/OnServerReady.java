@@ -1,5 +1,6 @@
-package mobi.anoda.archinamon.kernel.persefone.ui.activity.interfaces;
+package mobi.anoda.archinamon.kernel.persefone.ui.async.binder;
 
+import android.os.IBinder;
 import mobi.anoda.archinamon.kernel.persefone.service.async.AbstractAsyncServer;
 import mobi.anoda.archinamon.kernel.persefone.service.async.AsyncRequest;
 import mobi.anoda.archinamon.kernel.persefone.ui.fragment.AbstractFragment;
@@ -13,7 +14,7 @@ public interface OnServerReady {
     /**
      * Called when {@link Fragment} instance connected to the AsyncServer implementation
      */
-    void onBind();
+    void onBind(IBinder binder);
 
     /**
      * Called every time when {@link AbstractFragment} release an {@link AsyncRequest}

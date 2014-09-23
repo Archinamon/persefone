@@ -12,7 +12,6 @@ import mobi.anoda.archinamon.kernel.persefone.annotation.Implement;
 import mobi.anoda.archinamon.kernel.persefone.service.AbstractIntentService.RendezvousBinder;
 import mobi.anoda.archinamon.kernel.persefone.service.async.AbstractAsyncServer;
 import mobi.anoda.archinamon.kernel.persefone.service.async.AsyncRequest;
-import mobi.anoda.archinamon.kernel.persefone.ui.activity.interfaces.OnServerReady;
 import mobi.anoda.archinamon.kernel.persefone.ui.context.StableContext;
 import mobi.anoda.archinamon.kernel.persefone.ui.delegate.NetworkState;
 
@@ -39,7 +38,7 @@ public final class UiAffectionChain {
 
             if (mServerListeners.size() > 0) {
                 for (OnServerReady listener : mServerListeners) {
-                    listener.onBind();
+                    listener.onBind(service);
                 }
             }
 
@@ -69,7 +68,7 @@ public final class UiAffectionChain {
         mServerListeners.add(l);
 
         if (mIsBound) {
-            l.onBind();
+            l.onBind(mServerBinder);
         }
     }
 

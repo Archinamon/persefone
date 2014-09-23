@@ -6,14 +6,12 @@ import android.support.annotation.IdRes;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
-import android.util.Log;
 import android.view.View;
 import java.lang.reflect.Field;
 import mobi.anoda.archinamon.kernel.persefone.signal.broadcast.BroadcastFilter;
 import mobi.anoda.archinamon.kernel.persefone.signal.broadcast.Broadcastable;
 import mobi.anoda.archinamon.kernel.persefone.ui.TaggedView;
 import mobi.anoda.archinamon.kernel.persefone.ui.activity.AbstractActivity;
-import mobi.anoda.archinamon.kernel.persefone.ui.activity.interfaces.StateControllable.FragmentState;
 import mobi.anoda.archinamon.kernel.persefone.ui.async.binder.UiAffectionChain;
 import mobi.anoda.archinamon.kernel.persefone.ui.context.StableContext;
 import mobi.anoda.archinamon.kernel.persefone.ui.delegate.ActivityLauncher;
@@ -35,7 +33,6 @@ public abstract class AbstractFragment extends Fragment implements TaggedView {
     protected final     BroadcastFilter fActionsFilter = new BroadcastFilter();
     protected           Bundle          mFragmentData  = new Bundle();
     private volatile boolean                    isAsyncChained;
-    private volatile FragmentState              mInnerState;
     // replication of mHasMenu Fragment's field
     private          boolean                    mHasMenuReplica;
     private          IOptionsVisibilityListener mOptionsVisibilityListener;
@@ -92,37 +89,8 @@ public abstract class AbstractFragment extends Fragment implements TaggedView {
         LogHelper.println_error(TAG, e);
     }
 
-    public final synchronized void syncState() {
-        if (mInnerState == null) {
-            mInnerState = FragmentState.ATTACHED;
-            return;
-        }
-
-        switch (mInnerState) {
-            case DETACHED:
-                mInnerState = FragmentState.ATTACHED;
-                break;
-            case ATTACHED:
-                mInnerState = FragmentState.DETACHED;
-                break;
-        }
-
-        Log.w(TAG, mInnerState.name());
-    }
-
     public void setOptionVisibilityListener(IOptionsVisibilityListener listener) {
         mOptionsVisibilityListener = listener;
-    }
-
-    @Nullable
-    protected final FragmentState getInnerState() {
-        return mInnerState;
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        syncState();
     }
 
     @Override
