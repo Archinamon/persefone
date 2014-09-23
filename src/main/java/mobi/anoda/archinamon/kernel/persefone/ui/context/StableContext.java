@@ -58,13 +58,13 @@ public interface StableContext {
 
     boolean isNsContextRegistered();
 
-    <Impl extends AbstractActivity> Impl obtainUiContext();
+    <Ctx extends AbstractActivity> Ctx obtainUiContext();
 
-    <Impl extends AbstractService> Impl obtainRiContext();
+    <Ctx extends AbstractService> Ctx obtainRiContext();
 
-    <Impl extends Context> Impl obtainNsContext();
+    <Ctx extends Context> Ctx obtainNsContext();
 
-    <Impl extends AnodaApplicationDelegate> Impl obtainAppContext();
+    <Ctx extends AnodaApplicationDelegate> Ctx obtainAppContext();
 
     View getView();
 

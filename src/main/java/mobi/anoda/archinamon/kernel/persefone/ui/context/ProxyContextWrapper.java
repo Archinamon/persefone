@@ -72,26 +72,26 @@ abstract class ProxyContextWrapper extends Observable implements StableContext, 
 
     @Implement
     @SuppressWarnings("unchecked")
-    public <Impl extends AbstractActivity> Impl obtainUiContext() {
-        return (Impl) this.mUiContext;
+    public <Ctx extends AbstractActivity> Ctx obtainUiContext() {
+        return (Ctx) this.mUiContext;
     }
 
     @Implement
     @SuppressWarnings("unchecked")
-    public <Impl extends AbstractService> Impl obtainRiContext() {
-        return (Impl) this.mRiContext;
+    public <Ctx extends AbstractService> Ctx obtainRiContext() {
+        return (Ctx) this.mRiContext;
     }
 
     @Implement
     @SuppressWarnings("unchecked")
-    public <Impl extends Context> Impl obtainNsContext() {
-        return (Impl) this.mNsContext;
+    public <Ctx extends Context> Ctx obtainNsContext() {
+        return (Ctx) this.mNsContext;
     }
 
     @Implement
     @SuppressWarnings("unchecked")
-    public <Impl extends AnodaApplicationDelegate> Impl obtainAppContext() {
-        return (Impl) this.mAppContext;
+    public <Ctx extends AnodaApplicationDelegate> Ctx obtainAppContext() {
+        return (Ctx) this.mAppContext;
     }
 
     @Nullable
