@@ -31,9 +31,7 @@ public interface StableContext {
 
             @Implement
             protected ProxyContextWrapper create() {
-                ProxyContextWrapper impl = new ProxyContextWrapper() {};
-                impl.construct();
-                return impl;
+                return new ProxyContextWrapper() { {construct();} };
             }
         };
 
